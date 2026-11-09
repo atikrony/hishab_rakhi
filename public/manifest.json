@@ -1,0 +1,16 @@
+{
+  "name": "Hishab Rakhi - Smart Financial Wallet",
+  "short_name": "Hishab Rakhi",
+  "description": "Smart Wallet Dashboard, Expense Tracking, and Savings Goals for Web & Mobile",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#079be8",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
