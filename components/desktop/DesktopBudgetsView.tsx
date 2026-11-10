@@ -343,3 +343,4 @@ export const DesktopBudgetsView: React.FC<DesktopBudgetsViewProps> = ({
     </div>
   );
 };
+

@@ -26,6 +26,9 @@ yarn-error.log*
 .env*.local
 .env
 
+# local mcp secrets
+.agents/mcp_config.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
