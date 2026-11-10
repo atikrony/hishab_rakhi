@@ -192,3 +192,4 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
     </section>
   );
 };
+

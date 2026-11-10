@@ -210,3 +210,4 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     </div>
   );
 };
+

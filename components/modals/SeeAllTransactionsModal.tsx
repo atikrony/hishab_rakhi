@@ -155,3 +155,4 @@ export const SeeAllTransactionsModal: React.FC<SeeAllTransactionsModalProps> = (
     </div>
   );
 };
+

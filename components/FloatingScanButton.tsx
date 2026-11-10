@@ -23,3 +23,4 @@ export const FloatingScanButton: React.FC<FloatingScanButtonProps> = ({ onScanCl
     </button>
   );
 };
+

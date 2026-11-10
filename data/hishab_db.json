@@ -12,7 +12,7 @@
       "id": "wal_main",
       "name": "Main Checking",
       "type": "bank",
-      "balance": 8440.01,
+      "balance": 8290.01,
       "accountNumber": "•••• 4921",
       "color": "#079be8"
     },
@@ -38,10 +38,10 @@
       "id": "goal_pc_gaming",
       "title": "PC Gaming",
       "targetAmount": 150000,
-      "currentAmount": 21291,
+      "currentAmount": 21441,
       "category": "Electronics",
       "targetDate": "2026-12-31",
-      "note": "$128,709 USD remaining to achieve your goals",
+      "note": "$128,559 USD remaining to achieve your goals",
       "color": "#079fe9"
     },
     {
@@ -192,30 +192,5 @@
       "spent": 210
     }
   ],
-  "notifications": [
-    {
-      "id": "notif_01",
-      "title": "Payment Received",
-      "message": "Youtube Adsense credited +$250.23 to your account.",
-      "date": "2026-06-03T11:21:00Z",
-      "read": false,
-      "type": "success"
-    },
-    {
-      "id": "notif_02",
-      "title": "Savings Goal Milestone",
-      "message": "PC Gaming reached 14.2% of target goal ($21,291).",
-      "date": "2026-06-03T08:00:00Z",
-      "read": false,
-      "type": "info"
-    },
-    {
-      "id": "notif_03",
-      "title": "Budget Reminder",
-      "message": "You have used 63.3% of your monthly Food budget.",
-      "date": "2026-06-02T18:00:00Z",
-      "read": true,
-      "type": "alert"
-    }
-  ]
+  "notifications": []
 }

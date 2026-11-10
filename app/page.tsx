@@ -10,6 +10,8 @@ import {
   NotificationItem,
   DashboardSummary,
 } from '@/lib/types';
+
+// Mobile Components
 import { TopBar } from '@/components/TopBar';
 import { BalanceCard } from '@/components/BalanceCard';
 import { ActionButtons } from '@/components/ActionButtons';
@@ -22,6 +24,16 @@ import { AnalyticsView } from '@/components/AnalyticsView';
 import { StatisticsView } from '@/components/StatisticsView';
 import { ProfileView } from '@/components/ProfileView';
 import { Toast } from '@/components/Toast';
+
+// Desktop Suite Components
+import { DesktopSidebar, DesktopNavView } from '@/components/desktop/DesktopSidebar';
+import { DesktopHeader } from '@/components/desktop/DesktopHeader';
+import { DesktopDashboard } from '@/components/desktop/DesktopDashboard';
+import { DesktopTransactionsView } from '@/components/desktop/DesktopTransactionsView';
+import { DesktopWalletsView } from '@/components/desktop/DesktopWalletsView';
+import { DesktopAnalyticsView } from '@/components/desktop/DesktopAnalyticsView';
+import { DesktopBudgetsView } from '@/components/desktop/DesktopBudgetsView';
+import { DesktopScannerView } from '@/components/desktop/DesktopScannerView';
 
 // Modals
 import { AddTransactionModal } from '@/components/modals/AddTransactionModal';
@@ -58,11 +70,13 @@ export default function HomePage() {
   const [wallets, setWallets] = useState<WalletAccount[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
-  // Navigation & View Mode
-  const [activeTab, setActiveTab] = useState<NavTab>('Home');
+  // View States
+  const [isMobileMode, setIsMobileMode] = useState<boolean>(false);
+  const [desktopView, setDesktopView] = useState<DesktopNavView>('overview');
+  const [activeMobileTab, setActiveMobileTab] = useState<NavTab>('Home');
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
-  const [selectedDateText, setSelectedDateText] = useState('Tue 3 Jun, 2025');
-  const [isDesktopExpanded, setIsDesktopExpanded] = useState(false);
+  const [selectedDateFilter, setSelectedDateFilter] = useState('All Time');
+  const [globalSearch, setGlobalSearch] = useState('');
 
   // Modals
   const [isAddTxOpen, setIsAddTxOpen] = useState(false);
@@ -89,6 +103,18 @@ export default function HomePage() {
     }, 2200);
     setToastTimer(timer);
   };
+
+  // Auto-detect viewport on client mount
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setIsMobileMode(true);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Fetch initial dashboard from API
   const refreshData = async () => {
@@ -125,13 +151,6 @@ export default function HomePage() {
   // Handlers
   const handleToggleBalance = () => {
     setIsBalanceVisible((prev) => !prev);
-  };
-
-  const handleNavClick = (tab: NavTab) => {
-    setActiveTab(tab);
-    if (tab !== 'Home') {
-      showToast(`${tab} selected`);
-    }
   };
 
   const handleCreateTransaction = async (newTxData: any) => {
@@ -204,153 +223,254 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f5f7] flex flex-col justify-between">
-      {/* Desktop Top Control Bar */}
-      <div className="hidden sm:flex items-center justify-between px-6 py-2.5 bg-white border-b border-[#e9e9ec] shadow-sm text-xs">
-        <div className="flex items-center gap-3">
-          <span className="font-bold text-[#17191d] flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#079be8]"></span>
-            Hishab Rakhi
-          </span>
-          <span className="text-[#888]">Fintech Wallet & Expense Engine</span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* View Mode Toggle */}
-          <div className="flex items-center bg-[#f4f5f7] p-1 rounded-xl">
-            <button
-              onClick={() => setIsDesktopExpanded(false)}
-              className={`px-3 py-1 rounded-lg font-semibold transition-all ${
-                !isDesktopExpanded ? 'bg-white text-[#079be8] shadow-sm' : 'text-[#666]'
-              }`}
-            >
-              📱 Mobile App View
-            </button>
-            <button
-              onClick={() => setIsDesktopExpanded(true)}
-              className={`px-3 py-1 rounded-lg font-semibold transition-all ${
-                isDesktopExpanded ? 'bg-white text-[#079be8] shadow-sm' : 'text-[#666]'
-              }`}
-            >
-              💻 Responsive Wide View
-            </button>
-          </div>
-
-          <Link
-            href="/api-docs"
-            className="px-3 py-1.5 rounded-xl border border-[#079be8]/40 bg-[#f0f8ff] text-[#079be8] font-bold hover:bg-[#e0f1fe] transition-colors"
-          >
-            ⚡ Mobile API Hub &rarr;
-          </Link>
-        </div>
-      </div>
-
-      {/* Main Container */}
-      <div className="flex-1 flex justify-center items-start sm:py-6 sm:px-4">
-        <main
-          className={`w-full bg-white relative transition-all duration-300 ${
-            isDesktopExpanded
-              ? 'max-w-4xl rounded-[28px] p-6 pb-[110px] shadow-[0_0_35px_rgba(16,24,40,0.06)] min-h-[85vh]'
-              : 'max-w-[430px] min-h-screen sm:min-h-[calc(100vh-48px)] sm:rounded-[28px] p-[12px_6px_105px] shadow-[0_0_35px_#1018280a] overflow-hidden'
-          }`}
-        >
-          {/* Common Topbar */}
-          <TopBar
+    <div className="min-h-screen bg-[#f4f5f7] text-[#17191d]">
+      {/* =========================================================================
+          DESKTOP SUITE VIEW (Default on widescreen >= 1024px unless toggled)
+          ========================================================================= */}
+      {!isMobileMode ? (
+        <div className="flex min-h-screen">
+          {/* Desktop Sidebar Navigation */}
+          <DesktopSidebar
+            currentView={desktopView}
+            onSelectView={(v) => setDesktopView(v)}
             user={user}
             notifications={notifications}
-            selectedDateText={selectedDateText}
+            onToggleMobilePreview={() => setIsMobileMode(true)}
             onOpenNotifications={() => setIsNotifOpen(true)}
-            onOpenCalendar={() => setIsCalendarOpen(true)}
-            onOpenProfile={() => setActiveTab('Profile')}
           />
 
-          {/* Tab 1: Home Dashboard */}
-          {activeTab === 'Home' && (
-            <div className="animate-fade-in space-y-4">
-              <BalanceCard
-                totalBalance={totalBalance}
-                monthlyIncome={monthlyIncome}
-                monthlyExpense={monthlyExpense}
-                incomeTrend={incomeTrend}
-                expenseTrend={expenseTrend}
-                currencySymbol={user.currencySymbol || '$'}
-                isBalanceVisible={isBalanceVisible}
-                onToggleBalance={handleToggleBalance}
-                onOpenAnalytics={() => setActiveTab('Analytics')}
-              />
-
-              <ActionButtons
-                onAddTransaction={() => setIsAddTxOpen(true)}
-                onAddSaving={() => setIsAddSavingOpen(true)}
-              />
-
-              <SavingsSection
-                goals={savingsGoals}
-                currencySymbol={user.currencySymbol || '$'}
-                onSeeAll={() => setIsSeeAllSavingsOpen(true)}
-                onDeposit={(g) => setDepositTargetGoal(g)}
-              />
-
-              <RecentActivitySection
-                transactions={transactions}
-                currencySymbol={user.currencySymbol || '$'}
-                onSeeAll={() => setIsSeeAllTxOpen(true)}
-                onSelectTransaction={(tx) => setSelectedTxDetail(tx)}
-              />
-            </div>
-          )}
-
-          {/* Tab 2: Wallet */}
-          {activeTab === 'Wallet' && (
-            <WalletView
-              wallets={wallets}
-              currencySymbol={user.currencySymbol || '$'}
-              onAddWallet={() => setIsAddWalletOpen(true)}
+          {/* Desktop Main Content Area */}
+          <div className="flex-1 flex flex-col min-w-0">
+            <DesktopHeader
+              searchQuery={globalSearch}
+              onSearchChange={(q) => setGlobalSearch(q)}
+              selectedDateFilter={selectedDateFilter}
+              onSelectDateFilter={(f) => setSelectedDateFilter(f)}
+              notifications={notifications}
+              onOpenNotifications={() => setIsNotifOpen(true)}
+              onAddTransaction={() => setIsAddTxOpen(true)}
               onTransfer={() => setIsTransferOpen(true)}
+              onScanReceipt={() => setIsScanOpen(true)}
+              onAddSaving={() => setIsAddSavingOpen(true)}
+              onToggleMobilePreview={() => setIsMobileMode(true)}
             />
-          )}
 
-          {/* Tab 3: Analytics */}
-          {activeTab === 'Analytics' && (
-            <AnalyticsView
-              transactions={transactions}
-              currencySymbol={user.currencySymbol || '$'}
-            />
-          )}
+            <main className="flex-1 p-8 overflow-y-auto">
+              {desktopView === 'overview' && (
+                <DesktopDashboard
+                  user={user}
+                  totalBalance={totalBalance}
+                  monthlyIncome={monthlyIncome}
+                  monthlyExpense={monthlyExpense}
+                  incomeTrend={incomeTrend}
+                  expenseTrend={expenseTrend}
+                  isBalanceVisible={isBalanceVisible}
+                  onToggleBalance={handleToggleBalance}
+                  currencySymbol={user.currencySymbol || '$'}
+                  transactions={transactions}
+                  savingsGoals={savingsGoals}
+                  wallets={wallets}
+                  onSelectTransaction={(tx) => setSelectedTxDetail(tx)}
+                  onDepositGoal={(g) => setDepositTargetGoal(g)}
+                  onAddTransaction={() => setIsAddTxOpen(true)}
+                  onTransfer={() => setIsTransferOpen(true)}
+                  onViewAllTransactions={() => setDesktopView('transactions')}
+                  onViewAllSavings={() => setDesktopView('budgets')}
+                />
+              )}
 
-          {/* Tab 4: Statistics */}
-          {activeTab === 'Statistics' && (
-            <StatisticsView currencySymbol={user.currencySymbol || '$'} />
-          )}
+              {desktopView === 'transactions' && (
+                <DesktopTransactionsView
+                  transactions={transactions}
+                  currencySymbol={user.currencySymbol || '$'}
+                  onSelectTransaction={(tx) => setSelectedTxDetail(tx)}
+                  onAddTransaction={() => setIsAddTxOpen(true)}
+                  onDeleteTransaction={handleDeleteTransaction}
+                />
+              )}
 
-          {/* Tab 5: Profile */}
-          {activeTab === 'Profile' && (
-            <ProfileView
-              user={user}
-              transactions={transactions}
-              onUpdateProfile={handleUpdateProfile}
-              onResetData={handleResetData}
-              onToast={showToast}
-            />
-          )}
+              {desktopView === 'wallets' && (
+                <DesktopWalletsView
+                  wallets={wallets}
+                  transactions={transactions}
+                  currencySymbol={user.currencySymbol || '$'}
+                  onAddWallet={() => setIsAddWalletOpen(true)}
+                  onTransfer={() => setIsTransferOpen(true)}
+                />
+              )}
 
-          {/* Floating Scan Button (shown on Home tab or across tabs) */}
-          <FloatingScanButton
-            onScanClick={() => {
-              showToast('Scan feature selected');
-              setIsScanOpen(true);
-            }}
-          />
+              {desktopView === 'analytics' && (
+                <DesktopAnalyticsView
+                  transactions={transactions}
+                  currencySymbol={user.currencySymbol || '$'}
+                />
+              )}
 
-          {/* Floating Bottom Nav */}
-          <BottomNav activeTab={activeTab} onTabChange={handleNavClick} />
+              {desktopView === 'budgets' && (
+                <DesktopBudgetsView
+                  savingsGoals={savingsGoals}
+                  currencySymbol={user.currencySymbol || '$'}
+                  onDepositGoal={(g) => setDepositTargetGoal(g)}
+                  onAddSaving={() => setIsAddSavingOpen(true)}
+                  onDeleteGoal={handleDeleteSavingsGoal}
+                />
+              )}
 
-          {/* Toast Notification */}
-          <Toast message={toastMessage} />
-        </main>
-      </div>
+              {desktopView === 'scanner' && (
+                <DesktopScannerView
+                  currencySymbol={user.currencySymbol || '$'}
+                  onTransactionAdded={() => refreshData()}
+                  onToast={showToast}
+                />
+              )}
 
-      {/* Modals */}
+              {desktopView === 'settings' && (
+                <div className="max-w-2xl">
+                  <ProfileView
+                    user={user}
+                    transactions={transactions}
+                    onUpdateProfile={handleUpdateProfile}
+                    onResetData={handleResetData}
+                    onToast={showToast}
+                  />
+                </div>
+              )}
+            </main>
+          </div>
+        </div>
+      ) : (
+        /* =========================================================================
+           MOBILE APP VIEW (Exact Prototype 430px Frame & PWA Ready)
+           ========================================================================= */
+        <div className="min-h-screen flex flex-col justify-between">
+          {/* Top Switcher Banner on Desktop when Previewing Mobile */}
+          <div className="hidden sm:flex items-center justify-between px-6 py-2.5 bg-white border-b border-[#e9e9ec] shadow-xs text-xs">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-[#17191d]">Hishab Rakhi</span>
+              <span className="text-[#888]">Mobile App Prototype Frame (430px)</span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsMobileMode(false)}
+                className="px-3.5 py-1.5 rounded-xl bg-[#079be8] text-white font-bold hover:bg-[#0689cf] shadow-xs transition-all flex items-center gap-1.5"
+              >
+                <span>🖥️</span>
+                <span>Switch to Desktop Suite</span>
+              </button>
+              <Link
+                href="/api-docs"
+                className="px-3 py-1.5 rounded-xl border border-[#079be8]/40 bg-[#f0f8ff] text-[#079be8] font-bold hover:bg-[#e0f1fe]"
+              >
+                ⚡ Mobile REST API
+              </Link>
+            </div>
+          </div>
+
+          <div className="flex-1 flex justify-center items-start sm:py-6 sm:px-4">
+            <main className="w-full max-w-[430px] bg-white min-h-screen sm:min-h-[calc(100vh-48px)] sm:rounded-[28px] p-[12px_6px_105px] shadow-[0_0_35px_#1018280a] relative overflow-hidden">
+              {/* Mobile Topbar */}
+              <TopBar
+                user={user}
+                notifications={notifications}
+                selectedDateText={selectedDateFilter === 'All Time' ? 'Tue 3 Jun, 2025' : selectedDateFilter}
+                onOpenNotifications={() => setIsNotifOpen(true)}
+                onOpenCalendar={() => setIsCalendarOpen(true)}
+                onOpenProfile={() => setActiveMobileTab('Profile')}
+              />
+
+              {/* Mobile Tab 1: Home Dashboard */}
+              {activeMobileTab === 'Home' && (
+                <div className="animate-fade-in space-y-4">
+                  <BalanceCard
+                    totalBalance={totalBalance}
+                    monthlyIncome={monthlyIncome}
+                    monthlyExpense={monthlyExpense}
+                    incomeTrend={incomeTrend}
+                    expenseTrend={expenseTrend}
+                    currencySymbol={user.currencySymbol || '$'}
+                    isBalanceVisible={isBalanceVisible}
+                    onToggleBalance={handleToggleBalance}
+                    onOpenAnalytics={() => setActiveMobileTab('Analytics')}
+                  />
+
+                  <ActionButtons
+                    onAddTransaction={() => setIsAddTxOpen(true)}
+                    onAddSaving={() => setIsAddSavingOpen(true)}
+                  />
+
+                  <SavingsSection
+                    goals={savingsGoals}
+                    currencySymbol={user.currencySymbol || '$'}
+                    onSeeAll={() => setIsSeeAllSavingsOpen(true)}
+                    onDeposit={(g) => setDepositTargetGoal(g)}
+                  />
+
+                  <RecentActivitySection
+                    transactions={transactions}
+                    currencySymbol={user.currencySymbol || '$'}
+                    onSeeAll={() => setIsSeeAllTxOpen(true)}
+                    onSelectTransaction={(tx) => setSelectedTxDetail(tx)}
+                  />
+                </div>
+              )}
+
+              {/* Mobile Tab 2: Wallet */}
+              {activeMobileTab === 'Wallet' && (
+                <WalletView
+                  wallets={wallets}
+                  currencySymbol={user.currencySymbol || '$'}
+                  onAddWallet={() => setIsAddWalletOpen(true)}
+                  onTransfer={() => setIsTransferOpen(true)}
+                />
+              )}
+
+              {/* Mobile Tab 3: Analytics */}
+              {activeMobileTab === 'Analytics' && (
+                <AnalyticsView
+                  transactions={transactions}
+                  currencySymbol={user.currencySymbol || '$'}
+                />
+              )}
+
+              {/* Mobile Tab 4: Statistics */}
+              {activeMobileTab === 'Statistics' && (
+                <StatisticsView currencySymbol={user.currencySymbol || '$'} />
+              )}
+
+              {/* Mobile Tab 5: Profile */}
+              {activeMobileTab === 'Profile' && (
+                <ProfileView
+                  user={user}
+                  transactions={transactions}
+                  onUpdateProfile={handleUpdateProfile}
+                  onResetData={handleResetData}
+                  onToast={showToast}
+                />
+              )}
+
+              {/* Floating Scan Button */}
+              <FloatingScanButton
+                onScanClick={() => {
+                  showToast('Scan feature selected');
+                  setIsScanOpen(true);
+                }}
+              />
+
+              {/* Bottom Nav */}
+              <BottomNav
+                activeTab={activeMobileTab}
+                onTabChange={(tab) => {
+                  setActiveMobileTab(tab);
+                  if (tab !== 'Home') showToast(`${tab} selected`);
+                }}
+              />
+            </main>
+          </div>
+        </div>
+      )}
+
+      {/* Shared Modals Across Desktop & Mobile */}
       <AddTransactionModal
         isOpen={isAddTxOpen}
         wallets={wallets}
@@ -370,7 +490,7 @@ export default function HomePage() {
         isOpen={isScanOpen}
         currencySymbol={user.currencySymbol || '$'}
         onClose={() => setIsScanOpen(false)}
-        onTransactionAdded={(tx) => refreshData()}
+        onTransactionAdded={() => refreshData()}
         onToast={showToast}
       />
 
@@ -400,10 +520,10 @@ export default function HomePage() {
 
       <CalendarModal
         isOpen={isCalendarOpen}
-        selectedDate={selectedDateText}
+        selectedDate={selectedDateFilter}
         onClose={() => setIsCalendarOpen(false)}
         onSelectDate={(newDate) => {
-          setSelectedDateText(newDate);
+          setSelectedDateFilter(newDate);
           showToast(`Filtered date: ${newDate}`);
         }}
       />
@@ -458,6 +578,9 @@ export default function HomePage() {
         onSuccess={refreshData}
         onToast={showToast}
       />
+
+      {/* Floating Toast Notification */}
+      <Toast message={toastMessage} />
     </div>
   );
 }

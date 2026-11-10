@@ -191,3 +191,4 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
     </div>
   );
 };
+

@@ -119,3 +119,4 @@ export const DepositGoalModal: React.FC<DepositGoalModalProps> = ({
     </div>
   );
 };
+

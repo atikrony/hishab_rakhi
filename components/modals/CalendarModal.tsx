@@ -15,9 +15,19 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({
   onClose,
   onSelectDate,
 }) => {
-  const [tempDate, setTempDate] = useState(
-    selectedDate ? new Date(selectedDate).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)
-  );
+  const getInitialDate = () => {
+    try {
+      if (selectedDate) {
+        const d = new Date(selectedDate);
+        if (!isNaN(d.getTime())) {
+          return d.toISOString().slice(0, 10);
+        }
+      }
+    } catch {}
+    return new Date().toISOString().slice(0, 10);
+  };
+
+  const [tempDate, setTempDate] = useState(getInitialDate);
 
   if (!isOpen) return null;
 
@@ -113,3 +123,4 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({
     </div>
   );
 };
+

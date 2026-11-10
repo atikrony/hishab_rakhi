@@ -148,3 +148,4 @@ export const TransferFundsModal: React.FC<TransferFundsModalProps> = ({
     </div>
   );
 };
+

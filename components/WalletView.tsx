@@ -162,3 +162,4 @@ export const WalletView: React.FC<WalletViewProps> = ({
     </div>
   );
 };
+

@@ -100,3 +100,4 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
     </section>
   );
 };
+

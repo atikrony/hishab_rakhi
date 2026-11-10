@@ -82,3 +82,4 @@ npx cap sync
 
 ### Option C: PWA (Installable directly from browser)
 This Next.js app has full PWA support with `manifest.json`. Users on iOS Safari can tap **"Add to Home Screen"** and Android Chrome users will get a native install prompt!
+

@@ -151,3 +151,4 @@ npx cap sync
 
 ## 📄 License
 MIT License. Free to use, customize, and publish for personal or commercial projects.
+

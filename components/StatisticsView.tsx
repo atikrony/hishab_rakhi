@@ -233,3 +233,4 @@ export const StatisticsView: React.FC<StatisticsViewProps> = ({
     </div>
   );
 };
+

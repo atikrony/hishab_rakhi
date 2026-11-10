@@ -160,3 +160,4 @@ const styles = StyleSheet.create({
   positive: { color: '#219b35' },
   negative: { color: '#fa4563' },
 });
+

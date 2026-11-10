@@ -156,3 +156,4 @@ export const AddWalletModal: React.FC<AddWalletModalProps> = ({
     </div>
   );
 };
+
