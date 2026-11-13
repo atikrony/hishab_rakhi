@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb, saveDb } from '@/lib/db';
+import { getDbAsync, saveDbAsync } from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/security';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getSessionFromRequest(request);
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 });
+    }
     const { id } = await params;
-    const db = getDb();
+    const db = await getDbAsync(session.userId);
     const goal = db.savingsGoals.find((g) => g.id === id);
 
     if (!goal) {
@@ -17,7 +22,7 @@ export async function GET(
     return NextResponse.json({ success: true, data: goal });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error?.message || 'Failed to fetch goal' },
+      { success: false, error: 'Failed to fetch goal' },
       { status: 500 }
     );
   }
@@ -28,9 +33,13 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getSessionFromRequest(request);
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 });
+    }
     const { id } = await params;
     const body = await request.json();
-    const db = getDb();
+    const db = await getDbAsync(session.userId);
     const index = db.savingsGoals.findIndex((g) => g.id === id);
 
     if (index === -1) {
@@ -40,15 +49,19 @@ export async function PUT(
     const current = db.savingsGoals[index];
     const updated = {
       ...current,
-      ...body,
+      title: typeof body.title === 'string' ? body.title.trim().substring(0, 100) : current.title,
+      targetAmount: typeof body.targetAmount === 'number' && body.targetAmount > 0 ? Math.round(body.targetAmount) : current.targetAmount,
+      currentAmount: typeof body.currentAmount === 'number' && body.currentAmount >= 0 ? Math.round(body.currentAmount) : current.currentAmount,
+      category: typeof body.category === 'string' ? body.category.trim().substring(0, 50) : current.category,
+      note: typeof body.note === 'string' ? body.note.trim().substring(0, 200) : current.note,
       id: current.id,
     };
 
     const remaining = Math.max(0, updated.targetAmount - updated.currentAmount);
-    updated.note = `$${remaining.toLocaleString()} USD remaining to achieve your goals`;
+    updated.note = `৳${remaining.toLocaleString()} remaining to achieve your goals`;
 
     db.savingsGoals[index] = updated;
-    saveDb(db);
+    await saveDbAsync(db, session.userId);
 
     return NextResponse.json({
       success: true,
@@ -57,7 +70,7 @@ export async function PUT(
     });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error?.message || 'Failed to update goal' },
+      { success: false, error: 'Failed to update goal' },
       { status: 500 }
     );
   }
@@ -68,8 +81,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getSessionFromRequest(request);
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 });
+    }
     const { id } = await params;
-    const db = getDb();
+    const db = await getDbAsync(session.userId);
     const index = db.savingsGoals.findIndex((g) => g.id === id);
 
     if (index === -1) {
@@ -77,7 +94,7 @@ export async function DELETE(
     }
 
     const removed = db.savingsGoals.splice(index, 1)[0];
-    saveDb(db);
+    await saveDbAsync(db, session.userId);
 
     return NextResponse.json({
       success: true,
@@ -86,9 +103,8 @@ export async function DELETE(
     });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error?.message || 'Failed to delete goal' },
+      { success: false, error: 'Failed to delete goal' },
       { status: 500 }
     );
   }
 }
-

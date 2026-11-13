@@ -1,9 +1,14 @@
-import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { NextRequest, NextResponse } from 'next/server';
+import { getDbAsync } from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/security';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const db = getDb();
+    const session = await getSessionFromRequest(request);
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 });
+    }
+    const db = await getDbAsync(session.userId);
     const transactions = db.transactions;
 
     let totalIncome = 0;
@@ -25,7 +30,7 @@ export async function GET() {
     const categoryBreakdown = Object.entries(categoryExpenseMap)
       .map(([category, amount]) => ({
         category,
-        amount: Number(amount.toFixed(2)),
+        amount: Math.round(amount),
         percentage: totalExpense > 0 ? Number(((amount / totalExpense) * 100).toFixed(1)) : 0,
       }))
       .sort((a, b) => b.amount - a.amount);
@@ -35,34 +40,48 @@ export async function GET() {
         ? Number((((totalIncome - totalExpense) / totalIncome) * 100).toFixed(1))
         : 0;
 
-    // Monthly breakdown (mock realistic recent 6 months for chart visualization)
-    const monthlyOverview = [
-      { month: 'Jan', income: 6400, expense: 4200 },
-      { month: 'Feb', income: 6800, expense: 4500 },
-      { month: 'Mar', income: 7200, expense: 4900 },
-      { month: 'Apr', income: 6900, expense: 4600 },
-      { month: 'May', income: 7300, expense: 5200 },
-      { month: 'Jun', income: totalIncome || 7129.91, expense: totalExpense || 5129.91 },
-    ];
+    // Dynamically calculate the last 6 months from authenticated user's actual ledger transactions
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const now = new Date();
+    const monthlyOverview: { month: string; income: number; expense: number }[] = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const yr = d.getFullYear();
+      const mo = d.getMonth();
+      const monthLabel = monthNames[mo];
+      const prefix = `${yr}-${String(mo + 1).padStart(2, '0')}`;
+
+      const mIncome = transactions
+        .filter((t) => t.type === 'income' && t.date && t.date.startsWith(prefix))
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      const mExpense = transactions
+        .filter((t) => t.type === 'expense' && t.date && t.date.startsWith(prefix))
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      monthlyOverview.push({
+        month: monthLabel,
+        income: Math.round(mIncome),
+        expense: Math.round(mExpense),
+      });
+    }
 
     return NextResponse.json({
       success: true,
       data: {
-        totalIncome: Number(totalIncome.toFixed(2)),
-        totalExpense: Number(totalExpense.toFixed(2)),
-        netSavings: Number((totalIncome - totalExpense).toFixed(2)),
+        totalIncome: Math.round(totalIncome),
+        totalExpense: Math.round(totalExpense),
+        netSavings: Math.max(0, Math.round(totalIncome - totalExpense)),
         savingsRate,
         categoryBreakdown,
         monthlyOverview,
-        topCategory: categoryBreakdown[0] || null,
-        transactionCount: transactions.length,
       },
     });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error?.message || 'Failed to generate analytics' },
+      { success: false, error: error?.message || 'Failed to fetch analytics' },
       { status: 500 }
     );
   }
 }
-

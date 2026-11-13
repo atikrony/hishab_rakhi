@@ -94,7 +94,7 @@ const endpoints: ApiEndpoint[] = [
     title: 'Smart Receipt Scanner OCR',
     description: 'Parse physical or digital receipts and extract merchant, total, and category.',
     sampleBody: {
-      receiptText: 'Starbucks Coffee 2x Iced Latte Total $9.50',
+      receiptText: 'Starbucks Coffee 2x Iced Latte Total ৳9.50',
     },
   },
   {

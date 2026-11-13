@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb, saveDb } from '@/lib/db';
+import { getDbAsync, saveDbAsync } from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/security';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const db = getDb();
+    const session = await getSessionFromRequest(request);
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 });
+    }
+    const db = await getDbAsync(session.userId);
     const unreadCount = db.notifications.filter((n) => !n.read).length;
 
     return NextResponse.json({
@@ -16,7 +21,7 @@ export async function GET() {
     });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error?.message || 'Failed to fetch notifications' },
+      { success: false, error: 'Failed to fetch notifications' },
       { status: 500 }
     );
   }
@@ -24,9 +29,13 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getSessionFromRequest(request);
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 });
+    }
     const body = await request.json();
     const { action, id } = body;
-    const db = getDb();
+    const db = await getDbAsync(session.userId);
 
     if (action === 'mark_all_read') {
       db.notifications.forEach((n) => (n.read = true));
@@ -37,7 +46,7 @@ export async function POST(request: NextRequest) {
       db.notifications = [];
     }
 
-    saveDb(db);
+    await saveDbAsync(db, session.userId);
 
     return NextResponse.json({
       success: true,
@@ -51,4 +60,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

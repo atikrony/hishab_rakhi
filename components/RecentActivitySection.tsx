@@ -12,7 +12,7 @@ interface RecentActivitySectionProps {
 
 export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
   transactions,
-  currencySymbol = '$',
+  currencySymbol = '৳',
   onSeeAll,
   onSelectTransaction,
 }) => {
@@ -133,12 +133,7 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
               >
                 {tx.type === 'income' ? '+' : '-'}
                 {currencySymbol}
-                {tx.amount < 10 && tx.amount % 1 === 0
-                  ? tx.amount
-                  : tx.amount.toLocaleString(undefined, {
-                      minimumFractionDigits: tx.amount % 1 === 0 ? 0 : 2,
-                      maximumFractionDigits: 2,
-                    })}
+                {Math.round(tx.amount).toLocaleString()}
               </div>
               <div className="text-[13px] text-[#aaa] mt-[4px] capitalize">
                 {tx.type}
@@ -175,10 +170,7 @@ export const RecentActivitySection: React.FC<RecentActivitySectionProps> = ({
                   >
                     {tx.type === 'income' ? '+' : '-'}
                     {currencySymbol}
-                    {tx.amount.toLocaleString(undefined, {
-                      minimumFractionDigits: tx.amount % 1 === 0 ? 0 : 2,
-                      maximumFractionDigits: 2,
-                    })}
+                    {Math.round(tx.amount).toLocaleString()}
                   </div>
                   <div className="text-[13px] text-[#aaa] mt-[4px] capitalize">
                     {tx.type}

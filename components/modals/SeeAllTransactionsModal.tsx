@@ -14,7 +14,7 @@ interface SeeAllTransactionsModalProps {
 export const SeeAllTransactionsModal: React.FC<SeeAllTransactionsModalProps> = ({
   isOpen,
   transactions,
-  currencySymbol = '$',
+  currencySymbol = '৳',
   onClose,
   onSelectTransaction,
 }) => {
@@ -143,7 +143,7 @@ export const SeeAllTransactionsModal: React.FC<SeeAllTransactionsModalProps> = (
                   >
                     {tx.type === 'income' ? '+' : '-'}
                     {currencySymbol}
-                    {tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    {Math.round(tx.amount).toLocaleString()}
                   </div>
                   <div className="text-[11px] text-[#aaa] capitalize">{tx.type}</div>
                 </div>

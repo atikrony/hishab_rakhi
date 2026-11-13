@@ -15,7 +15,7 @@ interface TransferFundsModalProps {
 export const TransferFundsModal: React.FC<TransferFundsModalProps> = ({
   isOpen,
   wallets,
-  currencySymbol = '$',
+  currencySymbol = '৳',
   onClose,
   onTransferSuccess,
   onToast,
@@ -88,7 +88,7 @@ export const TransferFundsModal: React.FC<TransferFundsModalProps> = ({
             >
               {wallets.map((w) => (
                 <option key={w.id} value={w.id}>
-                  {w.name} (Balance: {currencySymbol}{w.balance.toFixed(2)})
+                  {w.name} (Balance: {currencySymbol}{Math.round(w.balance).toLocaleString()})
                 </option>
               ))}
             </select>
@@ -103,7 +103,7 @@ export const TransferFundsModal: React.FC<TransferFundsModalProps> = ({
             >
               {wallets.map((w) => (
                 <option key={w.id} value={w.id}>
-                  {w.name} (Balance: {currencySymbol}{w.balance.toFixed(2)})
+                  {w.name} (Balance: {currencySymbol}{Math.round(w.balance).toLocaleString()})
                 </option>
               ))}
             </select>
@@ -113,10 +113,10 @@ export const TransferFundsModal: React.FC<TransferFundsModalProps> = ({
             <label className="text-xs font-semibold text-[#888] uppercase">Transfer Amount ({currencySymbol})</label>
             <input
               type="number"
-              step="0.01"
-              min="0.01"
+              step="1"
+              min="1"
               required
-              placeholder="0.00"
+              placeholder="0"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               className="w-full mt-1 p-3 rounded-2xl border border-[#e2e2e6] text-lg font-bold"

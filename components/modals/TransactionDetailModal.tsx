@@ -12,7 +12,7 @@ interface TransactionDetailModalProps {
 
 export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
   transaction,
-  currencySymbol = '$',
+  currencySymbol = '৳',
   onClose,
   onDelete,
 }) => {
@@ -47,7 +47,7 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
             >
               {transaction.type === 'income' ? '+' : '-'}
               {currencySymbol}
-              {transaction.amount.toFixed(2)}
+              {Math.round(transaction.amount).toLocaleString()}
             </div>
             <div className="text-[17px] font-semibold text-[#17191d] mt-1">
               {transaction.title}

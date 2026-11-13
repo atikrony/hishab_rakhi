@@ -68,12 +68,17 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({
         <div className="py-4 space-y-4">
           <div>
             <label className="text-xs font-semibold text-[#888] uppercase block mb-1">
-              Select Specific Date
+              Select Specific Date (No Future Dates)
             </label>
             <input
               type="date"
+              max={new Date().toISOString().split('T')[0]}
               value={tempDate}
-              onChange={(e) => setTempDate(e.target.value)}
+              onChange={(e) => {
+                const todayStr = new Date().toISOString().split('T')[0];
+                if (e.target.value > todayStr) return;
+                setTempDate(e.target.value);
+              }}
               className="w-full px-4 py-2.5 rounded-2xl border border-[#e2e2e6] text-sm outline-none focus:border-[#079be8]"
             />
           </div>

@@ -13,7 +13,7 @@ interface DesktopBudgetsViewProps {
 
 export const DesktopBudgetsView: React.FC<DesktopBudgetsViewProps> = ({
   savingsGoals,
-  currencySymbol = '$',
+  currencySymbol = '৳',
   onDepositGoal,
   onAddSaving,
   onDeleteGoal,

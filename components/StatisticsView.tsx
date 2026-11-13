@@ -9,7 +9,7 @@ interface StatisticsViewProps {
 }
 
 export const StatisticsView: React.FC<StatisticsViewProps> = ({
-  currencySymbol = '$',
+  currencySymbol = '৳',
   onRefreshTrigger,
 }) => {
   const [budgets, setBudgets] = useState<any[]>([]);

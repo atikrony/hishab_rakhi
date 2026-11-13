@@ -1,0 +1,69 @@
+{
+  "user": {
+    "id": "usr_real_01",
+    "name": "Atiqur",
+    "email": "atiqur@hishabrakhi.com",
+    "avatar": "https://lh3.googleusercontent.com/aida-public/AB6AXuAGbe-PGr5FQv2oeTce8zWB0Rhh8gLQWtLLOSGRW2FKp1bwXwnCcWU0lR4hMV1MdQAaBamQvkWdPLbeuAnN8DD4HJCgzggnnEgNT5GyNl0LO7KqelGlysdZnh2Wa4FHMx4Inu5VyOMi4blUPrrWF20O4qENbQag0AkgsI7Pdqj3uY6cmXxnX5n3StoThWFweCLXBa5-clEAH9HP9JYdRKIjuRmcA9OwnNSCUYgg6S0m",
+    "plan": "Real Ledger",
+    "currency": "BDT",
+    "currencySymbol": "৳"
+  },
+  "wallets": [
+    {
+      "id": "wal_pocket",
+      "name": "Main Pocket",
+      "type": "bank",
+      "balance": 0,
+      "accountNumber": "•••• 0001",
+      "color": "#16a36a"
+    },
+    {
+      "id": "wal_vault",
+      "name": "Reserve Vault",
+      "type": "digital",
+      "balance": 0,
+      "accountNumber": "•••• 0002",
+      "color": "#006d44"
+    },
+    {
+      "id": "wal_cash",
+      "name": "Cash in Hand",
+      "type": "cash",
+      "balance": 0,
+      "accountNumber": "Cash Wallet",
+      "color": "#f59e0b"
+    }
+  ],
+  "transactions": [],
+  "savingsGoals": [],
+  "budgets": [
+    {
+      "id": "b_food",
+      "category": "Food & Dining",
+      "monthlyLimit": 15000,
+      "spent": 0
+    },
+    {
+      "id": "b_utilities",
+      "category": "Utilities",
+      "monthlyLimit": 5000,
+      "spent": 0
+    },
+    {
+      "id": "b_transport",
+      "category": "Transportation",
+      "monthlyLimit": 4000,
+      "spent": 0
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif_welcome",
+      "title": "Real Database Initialized",
+      "message": "Welcome to your real ledger. 0 dummy records are loaded. Every transaction you add is saved to your real database.",
+      "date": "2026-11-11T12:00:00Z",
+      "read": false,
+      "type": "info"
+    }
+  ]
+}

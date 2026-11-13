@@ -1,0 +1,322 @@
+{
+  "user": {
+    "id": "usr_atiqur_01",
+    "name": "Atiqur",
+    "email": "atiqur@hishabrakhi.com",
+    "avatar": "https://lh3.googleusercontent.com/aida-public/AB6AXuAGbe-PGr5FQv2oeTce8zWB0Rhh8gLQWtLLOSGRW2FKp1bwXwnCcWU0lR4hMV1MdQAaBamQvkWdPLbeuAnN8DD4HJCgzggnnEgNT5GyNl0LO7KqelGlysdZnh2Wa4FHMx4Inu5VyOMi4blUPrrWF20O4qENbQag0AkgsI7Pdqj3uY6cmXxnX5n3StoThWFweCLXBa5-clEAH9HP9JYdRKIjuRmcA9OwnNSCUYgg6S0m",
+    "plan": "Premium Plan",
+    "currency": "BDT",
+    "currencySymbol": "৳"
+  },
+  "wallets": [
+    {
+      "id": "wal_pocket",
+      "name": "Main Pocket (Checking)",
+      "type": "bank",
+      "balance": 965,
+      "accountNumber": "•••• 4420",
+      "color": "#16a36a"
+    },
+    {
+      "id": "wal_vault",
+      "name": "Reserve Vault",
+      "type": "digital",
+      "balance": 850,
+      "accountNumber": "•••• 9811",
+      "color": "#006d44"
+    },
+    {
+      "id": "wal_tax",
+      "name": "Tax Escrow",
+      "type": "bank",
+      "balance": 500,
+      "accountNumber": "•••• 3190",
+      "color": "#f59e0b"
+    }
+  ],
+  "savingsGoals": [
+    {
+      "id": "goal_01",
+      "title": "Tax Escrow Reserve",
+      "targetAmount": 5000,
+      "currentAmount": 2500,
+      "category": "Safety",
+      "targetDate": "2026-12-31",
+      "note": "৳2,500 remaining for annual tax balance",
+      "color": "#16a36a"
+    },
+    {
+      "id": "goal_02",
+      "title": "Tech Hardware Upgrade",
+      "targetAmount": 2000,
+      "currentAmount": 1400,
+      "category": "Electronics",
+      "targetDate": "2026-11-30",
+      "note": "৳600 remaining to purchase M4 Max workstation",
+      "color": "#079fe9"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "tx_in_01",
+      "title": "Tech Corp",
+      "amount": 750,
+      "type": "income",
+      "category": "Freelance",
+      "date": "2026-11-10T14:30:00Z",
+      "walletId": "wal_pocket",
+      "notes": "Direct Wire ACH • Invoice #TC-9921",
+      "channel": "Direct Wire ACH • Invoice #TC-9921",
+      "sourceStream": "Freelance",
+      "paymentMethod": "Direct Wire ACH",
+      "status": "Completed",
+      "brandIcon": "laptop_mac"
+    },
+    {
+      "id": "tx_in_02",
+      "title": "Monthly Salary",
+      "amount": 1500,
+      "type": "income",
+      "category": "Salary",
+      "date": "2026-11-06T09:00:00Z",
+      "walletId": "wal_pocket",
+      "notes": "Apex Labs Ltd • Direct Deposit Primary Payroll",
+      "channel": "Apex Labs Ltd • Direct Deposit",
+      "sourceStream": "Salary",
+      "paymentMethod": "Direct Deposit",
+      "status": "Completed",
+      "brandIcon": "corporate_fare"
+    },
+    {
+      "id": "tx_in_03",
+      "title": "Birthday Gift",
+      "amount": 100,
+      "type": "income",
+      "category": "Gift",
+      "date": "2026-10-28T16:15:00Z",
+      "walletId": "wal_pocket",
+      "notes": "Sent from family via instant bank transfer with celebration note",
+      "channel": "Sent via Zelle Instant",
+      "sourceStream": "Gifts & Family",
+      "paymentMethod": "Zelle Instant",
+      "status": "Completed",
+      "brandIcon": "featured_seasonal_and_gifts"
+    },
+    {
+      "id": "tx_in_04",
+      "title": "Asset Yield",
+      "amount": 150,
+      "type": "income",
+      "category": "Investment",
+      "date": "2026-10-22T11:00:00Z",
+      "walletId": "wal_pocket",
+      "notes": "Quarterly index fund dividend reinvestment allocation",
+      "channel": "Vanguard Index Yield Distribution",
+      "sourceStream": "Investment",
+      "paymentMethod": "ACH Direct",
+      "status": "Completed",
+      "brandIcon": "show_chart"
+    },
+    {
+      "id": "tx_out_01",
+      "title": "Artisan Grocery & Market",
+      "amount": 85,
+      "type": "expense",
+      "category": "Food & Dining",
+      "date": "2026-11-10T14:24:00Z",
+      "walletId": "wal_pocket",
+      "notes": "Groceries • Organic produce & pantry supply",
+      "paymentMethod": "Apple Pay (Debit)",
+      "status": "Completed",
+      "brandIcon": "local_grocery_store"
+    },
+    {
+      "id": "tx_out_02",
+      "title": "Uber Ride",
+      "amount": 20,
+      "type": "expense",
+      "category": "Transportation",
+      "date": "2026-11-09T08:45:00Z",
+      "walletId": "wal_pocket",
+      "notes": "Office meeting transit • Downtown trip",
+      "paymentMethod": "Credit Card (*4921)",
+      "status": "Completed",
+      "brandIcon": "commute"
+    },
+    {
+      "id": "tx_out_03",
+      "title": "Internet Bill - Fiber",
+      "amount": 45,
+      "type": "expense",
+      "category": "Bills & Utilities",
+      "date": "2026-11-08T00:01:00Z",
+      "walletId": "wal_pocket",
+      "notes": "Monthly 1 Gbps broadband connection",
+      "paymentMethod": "Auto-debit (Checking)",
+      "status": "Completed",
+      "brandIcon": "wifi"
+    },
+    {
+      "id": "tx_out_04",
+      "title": "Coffee & Bakery",
+      "amount": 12,
+      "type": "expense",
+      "category": "Food & Dining",
+      "date": "2026-11-07T09:12:00Z",
+      "walletId": "wal_pocket",
+      "notes": "Morning espresso & fresh croissant",
+      "paymentMethod": "Cash Pocket",
+      "status": "Completed",
+      "brandIcon": "local_cafe"
+    },
+    {
+      "id": "tx_out_05",
+      "title": "USB-C Dock",
+      "amount": 110,
+      "type": "expense",
+      "category": "Tech & Gadgets",
+      "date": "2026-11-05T17:30:00Z",
+      "walletId": "wal_pocket",
+      "notes": "Dual display 100W USB-C charging dock",
+      "paymentMethod": "Digital Wallet",
+      "status": "Completed",
+      "brandIcon": "hub"
+    },
+    {
+      "id": "tx_out_06",
+      "title": "Pharmacy",
+      "amount": 32,
+      "type": "expense",
+      "category": "Health & Meds",
+      "date": "2026-11-04T11:20:00Z",
+      "walletId": "wal_pocket",
+      "notes": "Prescription vitamins & daily wellness care",
+      "paymentMethod": "Health HSA Debit",
+      "status": "Completed",
+      "brandIcon": "prescriptions"
+    },
+    {
+      "id": "tx_out_07",
+      "title": "Bistro Team Dinner",
+      "amount": 94,
+      "type": "expense",
+      "category": "Food & Dining",
+      "date": "2026-11-03T19:30:00Z",
+      "walletId": "wal_pocket",
+      "notes": "Weekly team sprint dinner and celebration",
+      "paymentMethod": "Apple Pay",
+      "status": "Completed",
+      "brandIcon": "restaurant"
+    },
+    {
+      "id": "tx_out_08",
+      "title": "Artisan Roast & Provisions",
+      "amount": 49,
+      "type": "expense",
+      "category": "Food & Dining",
+      "date": "2026-11-02T11:22:00Z",
+      "walletId": "wal_pocket",
+      "notes": "Espresso beans & team brunch",
+      "paymentMethod": "Debit ••4109",
+      "status": "Completed",
+      "brandIcon": "local_cafe"
+    },
+    {
+      "id": "tx_out_09",
+      "title": "Vercel & Supabase Infra",
+      "amount": 70,
+      "type": "expense",
+      "category": "Tech & Gadgets",
+      "date": "2026-11-01T15:00:00Z",
+      "walletId": "wal_pocket",
+      "notes": "Cloud hosting serverless compute and database replica",
+      "paymentMethod": "Chase Debit",
+      "status": "Completed",
+      "brandIcon": "terminal"
+    },
+    {
+      "id": "tx_out_10",
+      "title": "Power & Electricity Grid",
+      "amount": 75,
+      "type": "expense",
+      "category": "Bills & Utilities",
+      "date": "2026-10-31T08:00:00Z",
+      "walletId": "wal_pocket",
+      "notes": "City grid green energy power utility billing",
+      "paymentMethod": "Auto-debit",
+      "status": "Completed",
+      "brandIcon": "bolt"
+    },
+    {
+      "id": "tx_out_11",
+      "title": "Metro Commuter Pass",
+      "amount": 58,
+      "type": "expense",
+      "category": "Transportation",
+      "date": "2026-10-30T07:45:00Z",
+      "walletId": "wal_pocket",
+      "notes": "Subway & commuter rapid rail reload",
+      "paymentMethod": "Apple Pay",
+      "status": "Completed",
+      "brandIcon": "directions_car"
+    }
+  ],
+  "budgets": [
+    {
+      "id": "bgt_food",
+      "category": "Food & Dining",
+      "monthlyLimit": 350,
+      "spent": 276
+    },
+    {
+      "id": "bgt_tech",
+      "category": "Tech & Gadgets",
+      "monthlyLimit": 250,
+      "spent": 180
+    },
+    {
+      "id": "bgt_util",
+      "category": "Bills & Utilities",
+      "monthlyLimit": 150,
+      "spent": 120
+    },
+    {
+      "id": "bgt_trans",
+      "category": "Transportation",
+      "monthlyLimit": 150,
+      "spent": 78
+    },
+    {
+      "id": "bgt_health",
+      "category": "Health & Meds",
+      "monthlyLimit": 100,
+      "spent": 32
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif_01",
+      "title": "Wire Settled",
+      "message": "Tech Corp invoice #TC-9921 (+৳750) completed ACH clearance.",
+      "date": "2026-11-10T14:30:00Z",
+      "read": false,
+      "type": "success"
+    },
+    {
+      "id": "notif_02",
+      "title": "Realtime Wire Connected",
+      "message": "Fold Finance sync active. Ledger reconciliation speed is ~0.4s.",
+      "date": "2026-11-10T08:00:00Z",
+      "read": false,
+      "type": "info"
+    },
+    {
+      "id": "notif_03",
+      "title": "Solvency Status",
+      "message": "Zero debt obligations active this cycle • Solvency Grade: Optimal.",
+      "date": "2026-11-09T00:00:00Z",
+      "read": true,
+      "type": "success"
+    }
+  ]
+}

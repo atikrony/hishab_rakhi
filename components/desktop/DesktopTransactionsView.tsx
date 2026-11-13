@@ -13,7 +13,7 @@ interface DesktopTransactionsViewProps {
 
 export const DesktopTransactionsView: React.FC<DesktopTransactionsViewProps> = ({
   transactions,
-  currencySymbol = '$',
+  currencySymbol = '৳',
   onSelectTransaction,
   onAddTransaction,
   onDeleteTransaction,
@@ -209,7 +209,7 @@ export const DesktopTransactionsView: React.FC<DesktopTransactionsViewProps> = (
                     >
                       {tx.type === 'income' ? '+' : '-'}
                       {currencySymbol}
-                      {tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      {Math.round(tx.amount).toLocaleString()}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-center">

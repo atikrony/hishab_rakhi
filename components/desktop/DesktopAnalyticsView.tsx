@@ -10,7 +10,7 @@ interface DesktopAnalyticsViewProps {
 
 export const DesktopAnalyticsView: React.FC<DesktopAnalyticsViewProps> = ({
   transactions,
-  currencySymbol = '$',
+  currencySymbol = '৳',
 }) => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -61,7 +61,7 @@ export const DesktopAnalyticsView: React.FC<DesktopAnalyticsViewProps> = ({
           <span className="text-xs text-[#888] uppercase font-semibold">Total Net Savings</span>
           <div className="text-2xl font-bold text-emerald-600 mt-1">
             +{currencySymbol}
-            {data.netSavings.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            {Math.round(data.netSavings).toLocaleString()}
           </div>
           <div className="text-[11px] text-[#888] mt-2">Calculated from all active income</div>
         </div>
@@ -122,12 +122,12 @@ export const DesktopAnalyticsView: React.FC<DesktopAnalyticsViewProps> = ({
                     <div
                       style={{ height: `${incHeight}%` }}
                       className="w-4 rounded-t-md bg-[#079be8] group-hover:opacity-85 transition-all shadow-xs"
-                      title={`Income: $${m.income}`}
+                      title={`Income: ৳${m.income}`}
                     />
                     <div
                       style={{ height: `${expHeight}%` }}
                       className="w-4 rounded-t-md bg-[#fa4563] group-hover:opacity-85 transition-all shadow-xs"
-                      title={`Expense: $${m.expense}`}
+                      title={`Expense: ৳${m.expense}`}
                     />
                   </div>
                   <span className="text-xs text-[#888] font-medium mt-2">{m.month}</span>
@@ -137,7 +137,7 @@ export const DesktopAnalyticsView: React.FC<DesktopAnalyticsViewProps> = ({
           </div>
 
           <div className="flex justify-between items-center text-xs text-[#888] pt-1">
-            <span>Average Net Margin: +$2,100 / month</span>
+            <span>Average Net Margin: +৳2,100 / month</span>
             <span className="text-emerald-600 font-semibold">Positive Cash Runway</span>
           </div>
         </div>

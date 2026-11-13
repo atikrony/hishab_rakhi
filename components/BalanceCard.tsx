@@ -20,16 +20,13 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
   monthlyExpense,
   incomeTrend = 3.1,
   expenseTrend = 4.2,
-  currencySymbol = '$',
+  currencySymbol = '৳',
   isBalanceVisible,
   onToggleBalance,
   onOpenAnalytics,
 }) => {
   const formatAmount = (val: number) => {
-    return `${currencySymbol}${val.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
+    return `${currencySymbol}${Math.round(val).toLocaleString()}`;
   };
 
   return (

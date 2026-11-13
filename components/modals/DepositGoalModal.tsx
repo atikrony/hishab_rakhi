@@ -15,7 +15,7 @@ interface DepositGoalModalProps {
 export const DepositGoalModal: React.FC<DepositGoalModalProps> = ({
   goal,
   wallets,
-  currencySymbol = '$',
+  currencySymbol = '৳',
   onClose,
   onDepositSuccess,
   onToast,
@@ -99,7 +99,7 @@ export const DepositGoalModal: React.FC<DepositGoalModalProps> = ({
             >
               {wallets.map((w) => (
                 <option key={w.id} value={w.id}>
-                  {w.name} (Balance: {currencySymbol}{w.balance.toFixed(2)})
+                  {w.name} (Balance: {currencySymbol}{Math.round(w.balance).toLocaleString()})
                 </option>
               ))}
             </select>

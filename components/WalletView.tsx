@@ -12,7 +12,7 @@ interface WalletViewProps {
 
 export const WalletView: React.FC<WalletViewProps> = ({
   wallets,
-  currencySymbol = '$',
+  currencySymbol = '৳',
   onAddWallet,
   onTransfer,
 }) => {
@@ -68,9 +68,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
             <div className="text-[12px] text-white/80">Available Balance</div>
             <div className="text-[26px] font-bold tracking-tight">
               {currencySymbol}
-              {(wallets[selectedCardIndex]?.balance || 0).toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-              })}
+              {Math.round(wallets[selectedCardIndex]?.balance || 0).toLocaleString()}
             </div>
           </div>
 
@@ -134,7 +132,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
               <div className="text-right">
                 <div className="text-[16px] font-semibold text-[#17191d]">
                   {currencySymbol}
-                  {w.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  {Math.round(w.balance).toLocaleString()}
                 </div>
                 <div className="text-[11px] text-[#888] capitalize">{w.type}</div>
               </div>
@@ -149,7 +147,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
           <div className="text-[13px] text-[#888]">Combined Net Balance</div>
           <div className="text-[20px] font-bold text-[#17191d] mt-0.5">
             {currencySymbol}
-            {total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            {Math.round(total).toLocaleString()}
           </div>
         </div>
         <button

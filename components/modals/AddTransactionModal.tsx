@@ -14,7 +14,7 @@ interface AddTransactionModalProps {
 export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   isOpen,
   wallets,
-  currencySymbol = '$',
+  currencySymbol = '৳',
   onClose,
   onSubmit,
 }) => {
@@ -123,10 +123,10 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               </span>
               <input
                 type="number"
-                step="0.01"
-                min="0.01"
+                step="1"
+                min="1"
                 required
-                placeholder="0.00"
+                placeholder="0"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 className="w-full pl-8 pr-4 py-3 rounded-2xl border border-[#e2e2e6] text-xl font-bold outline-none focus:border-[#079be8] focus:ring-2 focus:ring-[#079be8]/20"
@@ -173,7 +173,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             >
               {wallets.map((w) => (
                 <option key={w.id} value={w.id}>
-                  {w.name} ({currencySymbol}{w.balance.toFixed(2)})
+                  {w.name} ({currencySymbol}{Math.round(w.balance).toLocaleString()})
                 </option>
               ))}
             </select>

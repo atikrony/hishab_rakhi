@@ -1,9 +1,19 @@
-import { NextResponse } from 'next/server';
-import { getDashboardSummary } from '@/lib/db';
+import { NextRequest, NextResponse } from 'next/server';
+import { getDashboardSummaryAsync } from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/security';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const summary = getDashboardSummary();
+    const session = await getSessionFromRequest(request);
+    if (!session) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required. Please sign in.' },
+        { status: 401 }
+      );
+    }
+
+    const summary = await getDashboardSummaryAsync(session.userId);
+
     return NextResponse.json({
       success: true,
       data: summary,
@@ -11,16 +21,16 @@ export async function GET() {
       meta: {
         timestamp: new Date().toISOString(),
         version: 'v1.0.0',
+        userId: session.userId,
       },
     });
   } catch (error: any) {
     return NextResponse.json(
       {
         success: false,
-        error: error?.message || 'Failed to retrieve dashboard',
+        error: 'Failed to retrieve dashboard',
       },
       { status: 500 }
     );
   }
 }
-

@@ -1,14 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb, saveDb } from '@/lib/db';
+import { getDbAsync, saveDbAsync } from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/security';
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getSessionFromRequest(request);
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 });
+    }
     const body = await request.json();
     const { fromWalletId, toWalletId, amount, note } = body;
 
-    if (!fromWalletId || !toWalletId || typeof amount !== 'number' || amount <= 0) {
+    if (
+      !fromWalletId ||
+      !toWalletId ||
+      typeof amount !== 'number' ||
+      !Number.isFinite(amount) ||
+      isNaN(amount) ||
+      amount <= 0 ||
+      amount > 100000000
+    ) {
       return NextResponse.json(
-        { success: false, error: 'fromWalletId, toWalletId, and positive amount are required' },
+        { success: false, error: 'Valid positive amount (max 100,000,000) and wallet IDs are required' },
         { status: 400 }
       );
     }
@@ -20,7 +33,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const db = getDb();
+    const db = await getDbAsync(session.userId);
     const fromWallet = db.wallets.find((w) => w.id === fromWalletId);
     const toWallet = db.wallets.find((w) => w.id === toWalletId);
 
@@ -31,36 +44,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (fromWallet.balance < amount) {
+    const roundedAmount = Math.round(amount);
+
+    if (fromWallet.balance < roundedAmount) {
       return NextResponse.json(
         { success: false, error: 'Insufficient funds in source wallet' },
         { status: 400 }
       );
     }
 
-    fromWallet.balance -= amount;
-    toWallet.balance += amount;
+    fromWallet.balance -= roundedAmount;
+    toWallet.balance += roundedAmount;
 
     // Record notification/log
     db.notifications.unshift({
       id: `notif_${Date.now()}`,
       title: 'Wallet Transfer',
-      message: `Transferred $${amount} from ${fromWallet.name} to ${toWallet.name}. ${note ? `(${note})` : ''}`,
+      message: `Transferred ৳${roundedAmount} from ${fromWallet.name} to ${toWallet.name}. ${note ? `(${note})` : ''}`,
       date: new Date().toISOString(),
       read: false,
       type: 'info',
     });
 
-    saveDb(db);
+    await saveDbAsync(db, session.userId);
 
     return NextResponse.json({
       success: true,
       data: {
         fromWallet,
         toWallet,
-        transferredAmount: amount,
+        amount: roundedAmount,
       },
-      message: `Successfully transferred $${amount} from ${fromWallet.name} to ${toWallet.name}`,
+      message: 'Funds transferred successfully',
     });
   } catch (error: any) {
     return NextResponse.json(
@@ -69,4 +84,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

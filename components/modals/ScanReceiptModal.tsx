@@ -13,7 +13,7 @@ interface ScanReceiptModalProps {
 
 export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
   isOpen,
-  currencySymbol = '$',
+  currencySymbol = '৳',
   onClose,
   onTransactionAdded,
   onToast,
@@ -132,25 +132,25 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                 onClick={() => simulateScan('Starbucks Coffee')}
                 className="p-2 border border-[#e2e2e6] rounded-xl hover:bg-[#f0f8ff] hover:border-[#079be8] text-left font-medium"
               >
-                ☕ Starbucks ($4.85)
+                ☕ Starbucks (৳4.85)
               </button>
               <button
                 onClick={() => simulateScan('Target Supercenter')}
                 className="p-2 border border-[#e2e2e6] rounded-xl hover:bg-[#f0f8ff] hover:border-[#079be8] text-left font-medium"
               >
-                🛒 Target Market ($42.60)
+                🛒 Target Market (৳42.60)
               </button>
               <button
                 onClick={() => simulateScan('Uber Ride')}
                 className="p-2 border border-[#e2e2e6] rounded-xl hover:bg-[#f0f8ff] hover:border-[#079be8] text-left font-medium"
               >
-                🚗 Uber Ride ($18.25)
+                🚗 Uber Ride (৳18.25)
               </button>
               <button
                 onClick={() => simulateScan('Pharmacy')}
                 className="p-2 border border-[#e2e2e6] rounded-xl hover:bg-[#f0f8ff] hover:border-[#079be8] text-left font-medium"
               >
-                💊 Pharmacy ($22.40)
+                💊 Pharmacy (৳22.40)
               </button>
             </div>
           </div>
@@ -171,7 +171,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                 <div className="text-right">
                   <div className="text-lg font-bold text-[#fa4563]">
                     -{currencySymbol}
-                    {scannedResult.amount.toFixed(2)}
+                    {Math.round(scannedResult.amount).toLocaleString()}
                   </div>
                   <div className="text-xs text-[#888]">{scannedResult.category}</div>
                 </div>

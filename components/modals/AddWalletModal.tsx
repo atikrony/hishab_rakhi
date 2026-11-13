@@ -12,7 +12,7 @@ interface AddWalletModalProps {
 
 export const AddWalletModal: React.FC<AddWalletModalProps> = ({
   isOpen,
-  currencySymbol = '$',
+  currencySymbol = '৳',
   onClose,
   onSuccess,
   onToast,
@@ -105,8 +105,8 @@ export const AddWalletModal: React.FC<AddWalletModalProps> = ({
             <label className="text-xs font-semibold text-[#888] uppercase">Initial Balance ({currencySymbol})</label>
             <input
               type="number"
-              step="0.01"
-              placeholder="0.00"
+              step="1"
+              placeholder="0"
               value={balance}
               onChange={(e) => setBalance(e.target.value)}
               className="w-full mt-1 p-3 rounded-2xl border border-[#e2e2e6] text-sm font-semibold"

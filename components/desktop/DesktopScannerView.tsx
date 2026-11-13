@@ -10,7 +10,7 @@ interface DesktopScannerViewProps {
 }
 
 export const DesktopScannerView: React.FC<DesktopScannerViewProps> = ({
-  currencySymbol = '$',
+  currencySymbol = '৳',
   onTransactionAdded,
   onToast,
 }) => {
@@ -176,7 +176,7 @@ export const DesktopScannerView: React.FC<DesktopScannerViewProps> = ({
                     <div className="text-right">
                       <span className="text-xs text-[#888]">Amount</span>
                       <div className="text-2xl font-bold text-[#fa4563]">
-                        -{currencySymbol}{scannedResult.amount.toFixed(2)}
+                        -{currencySymbol}{Math.round(scannedResult.amount).toLocaleString()}
                       </div>
                     </div>
                   </div>

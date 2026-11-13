@@ -11,7 +11,7 @@ interface AddSavingsModalProps {
 
 export const AddSavingsModal: React.FC<AddSavingsModalProps> = ({
   isOpen,
-  currencySymbol = '$',
+  currencySymbol = '৳',
   onClose,
   onSubmit,
 }) => {

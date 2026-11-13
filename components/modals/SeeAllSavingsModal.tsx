@@ -16,7 +16,7 @@ interface SeeAllSavingsModalProps {
 export const SeeAllSavingsModal: React.FC<SeeAllSavingsModalProps> = ({
   isOpen,
   goals,
-  currencySymbol = '$',
+  currencySymbol = '৳',
   onClose,
   onAddNewGoal,
   onDeposit,

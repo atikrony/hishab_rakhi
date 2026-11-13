@@ -14,7 +14,7 @@ interface DesktopWalletsViewProps {
 export const DesktopWalletsView: React.FC<DesktopWalletsViewProps> = ({
   wallets,
   transactions,
-  currencySymbol = '$',
+  currencySymbol = '৳',
   onAddWallet,
   onTransfer,
 }) => {
@@ -87,7 +87,7 @@ export const DesktopWalletsView: React.FC<DesktopWalletsViewProps> = ({
                 <div className="text-[11px] text-white/80">Available Balance</div>
                 <div className="text-2xl font-bold tracking-tight">
                   {currencySymbol}
-                  {w.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  {Math.round(w.balance).toLocaleString()}
                 </div>
               </div>
 
@@ -112,7 +112,7 @@ export const DesktopWalletsView: React.FC<DesktopWalletsViewProps> = ({
                 Account number: {selectedWallet.accountNumber} • Current Balance:{' '}
                 <span className="font-bold text-[#17191d]">
                   {currencySymbol}
-                  {selectedWallet.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  {Math.round(selectedWallet.balance).toLocaleString()}
                 </span>
               </p>
             </div>
@@ -159,7 +159,7 @@ export const DesktopWalletsView: React.FC<DesktopWalletsViewProps> = ({
                       >
                         {tx.type === 'income' ? '+' : '-'}
                         {currencySymbol}
-                        {tx.amount.toFixed(2)}
+                        {Math.round(tx.amount).toLocaleString()}
                       </td>
                     </tr>
                   ))
@@ -178,7 +178,7 @@ export const DesktopWalletsView: React.FC<DesktopWalletsViewProps> = ({
           </span>
           <div className="text-2xl font-bold text-[#17191d] mt-1">
             {currencySymbol}
-            {total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            {Math.round(total).toLocaleString()}
           </div>
         </div>
         <button

@@ -26,6 +26,14 @@ yarn-error.log*
 .env*.local
 .env
 
+# customer financial data & local database privacy
+/data/hishab_db.json
+/data/hishab_real.json
+/data/hishab_dummy.json
+/data/users/
+/data/users.json
+/data/*.local.json
+
 # local mcp secrets
 .agents/mcp_config.json
 

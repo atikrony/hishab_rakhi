@@ -2,27 +2,38 @@ export type TransactionType = 'income' | 'expense';
 
 export type TransactionCategory =
   | 'Food'
-  | 'Subscription'
+  | 'Food & Dining'
+  | 'Tech & Gadgets'
+  | 'Bills & Utilities'
+  | 'Transportation'
+  | 'Health & Meds'
   | 'Salary'
   | 'Freelance'
+  | 'Investment'
+  | 'Gift'
   | 'Shopping'
   | 'Bills'
   | 'Entertainment'
+  | 'Subscription'
   | 'Transport'
   | 'Health'
-  | 'Investment'
-  | 'Other';
+  | 'Other'
+  | string;
 
 export interface Transaction {
   id: string;
   title: string;
   amount: number;
   type: TransactionType;
-  category: TransactionCategory;
-  date: string; // ISO string e.g. "2026-06-03T12:21:00Z"
+  category: string;
+  date: string; // ISO string e.g. "2024-11-10T14:24:00Z"
   walletId?: string;
   notes?: string;
-  brandIcon?: 'youtube' | 'apple' | 'food' | 'freelance' | 'coffee' | 'shopping' | 'bills' | 'default';
+  paymentMethod?: string;
+  sourceStream?: string;
+  channel?: string;
+  status?: string;
+  brandIcon?: string;
   receiptUrl?: string;
 }
 
@@ -48,7 +59,7 @@ export interface WalletAccount {
 
 export interface BudgetLimit {
   id: string;
-  category: TransactionCategory;
+  category: string;
   monthlyLimit: number;
   spent: number;
 }
@@ -67,20 +78,57 @@ export interface UserProfile {
   name: string;
   email: string;
   avatar: string;
+  plan: string;
   currency: string;
   currencySymbol: string;
+  occupation?: string;
+  monthlyIncome?: number;
+  salaryDate?: string;
+  lastExpense?: number;
 }
 
 export interface DashboardSummary {
   user: UserProfile;
+  databaseMode?: 'dummy' | 'real';
+  databaseFile?: string;
   totalBalance: number;
-  monthlyIncome: number;
-  monthlyExpense: number;
-  incomeTrend: number;
-  expenseTrend: number;
-  savingsGoals: SavingsGoal[];
+  availablePocketCash: number;
+  totalInflow: number;
+  totalExpense: number;
+  netRemaining: number;
+  retainedPercent: number;
+  debtAmount: number;
+  activeChannelsCount: number;
+  savingsVelocity: number;
+  dailyBurnRate: number;
   recentTransactions: Transaction[];
   wallets: WalletAccount[];
+  categoryBreakdown: {
+    category: string;
+    amount: number;
+    percentage: number;
+    count: number;
+  }[];
+  sourceBreakdown: {
+    source: string;
+    amount: number;
+    percentage: number;
+  }[];
+  weeklyInflow: {
+    day: string;
+    dayLabel: string;
+    amount: number;
+    heightPercent: number;
+    isPeak?: boolean;
+  }[];
+  weeklyLiquidity: {
+    label: string;
+    dateRange: string;
+    inflow: number;
+    outflow: number;
+    inflowPercent: number;
+    outflowPercent: number;
+  }[];
 }
 
 export interface ApiResponse<T = any> {
@@ -90,4 +138,3 @@ export interface ApiResponse<T = any> {
   error?: string;
   meta?: Record<string, any>;
 }
-

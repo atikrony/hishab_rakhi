@@ -10,7 +10,7 @@ interface AnalyticsViewProps {
 
 export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
   transactions,
-  currencySymbol = '$',
+  currencySymbol = '৳',
 }) => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);

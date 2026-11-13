@@ -38,7 +38,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
   expenseTrend = 4.2,
   isBalanceVisible,
   onToggleBalance,
-  currencySymbol = '$',
+  currencySymbol = '৳',
   transactions,
   savingsGoals,
   wallets,
@@ -54,10 +54,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
     monthlyIncome > 0 ? ((netSavings / monthlyIncome) * 100).toFixed(1) : '0';
 
   const formatMoney = (val: number) => {
-    return `${currencySymbol}${val.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
+    return `${currencySymbol}${Math.round(val).toLocaleString()}`;
   };
 
   // Monthly Overview for Chart
@@ -195,7 +192,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
 
           <div className="my-2">
             <div className="text-2xl font-bold tracking-tight text-emerald-600">
-              +{currencySymbol}{netSavings.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              +{currencySymbol}{Math.round(netSavings).toLocaleString()}
             </div>
           </div>
 
@@ -241,12 +238,12 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
                       <div
                         style={{ height: `${incPct}%` }}
                         className="w-4 rounded-t-md bg-[#079be8] group-hover:opacity-85 transition-all shadow-xs"
-                        title={`Inflow: $${m.income}`}
+                        title={`Inflow: ৳${m.income}`}
                       />
                       <div
                         style={{ height: `${expPct}%` }}
                         className="w-4 rounded-t-md bg-[#fa4563] group-hover:opacity-85 transition-all shadow-xs"
-                        title={`Outflow: $${m.expense}`}
+                        title={`Outflow: ৳${m.expense}`}
                       />
                     </div>
                     <span className="text-xs text-[#888] font-medium mt-2">{m.month}</span>
@@ -256,7 +253,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
             </div>
 
             <div className="flex justify-between items-center pt-3 text-xs text-[#888]">
-              <span>Last 6 months cash flow average: +$6,950/mo</span>
+              <span>Last 6 months cash flow average: +৳6,950/mo</span>
               <span className="font-semibold text-[#079be8]">Healthy Liquidity</span>
             </div>
           </div>
@@ -331,7 +328,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
                         >
                           {tx.type === 'income' ? '+' : '-'}
                           {currencySymbol}
-                          {tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          {Math.round(tx.amount).toLocaleString()}
                         </span>
                       </td>
                       <td className="py-3 px-3 text-center">
@@ -444,7 +441,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
                   <div className="text-right">
                     <div className="text-xs font-bold text-[#17191d]">
                       {currencySymbol}
-                      {w.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      {Math.round(w.balance).toLocaleString()}
                     </div>
                     <div className="text-[10px] text-[#aaa] capitalize">{w.type}</div>
                   </div>

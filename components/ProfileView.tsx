@@ -20,12 +20,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   onToast,
 }) => {
   const [name, setName] = useState(user.name);
-  const [currencySymbol, setCurrencySymbol] = useState(user.currencySymbol || '$');
+  const [currencySymbol, setCurrencySymbol] = useState(user.currencySymbol || '৳');
   const [apiKey] = useState('key_live_hishab_8921f00a391e');
 
   const currencies = [
-    { label: 'USD ($)', symbol: '$' },
     { label: 'BDT (৳)', symbol: '৳' },
+    { label: 'USD ($)', symbol: '$' },
     { label: 'EUR (€)', symbol: '€' },
     { label: 'GBP (£)', symbol: '£' },
     { label: 'INR (₹)', symbol: '₹' },

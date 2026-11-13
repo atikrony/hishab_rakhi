@@ -12,7 +12,7 @@ interface SavingsSectionProps {
 
 export const SavingsSection: React.FC<SavingsSectionProps> = ({
   goals,
-  currencySymbol = '$',
+  currencySymbol = '৳',
   onSeeAll,
   onDeposit,
 }) => {
