@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       data: {
         ...db.user,
         email: user?.email || db.user.email,
-        onboardingCompleted: user?.onboardingCompleted ?? true,
+        onboardingCompleted: user ? user.onboardingCompleted : (session.onboardingCompleted ?? false),
         occupation: db.user.occupation || user?.profile?.occupation || '',
         monthlyIncome: db.user.monthlyIncome !== undefined ? db.user.monthlyIncome : user?.profile?.monthlyIncome || 0,
         salaryDate: db.user.salaryDate || user?.profile?.salaryDate || '',

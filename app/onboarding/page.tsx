@@ -19,12 +19,12 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Verify authentication on mount; if unauthorized, navigate to register
+  // Verify authentication on mount; if unauthorized, navigate to login
   useEffect(() => {
     fetch('/api/v1/auth/profile')
       .then((res) => {
         if (res.status === 401) {
-          window.location.href = '/auth/register';
+          window.location.href = '/auth/login';
         }
       })
       .catch(() => {});

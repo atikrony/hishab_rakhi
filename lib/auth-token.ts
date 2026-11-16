@@ -15,19 +15,10 @@ export const SESSION_COOKIE_NAME = 'hr_session';
 
 function getSessionSecret(): string {
   if (process.env.SESSION_SECRET && process.env.SESSION_SECRET.trim().length >= 16) {
-    return process.env.SESSION_SECRET;
+    return process.env.SESSION_SECRET.trim();
   }
-  // If not set, generate or use an in-memory random string per server instance
-  const g = globalThis as any;
-  if (!g.__HR_SESSION_SECRET__) {
-    const randomHex = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
-    g.__HR_SESSION_SECRET__ = process.env.NODE_ENV === 'production'
-      ? randomHex
-      : 'hishab_rakhi_super_secure_auth_session_secret_2026';
-  }
-  return g.__HR_SESSION_SECRET__;
+  // Stable HMAC secret shared across all serverless lambda containers and Edge middleware workers
+  return 'hishab_rakhi_super_secure_auth_session_secret_2026_prod_vault_token';
 }
 
 function base64UrlEncode(bytes: Uint8Array): string {

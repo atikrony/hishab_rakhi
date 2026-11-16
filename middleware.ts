@@ -65,7 +65,7 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/onboarding')) {
     if (!session) {
       // Must register or sign in first
-      return withSecurityHeaders(NextResponse.redirect(new URL('/auth/register', request.url)));
+      return withSecurityHeaders(NextResponse.redirect(new URL('/auth/login', request.url)));
     }
     if (session.onboardingCompleted) {
       // Already completed onboarding, send to main dashboard
@@ -104,8 +104,8 @@ export async function middleware(request: NextRequest) {
 
   // 6. Protected Core Application Routes (/, /spend, /summary, /pocket, etc.)
   if (!session) {
-    // User must register while visiting the page
-    return withSecurityHeaders(NextResponse.redirect(new URL('/auth/register', request.url)));
+    // Redirect unauthenticated requests to login
+    return withSecurityHeaders(NextResponse.redirect(new URL('/auth/login', request.url)));
   }
 
   if (!session.onboardingCompleted) {
