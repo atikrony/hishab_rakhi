@@ -79,9 +79,29 @@ export function getPostgresPool(): Pool {
 
 export function isPostgresConfigured(): boolean {
   if (process.env.USE_POSTGRES === 'false') return false;
-  return Boolean(
+
+  const isServerless = Boolean(
+    process.env.VERCEL ||
+    process.env.AWS_LAMBDA_FUNCTION_NAME ||
+    process.env.LAMBDA_TASK_ROOT ||
+    process.env.VERCEL_ENV
+  );
+
+  const connStr =
     process.env.DATABASE_URL ||
     process.env.POSTGRES_URL ||
+    process.env.PG_CONNECTION_STRING ||
+    '';
+
+  if (isServerless) {
+    // In serverless (Vercel), only enable if a real remote connection string is provided
+    if (!connStr || connStr.includes('localhost') || connStr.includes('127.0.0.1')) {
+      return false;
+    }
+  }
+
+  return Boolean(
+    connStr ||
     process.env.PGHOST ||
     process.env.USE_POSTGRES === 'true'
   );

@@ -1,7 +1,14 @@
-import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { DatabaseSchema } from './db';
+import {
+  getUserLedgersDirectory,
+  getUsersFilePath,
+  readUsersData,
+  writeUsersData,
+  readUserLedgerData,
+  writeUserLedgerData,
+} from './storage';
 
 export interface OnboardingProfile {
   name: string;
@@ -21,36 +28,12 @@ export interface UserRecord {
   profile?: OnboardingProfile;
 }
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-const USERS_FILE = path.join(DATA_DIR, 'users.json');
-const USER_LEDGERS_DIR = path.join(DATA_DIR, 'users');
-
-function ensureDirectories() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-  if (!fs.existsSync(USER_LEDGERS_DIR)) {
-    fs.mkdirSync(USER_LEDGERS_DIR, { recursive: true });
-  }
-}
-
 export function getAllUsers(): UserRecord[] {
-  ensureDirectories();
-  if (!fs.existsSync(USERS_FILE)) {
-    fs.writeFileSync(USERS_FILE, JSON.stringify([], null, 2), 'utf-8');
-    return [];
-  }
-  try {
-    const raw = fs.readFileSync(USERS_FILE, 'utf-8');
-    return JSON.parse(raw);
-  } catch (err) {
-    return [];
-  }
+  return readUsersData<UserRecord>();
 }
 
 export function saveUsers(users: UserRecord[]): void {
-  ensureDirectories();
-  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf-8');
+  writeUsersData<UserRecord>(users);
 }
 
 export function findUserByEmail(email: string): UserRecord | null {
@@ -120,13 +103,11 @@ export function verifyUserPassword(email: string, password: string): UserRecord 
 }
 
 export function getUserLedgerPath(userId: string): string {
-  ensureDirectories();
   const safeId = (userId || '').replace(/[^a-zA-Z0-9_-]/g, '_');
-  return path.join(USER_LEDGERS_DIR, `${safeId}.json`);
+  return path.join(getUserLedgersDirectory(), `${safeId}.json`);
 }
 
 export function initializeBlankUserLedger(userId: string, email: string): DatabaseSchema {
-  const filePath = getUserLedgerPath(userId);
   const template: DatabaseSchema = {
     user: {
       id: userId,
@@ -182,7 +163,7 @@ export function initializeBlankUserLedger(userId: string, email: string): Databa
     ],
   };
 
-  fs.writeFileSync(filePath, JSON.stringify(template, null, 2), 'utf-8');
+  writeUserLedgerData<DatabaseSchema>(userId, template);
   return template;
 }
 
@@ -322,7 +303,7 @@ export function completeOnboarding(
     ],
   };
 
-  fs.writeFileSync(filePath, JSON.stringify(ledger, null, 2), 'utf-8');
+  writeUserLedgerData<DatabaseSchema>(userId, ledger);
 
   // Persist user profile and create dedicated user table in PostgreSQL
   import('./postgres')

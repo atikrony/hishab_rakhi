@@ -1,5 +1,13 @@
-import fs from 'fs';
 import path from 'path';
+import {
+  getDataStorageDirectory,
+  getUserLedgersDirectory,
+  safeReadJson,
+  safeWriteJson,
+  getMemoryStore,
+  readUserLedgerData,
+  writeUserLedgerData,
+} from './storage';
 import {
   UserProfile,
   Transaction,
@@ -428,7 +436,7 @@ export function getActiveDbConfig(): {
   filePath: string;
   dbDir: string;
 } {
-  const dbDir = path.join(process.cwd(), process.env.DATA_STORAGE_DIR || 'data');
+  const dbDir = getDataStorageDirectory();
 
   const rawMode = (
     process.env.DATABASE_MODE ||
@@ -475,44 +483,40 @@ function getSafeUserId(userId?: string): string {
 
 export function getDb(userId?: string): DatabaseSchema {
   if (userId) {
-    const safeId = getSafeUserId(userId);
-    const userFilePath = path.join(process.cwd(), 'data', 'users', `${safeId}.json`);
-    if (fs.existsSync(userFilePath)) {
-      try {
-        const raw = fs.readFileSync(userFilePath, 'utf-8');
-        return JSON.parse(raw);
-      } catch (err) {
-        // fallback
-      }
+    const userLedger = readUserLedgerData<DatabaseSchema>(userId);
+    if (userLedger) {
+      return userLedger;
     }
   }
 
   const { mode, fileName, filePath, dbDir } = getActiveDbConfig();
   const defaultTemplate = mode === 'real' ? realInitialData : dummyInitialData;
 
-  try {
-    if (!fs.existsSync(dbDir)) {
-      fs.mkdirSync(dbDir, { recursive: true });
-    }
-    if (!fs.existsSync(filePath)) {
-      // If dummy database file does not exist yet but legacy hishab_db.json exists, seed from legacy
-      if (mode === 'dummy') {
-        const legacyPath = path.join(dbDir, 'hishab_db.json');
-        if (fs.existsSync(legacyPath)) {
-          const legacyRaw = fs.readFileSync(legacyPath, 'utf-8');
-          fs.writeFileSync(filePath, legacyRaw, 'utf-8');
-          return JSON.parse(legacyRaw);
-        }
-      }
-      fs.writeFileSync(filePath, JSON.stringify(defaultTemplate, null, 2), 'utf-8');
-      return JSON.parse(JSON.stringify(defaultTemplate));
-    }
-    const raw = fs.readFileSync(filePath, 'utf-8');
-    const parsed = JSON.parse(raw);
-    return parsed;
-  } catch (err) {
-    return JSON.parse(JSON.stringify(defaultTemplate));
+  const memoryStore = getMemoryStore();
+  if (memoryStore.db) {
+    return memoryStore.db;
   }
+
+  const diskDb = safeReadJson<DatabaseSchema>(filePath, path.join('data', fileName));
+  if (diskDb) {
+    memoryStore.db = diskDb;
+    return diskDb;
+  }
+
+  // Fallback check legacy hishab_db.json if in dummy mode
+  if (mode === 'dummy') {
+    const legacyDb = safeReadJson<DatabaseSchema>(path.join(dbDir, 'hishab_db.json'), 'data/hishab_db.json');
+    if (legacyDb) {
+      memoryStore.db = legacyDb;
+      safeWriteJson(filePath, legacyDb);
+      return legacyDb;
+    }
+  }
+
+  const clone = JSON.parse(JSON.stringify(defaultTemplate));
+  memoryStore.db = clone;
+  safeWriteJson(filePath, clone);
+  return clone;
 }
 
 /**
@@ -527,17 +531,7 @@ export async function getDbAsync(userId?: string): Promise<DatabaseSchema> {
       const { getUserLedgerFromPostgres } = await import('./postgres');
       const pgData = await getUserLedgerFromPostgres(userId);
       if (pgData) {
-        // Cache to local file so offline fallback remains synchronized
-        const usersDir = path.join(process.cwd(), 'data', 'users');
-        if (!fs.existsSync(usersDir)) {
-          fs.mkdirSync(usersDir, { recursive: true });
-        }
-        const safeId = getSafeUserId(userId);
-        fs.writeFileSync(
-          path.join(usersDir, `${safeId}.json`),
-          JSON.stringify(pgData, null, 2),
-          'utf-8'
-        );
+        writeUserLedgerData<DatabaseSchema>(userId, pgData);
         return pgData;
       }
     } catch (err) {
@@ -550,17 +544,7 @@ export async function getDbAsync(userId?: string): Promise<DatabaseSchema> {
 
 export function saveDb(data: DatabaseSchema, userId?: string): void {
   if (userId) {
-    const usersDir = path.join(process.cwd(), 'data', 'users');
-    if (!fs.existsSync(usersDir)) {
-      fs.mkdirSync(usersDir, { recursive: true });
-    }
-    const safeId = getSafeUserId(userId);
-    const userFilePath = path.join(usersDir, `${safeId}.json`);
-    try {
-      fs.writeFileSync(userFilePath, JSON.stringify(data, null, 2), 'utf-8');
-    } catch (err) {
-      console.warn('User ledger file write failed:', err);
-    }
+    writeUserLedgerData<DatabaseSchema>(userId, data);
 
     // Persist to PostgreSQL in background
     import('./postgres')
@@ -572,15 +556,10 @@ export function saveDb(data: DatabaseSchema, userId?: string): void {
     return;
   }
 
-  const { filePath, dbDir } = getActiveDbConfig();
-  try {
-    if (!fs.existsSync(dbDir)) {
-      fs.mkdirSync(dbDir, { recursive: true });
-    }
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
-  } catch (err) {
-    console.warn('File system write skipped or failed:', err);
-  }
+  const { filePath } = getActiveDbConfig();
+  const store = getMemoryStore();
+  store.db = data;
+  safeWriteJson(filePath, data);
 }
 
 /**
@@ -599,17 +578,12 @@ export async function saveDbAsync(data: DatabaseSchema, userId?: string): Promis
 }
 
 export function resetDb(): DatabaseSchema {
-  const { mode, filePath, dbDir } = getActiveDbConfig();
+  const { mode, filePath } = getActiveDbConfig();
   const defaultTemplate = mode === 'real' ? realInitialData : dummyInitialData;
   const clone = JSON.parse(JSON.stringify(defaultTemplate));
-  try {
-    if (!fs.existsSync(dbDir)) {
-      fs.mkdirSync(dbDir, { recursive: true });
-    }
-    fs.writeFileSync(filePath, JSON.stringify(clone, null, 2), 'utf-8');
-  } catch (err) {
-    // fallback ok
-  }
+  const store = getMemoryStore();
+  store.db = clone;
+  safeWriteJson(filePath, clone);
   return clone;
 }
 
