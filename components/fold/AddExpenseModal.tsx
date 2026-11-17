@@ -187,7 +187,7 @@ export function AddExpenseModal({ isOpen, onClose, onSubmit }: AddExpenseModalPr
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Blue Bottle Coffee, Target, Uber"
+                placeholder="e.g. Groceries, Shopping, Uber"
                 className="w-full bg-transparent font-title-sm text-title-sm text-on-surface outline-none placeholder:text-outline"
               />
               {title && (

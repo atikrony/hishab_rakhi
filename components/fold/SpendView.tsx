@@ -52,7 +52,7 @@ export function SpendView({
 }: SpendViewProps) {
   // Quick Expense Form State
   const [quickAmount, setQuickAmount] = useState('45');
-  const [merchantTitle, setMerchantTitle] = useState('Blue Bottle Coffee');
+  const [merchantTitle, setMerchantTitle] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Food & Dining');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -734,7 +734,7 @@ export function SpendView({
                     required
                     value={merchantTitle}
                     onChange={(e) => setMerchantTitle(e.target.value)}
-                    placeholder="e.g. Whole Foods, Blue Bottle"
+                    placeholder="e.g. Groceries, Shopping, Coffee"
                     className="w-full bg-surface-container-low rounded-lg px-space-md py-space-sm font-body-md text-body-md text-on-surface outline-none border border-transparent focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
