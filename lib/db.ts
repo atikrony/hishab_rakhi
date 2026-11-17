@@ -356,6 +356,7 @@ export const dummyInitialData: DatabaseSchema = {
       type: 'success',
     },
   ],
+  fixedCosts: [],
 };
 
 export const realInitialData: DatabaseSchema = {
@@ -426,6 +427,7 @@ export const realInitialData: DatabaseSchema = {
       type: 'info',
     },
   ],
+  fixedCosts: [],
 };
 
 /**

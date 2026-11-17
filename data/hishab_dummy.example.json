@@ -318,5 +318,6 @@
       "read": true,
       "type": "success"
     }
-  ]
+  ],
+  "fixedCosts": []
 }
