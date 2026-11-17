@@ -372,23 +372,9 @@ export function SummaryView({
 
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-space-lg relative z-10">
           <div className="flex flex-col gap-space-xs">
-            <div className="flex items-center gap-space-xs">
-              <span className="inline-block w-2 h-2 rounded-full bg-secondary-fixed animate-pulse" />
-              <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary-fixed font-semibold">
-                Live Financial Diagnostics
-              </span>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-space-md">
-              <h1 className="font-headline-xl text-headline-xl text-on-primary tracking-tight font-bold">
-                Summary Analytics
-              </h1>
-              <span className="font-label-md text-label-md text-outline-variant bg-white/5 px-2.5 py-0.5 rounded-full border border-white/10 self-start sm:self-auto">
-                {periodLabel}
-              </span>
-            </div>
-            <p className="font-body-md text-body-md text-on-primary-container max-w-xl">
-              Real-time cashflow intelligence. Aggregating multi-source inflows against settled expenses with live ledger analytics.
-            </p>
+            <h1 className="font-headline-xl text-headline-xl text-on-primary tracking-tight font-bold">
+              Summary Analytics
+            </h1>
           </div>
         </div>
       </section>
