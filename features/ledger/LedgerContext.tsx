@@ -35,6 +35,7 @@ interface LedgerContextType {
     paymentMethod?: string;
   }) => Promise<void>;
   handleDeleteTransaction: (id: string) => Promise<void>;
+  handleUpdateTransaction: (id: string, updates: Partial<Transaction>) => Promise<boolean>;
   handleResetDb: () => Promise<void>;
   handleLogout: () => Promise<void>;
   selectedTx: Transaction | null;
@@ -299,6 +300,35 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Update Transaction
+  const handleUpdateTransaction = async (
+    id: string,
+    updates: Partial<Transaction>
+  ): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/v1/transactions/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      const json = await res.json();
+      if (json.success) {
+        showToast('Expense updated successfully');
+        await fetchData();
+        if (selectedTx && selectedTx.id === id) {
+          setSelectedTx(json.data);
+        }
+        return true;
+      } else {
+        showToast(json.error || 'Failed to update expense');
+        return false;
+      }
+    } catch (err) {
+      showToast('Network error updating expense');
+      return false;
+    }
+  };
+
   // Reset Database
   const handleResetDb = async () => {
     try {
@@ -352,6 +382,7 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
         handleAddInflow,
         handleAddExpense,
         handleDeleteTransaction,
+        handleUpdateTransaction,
         handleResetDb,
         handleLogout,
         selectedTx,

@@ -48,16 +48,6 @@ export function HishabSidebar() {
             <span className="font-title-sm text-title-sm text-on-surface truncate font-semibold">
               {user.name}
             </span>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  summary?.databaseMode === 'real' ? 'bg-secondary' : 'bg-primary'
-                }`}
-              />
-              <span className="font-label-sm text-[11px] text-on-surface-variant font-medium">
-                {summary?.databaseMode === 'real' ? 'Real Database' : 'Dummy Database'}
-              </span>
-            </div>
           </div>
         </div>
 

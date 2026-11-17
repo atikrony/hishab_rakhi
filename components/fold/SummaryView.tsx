@@ -245,10 +245,10 @@ export function SummaryView({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
               <div className="flex flex-col">
                 <h2 className="font-title-sm text-title-sm text-on-surface font-bold">
-                  Cashflow Dynamics & Retention
+                  Cash Flow Overview
                 </h2>
                 <p className="font-label-md text-label-md text-on-surface-variant">
-                  Realized inflow versus authorized outflows over active cycle
+                  Total money in versus money out this period
                 </p>
               </div>
               <div className="flex items-center gap-space-xs bg-surface-container p-0.5 rounded-lg self-start sm:self-auto">
@@ -269,28 +269,6 @@ export function SummaryView({
               </div>
             </div>
 
-            {/* Metric Highlight Badge */}
-            <div className="flex items-center justify-between p-space-md bg-secondary-container/20 rounded-xl border border-secondary-container/30">
-              <div className="flex items-center gap-space-sm">
-                <span
-                  className="material-symbols-outlined text-secondary text-[22px]"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  shield_with_heart
-                </span>
-                <div className="flex flex-col">
-                  <span className="font-title-sm text-title-sm text-on-surface font-bold">
-                    Spending within owned funds
-                  </span>
-                  <span className="font-label-sm text-label-sm text-on-secondary-container font-medium">
-                    No outstanding lines of credit drawn this period
-                  </span>
-                </div>
-              </div>
-              <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold px-space-sm py-1 bg-surface-container-lowest rounded-lg shadow-sm border border-secondary/20">
-                Optimal Grade
-              </span>
-            </div>
 
             {/* Donut & Breakdown Visualization */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter-desktop items-center pt-space-xs">
@@ -485,22 +463,7 @@ export function SummaryView({
               })}
             </div>
 
-            {/* Budget Advice Snippet */}
-            <div className="mt-auto p-space-md rounded-xl bg-surface-container-low flex items-start gap-space-sm border border-surface-container">
-              <span className="material-symbols-outlined text-outline text-[20px] shrink-0 mt-0.5">
-                tips_and_updates
-              </span>
-              <div className="flex flex-col">
-                <span className="font-label-md text-label-md font-bold text-on-surface">
-                  Pacing Strategy
-                </span>
-                <span className="font-label-sm text-label-sm text-on-surface-variant leading-relaxed">
-                  {topCat
-                    ? `${topCat.category} is tracking at ${topCat.percentage}% of expense volume. Shifting ৳40 to emergency pool preserves high liquid ratio.`
-                    : 'All expense allocations are tracking well within verified monthly benchmarks.'}
-                </span>
-              </div>
-            </div>
+
           </div>
         </div>
 

@@ -32,6 +32,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     handleAddInflow,
     handleAddExpense,
     handleDeleteTransaction,
+    handleUpdateTransaction,
     handleResetDb,
     handleLogout,
   } = useLedger();
@@ -105,6 +106,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         transaction={selectedTx}
         onClose={() => setSelectedTx(null)}
         onDelete={handleDeleteTransaction}
+        onUpdate={handleUpdateTransaction}
       />
 
       {/* Settings Modal */}

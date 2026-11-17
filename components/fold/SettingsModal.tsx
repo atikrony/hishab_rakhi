@@ -55,7 +55,7 @@ export function SettingsModal({
             <span className="font-label-sm text-label-sm text-on-surface-variant font-mono">
               {user.email}
             </span>
-            <span className="font-label-sm text-[10px] text-secondary font-semibold uppercase mt-0.5">
+            <span className="hidden sm:inline-block font-label-sm text-[10px] text-secondary font-semibold uppercase mt-0.5">
               {user.plan || 'Premium Plan'} • Currency: {user.currency || 'BDT'} ({user.currencySymbol || '৳'})
             </span>
           </div>
@@ -66,53 +66,19 @@ export function SettingsModal({
           <span className="font-label-sm text-label-sm text-on-surface-variant font-semibold uppercase tracking-wider">
             Active Security Guarantees
           </span>
-          <div className="space-y-1.5 text-xs text-on-surface-variant">
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-surface-container-low">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-surface-container-low font-semibold text-on-surface">
               <span className="material-symbols-outlined text-[16px] text-emerald-600">verified_user</span>
-              <span><strong>Git Excluded:</strong> Customer DB never checked into source control.</span>
+              <span>Git Excluded</span>
             </div>
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-surface-container-low">
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-surface-container-low font-semibold text-on-surface">
               <span className="material-symbols-outlined text-[16px] text-emerald-600">lock</span>
-              <span><strong>Input Sanitized:</strong> HTML/script injection tags stripped on API routes.</span>
+              <span>Input Sanitized</span>
             </div>
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-surface-container-low">
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-surface-container-low font-semibold text-on-surface">
               <span className="material-symbols-outlined text-[16px] text-emerald-600">speed</span>
-              <span><strong>Rate Limited:</strong> Brute-force and scrapers restricted via sliding-window limiters.</span>
+              <span>Rate Limited</span>
             </div>
-          </div>
-        </div>
-
-        {/* Database Engine Information */}
-        <div className="flex flex-col gap-2">
-          <span className="font-label-sm text-label-sm text-on-surface-variant font-semibold uppercase tracking-wider">
-            Active Database Engine (.env)
-          </span>
-          <div className="p-3 rounded-xl bg-surface-container-low border border-surface-container flex flex-col gap-1.5">
-            <div className="flex items-center justify-between">
-              <span className="font-label-md text-label-md font-semibold text-on-surface flex items-center gap-1.5">
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    databaseMode === 'real' ? 'bg-secondary' : 'bg-primary'
-                  }`}
-                />
-                Mode: {databaseMode === 'real' ? 'Real Database' : 'Dummy Database'}
-              </span>
-              <span
-                className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
-                  databaseMode === 'real'
-                    ? 'bg-secondary-container text-on-secondary-container'
-                    : 'bg-primary-container text-on-primary'
-                }`}
-              >
-                {databaseMode}
-              </span>
-            </div>
-            <div className="font-label-sm text-[11px] text-on-surface-variant">
-              Active File: <code className="bg-surface-container px-1 py-0.5 rounded font-mono text-on-surface font-semibold">{databaseFile}</code>
-            </div>
-            <p className="text-[11px] text-outline mt-0.5 leading-snug">
-              To switch between real and dummy database, comment or uncomment <code className="bg-surface-container px-1 py-0.5 rounded font-mono">DATABASE_MODE</code> in your <code className="bg-surface-container px-1 py-0.5 rounded font-mono">.env</code> file.
-            </p>
           </div>
         </div>
 

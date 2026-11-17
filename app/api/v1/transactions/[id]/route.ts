@@ -86,6 +86,7 @@ export async function PUT(
       category: typeof body.category === 'string' ? body.category.trim().substring(0, 50) : oldTx.category,
       notes: typeof body.notes === 'string' ? body.notes.trim().substring(0, 500) : oldTx.notes,
       amount: newAmount,
+      date: typeof body.date === 'string' && body.date ? body.date : oldTx.date,
       id: oldTx.id,
       type: oldTx.type,
       walletId: oldTx.walletId,
