@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
     response.headers.set('X-XSS-Protection', '1; mode=block');
     response.headers.set(
       'Content-Security-Policy',
-      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://api.dicebear.com https://images.unsplash.com https://lh3.googleusercontent.com; connect-src 'self';"
+      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://api.dicebear.com https://images.unsplash.com https://lh3.googleusercontent.com https://*.googleusercontent.com; connect-src 'self';"
     );
     return response;
   };
@@ -47,9 +47,19 @@ export async function middleware(request: NextRequest) {
   if (pathname === '/register') {
     return withSecurityHeaders(NextResponse.redirect(new URL('/auth/register', request.url)));
   }
+  if (pathname === '/forgot-password') {
+    return withSecurityHeaders(NextResponse.redirect(new URL('/auth/forgot-password', request.url)));
+  }
+  if (pathname === '/reset-password') {
+    return withSecurityHeaders(NextResponse.redirect(new URL('/auth/reset-password', request.url)));
+  }
 
-  // 3. Public Auth Routes (/auth/register, /auth/login)
-  const isAuthRoute = pathname.startsWith('/auth/register') || pathname.startsWith('/auth/login');
+  // 3. Public Auth Routes (/auth/register, /auth/login, /auth/forgot-password, /auth/reset-password)
+  const isAuthRoute =
+    pathname.startsWith('/auth/register') ||
+    pathname.startsWith('/auth/login') ||
+    pathname.startsWith('/auth/forgot-password') ||
+    pathname.startsWith('/auth/reset-password');
   if (isAuthRoute) {
     if (session) {
       // If user is already authenticated
@@ -76,11 +86,14 @@ export async function middleware(request: NextRequest) {
 
   // 5. API Routes handling
   if (pathname.startsWith('/api/')) {
-    // Only public auth endpoints are login, register, and logout
+    // Public auth endpoints
     const isPublicAuth =
       pathname.startsWith('/api/v1/auth/login') ||
       pathname.startsWith('/api/v1/auth/register') ||
-      pathname.startsWith('/api/v1/auth/logout');
+      pathname.startsWith('/api/v1/auth/logout') ||
+      pathname.startsWith('/api/v1/auth/forgot-password') ||
+      pathname.startsWith('/api/v1/auth/reset-password') ||
+      pathname.startsWith('/api/v1/auth/google');
 
     if (isPublicAuth) {
       return withSecurityHeaders(NextResponse.next());

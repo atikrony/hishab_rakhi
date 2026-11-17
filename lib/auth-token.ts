@@ -115,3 +115,64 @@ export async function verifySession(token?: string | null): Promise<SessionPaylo
     return null;
   }
 }
+
+export async function signPasswordResetToken(email: string): Promise<string> {
+  const payload = {
+    email: email.trim().toLowerCase(),
+    type: 'pwd_reset',
+    exp: Math.floor(Date.now() / 1000) + 15 * 60, // 15 minutes validity
+  };
+  const headerStr = JSON.stringify({ alg: 'HS256', typ: 'JWT' });
+  const payloadStr = JSON.stringify(payload);
+  const encHeader = base64UrlEncode(enc.encode(headerStr));
+  const encPayload = base64UrlEncode(enc.encode(payloadStr));
+  const dataToSign = enc.encode(`${encHeader}.${encPayload}`);
+
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(getSessionSecret()) as unknown as BufferSource,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  const sig = await crypto.subtle.sign('HMAC', key, dataToSign as unknown as BufferSource);
+  const encSig = base64UrlEncode(new Uint8Array(sig));
+  return `${encHeader}.${encPayload}.${encSig}`;
+}
+
+export async function verifyPasswordResetToken(token: string): Promise<string | null> {
+  if (!token || typeof token !== 'string') return null;
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const [headerB64, payloadB64, sigB64] = parts;
+    const dataToVerify = enc.encode(`${headerB64}.${payloadB64}`);
+    const sigBytes = base64UrlDecode(sigB64);
+
+    const key = await crypto.subtle.importKey(
+      'raw',
+      enc.encode(getSessionSecret()) as unknown as BufferSource,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['verify']
+    );
+
+    const isValid = await crypto.subtle.verify(
+      'HMAC',
+      key,
+      sigBytes as unknown as BufferSource,
+      dataToVerify as unknown as BufferSource
+    );
+    if (!isValid) return null;
+
+    const payloadText = dec.decode(base64UrlDecode(payloadB64));
+    const payload = JSON.parse(payloadText);
+    if (payload.type !== 'pwd_reset') return null;
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
+
+    return payload.email || null;
+  } catch (err) {
+    return null;
+  }
+}

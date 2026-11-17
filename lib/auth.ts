@@ -102,6 +102,83 @@ export function verifyUserPassword(email: string, password: string): UserRecord 
   return null;
 }
 
+export function updateUserPassword(email: string, newPassword: string): boolean {
+  const users = getAllUsers();
+  const normalized = email.trim().toLowerCase();
+  const index = users.findIndex((u) => u.email.toLowerCase() === normalized);
+  if (index === -1) return false;
+
+  const newSalt = crypto.randomBytes(16).toString('hex');
+  const newHash = hashPassword(newPassword, newSalt);
+  users[index].salt = newSalt;
+  users[index].passwordHash = newHash;
+  saveUsers(users);
+
+  // Sync to Postgres if configured
+  import('./postgres')
+    .then(({ saveUserToPostgres }) => {
+      saveUserToPostgres(users[index]).catch(() => {});
+    })
+    .catch(() => {});
+
+  return true;
+}
+
+export function findOrCreateGoogleUser(
+  email: string,
+  name: string,
+  avatar?: string
+): UserRecord {
+  const normalized = email.trim().toLowerCase();
+  const existing = findUserByEmail(normalized);
+  if (existing) {
+    return existing;
+  }
+
+  // Create new user with random secure salt & hash
+  const randomPassword = crypto.randomBytes(32).toString('hex');
+  const salt = crypto.randomBytes(16).toString('hex');
+  const passwordHash = hashPassword(randomPassword, salt);
+  const now = new Date().toISOString();
+
+  const newUser: UserRecord = {
+    id: `usr_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`,
+    email: normalized,
+    passwordHash,
+    salt,
+    createdAt: now,
+    onboardingCompleted: false,
+    profile: {
+      name: name || normalized.split('@')[0],
+      occupation: '',
+      monthlyIncome: 0,
+      salaryDate: now.split('T')[0],
+      lastExpense: 0,
+    },
+  };
+
+  const users = getAllUsers();
+  users.push(newUser);
+  saveUsers(users);
+
+  // Initialize a blank solo ledger file for the new user
+  const initialLedger = initializeBlankUserLedger(newUser.id, newUser.email);
+  if (avatar) {
+    initialLedger.user.avatar = avatar;
+    if (name) initialLedger.user.name = name;
+    writeUserLedgerData(newUser.id, initialLedger);
+  }
+
+  import('./postgres')
+    .then(({ saveUserToPostgres, createDedicatedUserTable }) => {
+      saveUserToPostgres(newUser).catch(() => {});
+      createDedicatedUserTable(newUser.id, newUser.email, initialLedger).catch(() => {});
+    })
+    .catch(() => {});
+
+  return newUser;
+}
+
 export function getUserLedgerPath(userId: string): string {
   const safeId = (userId || '').replace(/[^a-zA-Z0-9_-]/g, '_');
   return path.join(getUserLedgersDirectory(), `${safeId}.json`);

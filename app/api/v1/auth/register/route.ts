@@ -48,33 +48,15 @@ export async function POST(request: NextRequest) {
 
     const newUser = createUser(email, password);
 
-    // Sign session token
-    const token = await signSession({
-      userId: newUser.id,
-      email: newUser.email,
-      onboardingCompleted: false,
-    });
-
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: true,
       data: {
         userId: newUser.id,
         email: newUser.email,
         onboardingCompleted: false,
       },
-      message: 'Account created successfully. Welcome to Hishab Rakhi!',
+      message: 'Account created successfully! Please sign in.',
     });
-
-    // Set secure HTTP-only cookie
-    response.cookies.set(SESSION_COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 7 * 24 * 3600, // 7 days
-    });
-
-    return response;
   } catch (error: any) {
     return NextResponse.json(
       { success: false, error: error?.message || 'Registration failed' },
