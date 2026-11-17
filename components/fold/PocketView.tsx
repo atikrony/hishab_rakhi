@@ -265,69 +265,6 @@ export function PocketView({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop items-start">
           {/* LEFT ASYMMETRIC COLUMN: Analytics, Velocity & Source Mix (5 Cols) */}
           <div className="lg:col-span-5 flex flex-col gap-space-lg">
-            {/* Weekly Income Chart Card */}
-            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB] flex flex-col gap-space-md">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline">
-                    Velocity Cadence
-                  </span>
-                  <h3 className="font-headline-md text-headline-md text-on-surface font-bold">
-                    Weekly Income Influx
-                  </h3>
-                </div>
-                <span className="font-label-sm text-label-sm px-space-sm py-0.5 rounded-md bg-secondary-container text-on-secondary-container font-semibold">
-                  Peak: Wed
-                </span>
-              </div>
-              <p className="font-body-md text-body-md text-on-surface-variant">
-                Wednesday experienced the primary milestone with freelance milestone tranche clearing escrow.
-              </p>
-
-              {/* Weekly Interactive Bar Chart */}
-              <div className="pt-space-md pb-space-xs">
-                <div className="h-44 w-full flex items-end justify-between gap-2 px-space-xs">
-                  {summary.weeklyInflow.map((item, idx) => (
-                    <div key={idx} className="flex-1 flex flex-col items-center gap-space-xs group relative">
-                      {/* Hover Tooltip or Peak Tag */}
-                      {item.isPeak ? (
-                        <div className="absolute -top-7 px-1.5 py-0.5 rounded bg-primary text-on-primary font-label-sm text-label-sm shadow-sm whitespace-nowrap z-10 font-bold">
-                          ৳{item.amount.toLocaleString()}
-                        </div>
-                      ) : (
-                        <span className="font-label-sm text-label-sm text-outline opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                          ৳{item.amount.toLocaleString()}
-                        </span>
-                      )}
-
-                      <div
-                        className={`w-full rounded-t-md transition-all duration-300 ${
-                          item.isPeak
-                            ? 'bg-primary shadow-md'
-                            : item.amount > 0
-                            ? 'bg-surface-container-high group-hover:bg-primary-fixed'
-                            : 'bg-surface-container-low'
-                        }`}
-                        style={{ height: `${item.heightPercent}%` }}
-                      />
-
-                      <span
-                        className={`font-label-md text-label-md ${
-                          item.isPeak
-                            ? 'text-on-surface font-bold'
-                            : item.amount > 0
-                            ? 'text-on-surface-variant group-hover:text-on-surface'
-                            : 'text-outline'
-                        }`}
-                      >
-                        {item.day}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
             {/* Inbound Allocation Donut & Legend */}
             <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB] flex flex-col gap-space-md">
               <div className="flex items-center justify-between">
