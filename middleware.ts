@@ -86,14 +86,15 @@ export async function middleware(request: NextRequest) {
 
   // 5. API Routes handling
   if (pathname.startsWith('/api/')) {
-    // Public auth endpoints
+    // Public auth and status endpoints
     const isPublicAuth =
       pathname.startsWith('/api/v1/auth/login') ||
       pathname.startsWith('/api/v1/auth/register') ||
       pathname.startsWith('/api/v1/auth/logout') ||
       pathname.startsWith('/api/v1/auth/forgot-password') ||
       pathname.startsWith('/api/v1/auth/reset-password') ||
-      pathname.startsWith('/api/v1/auth/google');
+      pathname.startsWith('/api/v1/auth/google') ||
+      pathname.startsWith('/api/v1/kotojon');
 
     if (isPublicAuth) {
       return withSecurityHeaders(NextResponse.next());
@@ -115,7 +116,12 @@ export async function middleware(request: NextRequest) {
     return withSecurityHeaders(NextResponse.next());
   }
 
-  // 6. Protected Core Application Routes (/, /spend, /summary, /pocket, etc.)
+  // 6. Hidden Analytics/Status Route (/kotojon)
+  if (pathname.startsWith('/kotojon')) {
+    return withSecurityHeaders(NextResponse.next());
+  }
+
+  // 7. Protected Core Application Routes (/, /spend, /summary, /pocket, etc.)
   if (!session) {
     // Redirect unauthenticated requests to login
     return withSecurityHeaders(NextResponse.redirect(new URL('/auth/login', request.url)));

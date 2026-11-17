@@ -27,6 +27,7 @@ export const viewport: Viewport = {
 
 import { LedgerProvider } from '@/features/ledger/LedgerContext';
 import { AppLayout } from '@/features/layout/AppLayout';
+import { VisitorTracker } from '@/components/fold/VisitorTracker';
 
 export default function RootLayout({
   children,
@@ -50,6 +51,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-surface font-body-md text-body-md text-on-surface min-h-full antialiased selection:bg-secondary-container selection:text-on-secondary-container">
+        <VisitorTracker />
         <LedgerProvider>
           <AppLayout>{children}</AppLayout>
         </LedgerProvider>

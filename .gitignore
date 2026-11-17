@@ -32,6 +32,7 @@ yarn-error.log*
 /data/hishab_dummy.json
 /data/users/
 /data/users.json
+/data/visitors.json
 /data/*.local.json
 
 # local mcp secrets
