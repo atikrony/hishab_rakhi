@@ -38,7 +38,7 @@ export function PocketView({
 }: PocketViewProps) {
   // Quick Inflow Form State
   const [quickAmount, setQuickAmount] = useState('500');
-  const [targetAccount, setTargetAccount] = useState('wal_pocket');
+  const targetAccount = 'wal_pocket';
   const [effectiveDate, setEffectiveDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [selectedSource, setSelectedSource] = useState('Salary');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -429,22 +429,19 @@ export function PocketView({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-space-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
                   <div>
                     <label className="font-label-sm text-label-sm text-on-surface-variant block mb-1 font-medium">
-                      Target Account
+                      Source Stream
                     </label>
-                    <select
-                      value={targetAccount}
-                      onChange={(e) => setTargetAccount(e.target.value)}
-                      className="w-full h-10 px-2 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md outline-none border border-surface-container cursor-pointer focus:border-primary"
-                    >
-                      {summary.wallets.map((w) => (
-                        <option key={w.id} value={w.id}>
-                          {w.name}
-                        </option>
-                      ))}
-                    </select>
+                    <input
+                      type="text"
+                      required
+                      value={selectedSource}
+                      onChange={(e) => setSelectedSource(e.target.value)}
+                      placeholder="e.g. Salary, Freelance, Gift"
+                      className="w-full h-10 px-3 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md outline-none border border-surface-container focus:border-primary placeholder:text-on-surface-variant/40"
+                    />
                   </div>
                   <div>
                     <label className="font-label-sm text-label-sm text-on-surface-variant block mb-1 font-medium">
@@ -461,28 +458,6 @@ export function PocketView({
                       }}
                       className="w-full h-10 px-2 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md outline-none border border-surface-container focus:border-primary"
                     />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="font-label-sm text-label-sm text-on-surface-variant block mb-1 font-medium">
-                    Source Stream
-                  </label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {['Salary', 'Freelance', 'Investment', 'Reimbursement'].map((src) => (
-                      <button
-                        key={src}
-                        type="button"
-                        onClick={() => setSelectedSource(src)}
-                        className={`cursor-pointer px-2.5 py-1 rounded-md font-label-sm text-label-sm transition-all ${
-                          selectedSource === src
-                            ? 'bg-primary text-on-primary font-bold shadow-sm'
-                            : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
-                        }`}
-                      >
-                        {src}
-                      </button>
-                    ))}
                   </div>
                 </div>
 
@@ -677,16 +652,7 @@ export function PocketView({
             </div>
 
             {/* Ledger Footer Summary */}
-            <div className="bg-surface-container-low rounded-xl p-space-md flex items-center justify-between border border-surface-container text-on-surface-variant font-label-sm text-label-sm">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px] text-secondary">
-                  verified_user
-                </span>
-                <span>
-                  Showing {inboundTransactions.length} settled inflows • Total MTD: ৳
-                  {Math.round(summary.totalInflow).toLocaleString()}
-                </span>
-              </div>
+            <div className="bg-surface-container-low rounded-xl p-space-md flex items-center justify-end border border-surface-container text-on-surface-variant font-label-sm text-label-sm">
               <button
                 onClick={handleExportCSV}
                 className="hover:text-on-surface flex items-center gap-1 font-semibold transition-colors"

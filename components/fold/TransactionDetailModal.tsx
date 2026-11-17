@@ -96,7 +96,7 @@ export function TransactionDetailModal({
               : 'Expense Receipt'}
           </span>
           <div className="flex items-center gap-1">
-            {!isEditing && onUpdate && (
+            {!isEditing && !isIncome && onUpdate && (
               <button
                 type="button"
                 onClick={() => setIsEditing(true)}
@@ -312,7 +312,7 @@ export function TransactionDetailModal({
                   <span className="material-symbols-outlined text-[18px]">delete</span>
                 </button>
               )}
-              {onUpdate && (
+              {!isIncome && onUpdate && (
                 <button
                   type="button"
                   onClick={() => setIsEditing(true)}
