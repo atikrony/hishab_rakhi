@@ -627,6 +627,45 @@ export function computeDashboardSummary(db: DatabaseSchema, userId?: string): Da
     }
   }
 
+  // All created fixed costs calculate as expenses for the active monthly cycle
+  const now = new Date();
+  const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const activeFixedCosts = db.fixedCosts || [];
+  for (const fc of activeFixedCosts) {
+    const amt = Number(fc.amount) || 0;
+    totalExpense += amt;
+    const cat = fc.category || 'Bills & Utilities';
+    if (!categoryMap[cat]) {
+      categoryMap[cat] = { amount: 0, count: 0 };
+    }
+    categoryMap[cat].amount += amt;
+    categoryMap[cat].count += 1;
+  }
+
+  const fixedCostTxs: Transaction[] = activeFixedCosts.map((fc) => {
+    const isPaid = (fc.paidMonths || []).includes(currentMonthKey);
+    const day = fc.dueDay ? String(Math.min(28, fc.dueDay)).padStart(2, '0') : '01';
+    const dateStr = `${currentMonthKey}-${day}T09:00:00Z`;
+    return {
+      id: `fc_${fc.id}`,
+      fixedCostId: fc.id,
+      isFixedCost: true,
+      isPaid,
+      title: fc.title,
+      amount: Number(fc.amount) || 0,
+      type: 'expense' as const,
+      category: fc.category || 'Bills & Utilities',
+      date: fc.createdAt && fc.createdAt.startsWith(currentMonthKey) ? fc.createdAt : dateStr,
+      status: isPaid ? 'Settled' : 'Pending',
+      brandIcon: 'event_repeat',
+      notes: isPaid ? 'Monthly Fixed Cost • Paid' : 'Monthly Fixed Cost • Planned (Not spent yet)',
+    };
+  });
+
+  const combinedRecentTransactions = [...fixedCostTxs, ...db.transactions].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+
   const netRemaining = Math.max(0, totalInflow - totalExpense);
   const retainedPercent = totalInflow > 0 ? Number(((netRemaining / totalInflow) * 100).toFixed(1)) : 0;
   const savingsVelocity = totalInflow > 0 ? Number((((totalInflow - totalExpense) / totalInflow) * 100).toFixed(1)) : 0;
@@ -720,7 +759,7 @@ export function computeDashboardSummary(db: DatabaseSchema, userId?: string): Da
     activeChannelsCount: Math.max(1, sourceBreakdown.length),
     savingsVelocity,
     dailyBurnRate,
-    recentTransactions: db.transactions.slice(0, 20),
+    recentTransactions: combinedRecentTransactions.slice(0, 20),
     wallets: db.wallets,
     fixedCosts: db.fixedCosts || [],
     categoryBreakdown,

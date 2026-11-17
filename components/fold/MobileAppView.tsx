@@ -441,46 +441,91 @@ export function MobileAppView({
                 </div>
               ) : (
                 expenseTransactions.map((tx) => {
-                const dateObj = new Date(tx.date);
-                const dayStr = String(dateObj.getDate()).padStart(2, '0');
-                const monthStr = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
-                return (
-                  <article
-                    key={tx.id}
-                    onClick={() => onSelectTransaction(tx)}
-                    className="w-full bg-surface-container-lowest rounded-xl p-space-md flex items-center gap-space-md shadow-sm border border-[#E5E7EB] active:scale-[0.99] transition-transform cursor-pointer"
-                  >
-                    <div className="flex flex-col items-center justify-center bg-surface-container w-11 h-11 rounded-lg flex-shrink-0">
-                      <span className="font-title-sm text-title-sm leading-none text-on-surface font-bold">
-                        {dayStr}
-                      </span>
-                      <span className="font-label-sm text-label-sm leading-none text-on-surface-variant mt-0.5 uppercase">
-                        {monthStr}
-                      </span>
-                    </div>
+                  const isUnpaidFixedCost = tx.isFixedCost && !tx.isPaid;
+                  const dateObj = new Date(tx.date);
+                  const dayStr = String(dateObj.getDate()).padStart(2, '0');
+                  const monthStr = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                  return (
+                    <article
+                      key={tx.id}
+                      onClick={() => onSelectTransaction(tx)}
+                      className={`w-full bg-surface-container-lowest rounded-xl p-space-md flex items-center gap-space-md shadow-sm border active:scale-[0.99] transition-transform cursor-pointer border-l-4 ${
+                        isUnpaidFixedCost
+                          ? 'border-l-amber-500 bg-amber-500/[0.04] border-[#E5E7EB]'
+                          : 'border-[#E5E7EB] border-l-transparent'
+                      }`}
+                    >
+                      {tx.isFixedCost && onToggleFixedCost ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleFixedCost(tx.fixedCostId || tx.id.replace('fc_', ''), !tx.isPaid);
+                          }}
+                          className={`w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
+                            tx.isPaid
+                              ? 'bg-secondary text-on-secondary shadow-sm'
+                              : 'border-2 border-amber-500 bg-amber-500/15 text-amber-700 dark:text-amber-300'
+                          }`}
+                          title={tx.isPaid ? 'Settled fixed cost' : 'Tap to mark as settled'}
+                        >
+                          <span className="material-symbols-outlined text-[20px] font-bold">check</span>
+                        </button>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center bg-surface-container w-11 h-11 rounded-lg flex-shrink-0">
+                          <span className="font-title-sm text-title-sm leading-none text-on-surface font-bold">
+                            {dayStr}
+                          </span>
+                          <span className="font-label-sm text-label-sm leading-none text-on-surface-variant mt-0.5 uppercase">
+                            {monthStr}
+                          </span>
+                        </div>
+                      )}
 
-                    <div className="flex-1 min-w-0 flex flex-col justify-center">
-                      <div className="flex items-center gap-1.5">
-                        <h3 className="font-title-sm text-title-sm text-on-surface truncate font-semibold">
-                          {tx.title}
-                        </h3>
-                        <span className="bg-surface-container px-1.5 py-0.5 rounded font-label-sm text-[10px] text-on-surface-variant truncate">
-                          {tx.category}
+                      <div className="flex-1 min-w-0 flex flex-col justify-center">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h3
+                            className={`font-title-sm text-title-sm truncate font-semibold ${
+                              tx.isFixedCost && tx.isPaid ? 'line-through text-outline' : 'text-on-surface'
+                            }`}
+                          >
+                            {tx.title}
+                          </h3>
+                          <span className="bg-surface-container px-1.5 py-0.5 rounded font-label-sm text-[10px] text-on-surface-variant truncate">
+                            {tx.category}
+                          </span>
+                          {isUnpaidFixedCost && (
+                            <span className="bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40 px-1.5 py-0.2 rounded font-label-sm text-[10px] font-bold">
+                              Not spent yet
+                            </span>
+                          )}
+                        </div>
+                        <p
+                          className={`font-label-md text-label-md truncate mt-0.5 text-xs ${
+                            isUnpaidFixedCost ? 'text-amber-700 dark:text-amber-400 font-medium' : 'text-on-surface-variant'
+                          }`}
+                        >
+                          {isUnpaidFixedCost ? 'Meant to be spent' : tx.notes}
+                        </p>
+                      </div>
+
+                      <div className="flex-shrink-0 text-right">
+                        <span
+                          className={`font-currency-md text-currency-md font-bold block ${
+                            isUnpaidFixedCost
+                              ? 'text-amber-600 dark:text-amber-400'
+                              : tx.isFixedCost && tx.isPaid
+                              ? 'text-secondary line-through opacity-80'
+                              : 'text-on-tertiary-container'
+                          }`}
+                        >
+                          -৳{Math.round(tx.amount).toLocaleString()}
                         </span>
                       </div>
-                      <p className="font-label-md text-label-md text-on-surface-variant truncate mt-0.5 text-xs">
-                        {tx.notes}
-                      </p>
-                    </div>
-
-                    <div className="flex-shrink-0 text-right">
-                      <span className="font-currency-md text-currency-md text-on-tertiary-container font-bold">
-                        -৳{Math.round(tx.amount).toLocaleString()}
-                      </span>
-                    </div>
-                  </article>
-                );
-              }))}
+                    </article>
+                  );
+                })
+              )}
             </div>
 
             {/* Fixed Cost Checklist Section */}

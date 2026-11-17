@@ -597,60 +597,124 @@ export function SpendView({
                     </p>
                   </div>
                 ) : (
-                  expenseList.map((tx) => (
+                  expenseList.map((tx) => {
+                    const isUnpaidFixedCost = tx.isFixedCost && !tx.isPaid;
+
+                  return (
                     <div
                       key={tx.id}
                       onClick={() => onSelectTransaction(tx)}
-                      className="px-space-lg py-space-md flex items-center justify-between hover:bg-surface-container-low/40 transition-colors group cursor-pointer"
+                      className={`px-space-lg py-space-md flex items-center justify-between transition-all group cursor-pointer border-l-4 ${
+                        isUnpaidFixedCost
+                          ? 'border-l-amber-500 bg-amber-500/[0.04] hover:bg-amber-500/[0.08]'
+                          : 'border-l-transparent hover:bg-surface-container-low/40'
+                      }`}
                     >
                       <div className="flex items-center gap-space-md min-w-0">
-                        <div className="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-on-surface flex-shrink-0 group-hover:scale-105 transition-transform">
-                          <span className="material-symbols-outlined text-[20px]">
-                            {tx.brandIcon || 'receipt_long'}
-                          </span>
-                        </div>
+                        {tx.isFixedCost && onToggleFixedCost ? (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onToggleFixedCost(tx.fixedCostId || tx.id.replace('fc_', ''), !tx.isPaid);
+                            }}
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all ${
+                              tx.isPaid
+                                ? 'bg-secondary text-on-secondary shadow-sm scale-105'
+                                : 'border-2 border-amber-500 bg-amber-500/15 text-amber-700 dark:text-amber-300 hover:bg-amber-500/25 shadow-xs'
+                            }`}
+                            title={tx.isPaid ? 'Settled fixed cost (click to mark unpaid)' : 'Meant to be spent (click checkmark to settle)'}
+                          >
+                            <span className="material-symbols-outlined text-[20px] font-bold">check</span>
+                          </button>
+                        ) : (
+                          <div className="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-on-surface flex-shrink-0 group-hover:scale-105 transition-transform">
+                            <span className="material-symbols-outlined text-[20px]">
+                              {tx.brandIcon || 'receipt_long'}
+                            </span>
+                          </div>
+                        )}
+
                         <div className="flex flex-col min-w-0">
-                          <div className="flex items-center gap-space-sm">
-                            <span className="font-title-sm text-title-sm text-on-surface truncate font-bold">
+                          <div className="flex items-center gap-space-sm flex-wrap">
+                            <span
+                              className={`font-title-sm text-title-sm truncate font-bold ${
+                                tx.isFixedCost && tx.isPaid ? 'line-through text-outline' : 'text-on-surface'
+                              }`}
+                            >
                               {tx.title}
                             </span>
                             <span className="hidden sm:inline-block font-label-sm text-label-sm bg-surface-container px-space-xs rounded text-on-surface-variant">
                               {tx.category}
                             </span>
-                            {tx.title.toLowerCase().includes('bill') && (
-                              <span
-                                className="material-symbols-outlined text-[14px] text-secondary"
-                                title="Auto-debit recurring"
-                              >
-                                sync
+                            {isUnpaidFixedCost ? (
+                              <span className="font-label-sm text-[11px] bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-bold flex items-center gap-1 shadow-xs">
+                                <span className="material-symbols-outlined text-[13px] animate-pulse">schedule</span>
+                                <span>Planned • Not spent yet</span>
                               </span>
+                            ) : tx.isFixedCost ? (
+                              <span className="font-label-sm text-[11px] bg-secondary/15 text-secondary border border-secondary/30 px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
+                                <span className="material-symbols-outlined text-[13px]">check_circle</span>
+                                <span>Settled Fixed Cost</span>
+                              </span>
+                            ) : (
+                              tx.title.toLowerCase().includes('bill') && (
+                                <span
+                                  className="material-symbols-outlined text-[14px] text-secondary"
+                                  title="Auto-debit recurring"
+                                >
+                                  sync
+                                </span>
+                              )
                             )}
                           </div>
-                          <span className="font-body-md text-body-md text-on-surface-variant truncate">
-                            {tx.notes || `${tx.category} • Settled transaction`}
+                          <span
+                            className={`font-body-md text-body-md truncate ${
+                              isUnpaidFixedCost
+                                ? 'text-amber-700 dark:text-amber-400 font-medium'
+                                : 'text-on-surface-variant'
+                            }`}
+                          >
+                            {isUnpaidFixedCost
+                              ? 'Fixed Cost • Meant to be spent (Tap checkmark to settle)'
+                              : tx.notes || `${tx.category} • Settled transaction`}
                           </span>
                         </div>
                       </div>
 
                       <div className="flex flex-col items-end flex-shrink-0 pl-space-md">
-                        <span className="font-currency-md text-currency-md text-error font-bold">
+                        <span
+                          className={`font-currency-md text-currency-md font-bold ${
+                            isUnpaidFixedCost
+                              ? 'text-amber-600 dark:text-amber-400'
+                              : tx.isFixedCost && tx.isPaid
+                              ? 'text-secondary line-through opacity-80'
+                              : 'text-error'
+                          }`}
+                        >
                           -৳{Math.round(tx.amount).toLocaleString()}
                         </span>
-                        <span className="font-label-sm text-label-sm text-on-surface-variant">
-                          {new Date(tx.date).toLocaleDateString('en-GB', {
-                            day: '2-digit',
-                            month: 'short',
-                          })}
-                          ,{' '}
-                          {new Date(tx.date).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </span>
+                        {isUnpaidFixedCost ? (
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-amber-700 dark:text-amber-300 bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.5 rounded mt-0.5">
+                            Not Spent Yet
+                          </span>
+                        ) : (
+                          <span className="font-label-sm text-label-sm text-on-surface-variant">
+                            {new Date(tx.date).toLocaleDateString('en-GB', {
+                              day: '2-digit',
+                              month: 'short',
+                            })}
+                            ,{' '}
+                            {new Date(tx.date).toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </span>
+                        )}
                       </div>
                     </div>
-                  ))
-                )}
+                  );
+                }))}
               </div>
 
               {/* Bottom Ledger Pagination Footer */}

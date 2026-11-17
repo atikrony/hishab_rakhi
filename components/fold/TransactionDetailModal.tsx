@@ -264,9 +264,26 @@ export function TransactionDetailModal({
               <h4 className="font-headline-md text-headline-md text-on-surface mt-2 font-bold">
                 {transaction.title}
               </h4>
+              {transaction.isFixedCost && (
+                <div className="mt-1 flex justify-center">
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                      transaction.isPaid
+                        ? 'bg-secondary/15 text-secondary border border-secondary/30'
+                        : 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30'
+                    }`}
+                  >
+                    {transaction.isPaid ? 'Settled Fixed Cost' : 'Fixed Cost • Not Spent Yet'}
+                  </span>
+                </div>
+              )}
               <div
                 className={`font-headline-xl-mobile text-headline-xl-mobile font-currency-display mt-1 font-bold ${
-                  isIncome ? 'text-secondary' : 'text-on-tertiary-container'
+                  isIncome
+                    ? 'text-secondary'
+                    : transaction.isFixedCost && !transaction.isPaid
+                    ? 'text-amber-600 dark:text-amber-400'
+                    : 'text-on-tertiary-container'
                 }`}
               >
                 {isIncome ? '+' : '-'}৳
@@ -290,15 +307,25 @@ export function TransactionDetailModal({
                 <span className="text-on-surface-variant">Status</span>
                 <span
                   className={`font-semibold flex items-center gap-1 ${
-                    isIncome ? 'text-secondary' : 'text-on-surface'
+                    isIncome
+                      ? 'text-secondary'
+                      : transaction.isFixedCost && !transaction.isPaid
+                      ? 'text-amber-700 dark:text-amber-300'
+                      : 'text-on-surface'
                   }`}
                 >
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${
-                      isIncome ? 'bg-secondary' : 'bg-outline'
+                      isIncome
+                        ? 'bg-secondary'
+                        : transaction.isFixedCost && !transaction.isPaid
+                        ? 'bg-amber-500 animate-pulse'
+                        : 'bg-outline'
                     }`}
                   />
-                  {transaction.status || 'Completed'}
+                  {transaction.isFixedCost && !transaction.isPaid
+                    ? 'Planned (Not spent yet)'
+                    : transaction.status || 'Completed'}
                 </span>
               </div>
               {transaction.notes && (

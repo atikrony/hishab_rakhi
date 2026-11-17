@@ -179,11 +179,46 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Synthesize fixed cost expenses for the active monthly cycle
+  const currentMonthKey = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  }, []);
+
+  const fixedCostTransactions: Transaction[] = useMemo(() => {
+    return fixedCosts.map((fc) => {
+      const isPaid = (fc.paidMonths || []).includes(currentMonthKey);
+      const day = fc.dueDay ? String(Math.min(28, fc.dueDay)).padStart(2, '0') : '01';
+      const dateStr = `${currentMonthKey}-${day}T09:00:00Z`;
+      return {
+        id: `fc_${fc.id}`,
+        fixedCostId: fc.id,
+        isFixedCost: true,
+        isPaid,
+        title: fc.title,
+        amount: Number(fc.amount) || 0,
+        type: 'expense' as const,
+        category: fc.category || 'Bills & Utilities',
+        date: fc.createdAt && fc.createdAt.startsWith(currentMonthKey) ? fc.createdAt : dateStr,
+        status: isPaid ? 'Settled' : 'Pending',
+        brandIcon: 'event_repeat',
+        notes: isPaid ? 'Monthly Fixed Cost • Paid' : 'Monthly Fixed Cost • Planned (Not spent yet)',
+      };
+    });
+  }, [fixedCosts, currentMonthKey]);
+
+  // Combined transactions including active monthly cycle fixed costs
+  const combinedTransactions = useMemo(() => {
+    return [...fixedCostTransactions, ...transactions].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+  }, [fixedCostTransactions, transactions]);
+
   // Filtered transactions based on date range, guaranteed sorted by date descending
   const filteredTransactions = useMemo(() => {
-    let list = transactions;
+    let list = combinedTransactions;
     if (startDate || endDate) {
-      list = transactions.filter((tx) => {
+      list = combinedTransactions.filter((tx) => {
         const txDate = tx.date.split('T')[0];
         if (startDate && txDate < startDate) return false;
         if (endDate && txDate > endDate) return false;
@@ -191,7 +226,7 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
       });
     }
     return [...list].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [transactions, startDate, endDate]);
+  }, [combinedTransactions, startDate, endDate]);
 
   // Recalibrated summary based on filtered transactions
   const effectiveSummary = useMemo(() => {
@@ -315,6 +350,11 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
   // Delete Transaction
   const handleDeleteTransaction = async (id: string) => {
     try {
+      if (id.startsWith('fc_')) {
+        const fcId = id.replace('fc_', '');
+        await handleDeleteFixedCost(fcId);
+        return;
+      }
       const res = await fetch(`/api/v1/transactions/${id}`, {
         method: 'DELETE',
       });
@@ -336,6 +376,22 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
     updates: Partial<Transaction>
   ): Promise<boolean> => {
     try {
+      if (id.startsWith('fc_')) {
+        const fcId = id.replace('fc_', '');
+        const res = await fetch(`/api/v1/fixed-costs/${fcId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates),
+        });
+        const json = await res.json();
+        if (json.success) {
+          showToast('Fixed cost updated');
+          await fetchData();
+          return true;
+        }
+        showToast(json.error || 'Failed to update fixed cost');
+        return false;
+      }
       const res = await fetch(`/api/v1/transactions/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -485,7 +541,7 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
       value={{
         summary,
         activeSummary,
-        transactions,
+        transactions: combinedTransactions,
         filteredTransactions,
         fixedCosts,
         loading,

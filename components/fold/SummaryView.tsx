@@ -1102,6 +1102,7 @@ export function SummaryView({
                 ) : (
                   filteredTransactions.map((tx) => {
                     const isIncome = tx.type === 'income';
+                    const isUnpaidFixedCost = tx.isFixedCost && !tx.isPaid;
                     const txDate = new Date(tx.date);
                     const isToday = tx.date.startsWith(today);
                     const formattedDate = isToday
@@ -1116,27 +1117,59 @@ export function SummaryView({
                       <tr
                         key={tx.id}
                         onClick={() => onSelectTransaction(tx)}
-                        className="hover:bg-surface-container-low/60 transition-colors cursor-pointer group"
+                        className={`transition-colors cursor-pointer group ${
+                          isUnpaidFixedCost
+                            ? 'bg-amber-500/[0.04] hover:bg-amber-500/[0.08]'
+                            : 'hover:bg-surface-container-low/60'
+                        }`}
                       >
                         <td className="py-space-md px-space-lg">
                           <div className="flex items-center gap-space-sm">
-                            <div
-                              className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                                isIncome
-                                  ? 'bg-secondary-container/40 text-on-secondary-container'
-                                  : 'bg-surface-container text-on-surface-variant'
-                              }`}
-                            >
-                              <span className="material-symbols-outlined text-[18px]">
-                                {tx.brandIcon || (isIncome ? 'account_balance' : 'receipt_long')}
-                              </span>
-                            </div>
+                            {tx.isFixedCost && onToggleFixedCost ? (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onToggleFixedCost(tx.fixedCostId || tx.id.replace('fc_', ''), !tx.isPaid);
+                                }}
+                                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                                  tx.isPaid
+                                    ? 'bg-secondary text-on-secondary shadow-sm scale-105'
+                                    : 'border-2 border-amber-500 bg-amber-500/15 text-amber-700 dark:text-amber-300 hover:bg-amber-500/25 shadow-xs'
+                                }`}
+                                title={tx.isPaid ? 'Settled fixed cost (click to mark unpaid)' : 'Meant to be spent (click checkmark to settle)'}
+                              >
+                                <span className="material-symbols-outlined text-[18px] font-bold">check</span>
+                              </button>
+                            ) : (
+                              <div
+                                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                                  isIncome
+                                    ? 'bg-secondary-container/40 text-on-secondary-container'
+                                    : 'bg-surface-container text-on-surface-variant'
+                                }`}
+                              >
+                                <span className="material-symbols-outlined text-[18px]">
+                                  {tx.brandIcon || (isIncome ? 'account_balance' : 'receipt_long')}
+                                </span>
+                              </div>
+                            )}
                             <div className="flex flex-col min-w-0">
-                              <span className="font-title-sm text-title-sm text-on-surface truncate font-bold group-hover:text-primary transition-colors">
+                              <span
+                                className={`font-title-sm text-title-sm truncate font-bold group-hover:text-primary transition-colors ${
+                                  tx.isFixedCost && tx.isPaid ? 'line-through text-outline' : 'text-on-surface'
+                                }`}
+                              >
                                 {tx.title}
                               </span>
-                              <span className="font-label-sm text-label-sm text-outline truncate">
-                                {tx.notes || tx.channel || 'Standard transaction'}
+                              <span
+                                className={`font-label-sm text-label-sm truncate ${
+                                  isUnpaidFixedCost ? 'text-amber-700 dark:text-amber-400 font-medium' : 'text-outline'
+                                }`}
+                              >
+                                {isUnpaidFixedCost
+                                  ? 'Fixed Cost • Meant to be spent (Not spent yet)'
+                                  : tx.notes || tx.channel || 'Standard transaction'}
                               </span>
                             </div>
                           </div>
@@ -1166,25 +1199,38 @@ export function SummaryView({
                           </div>
                         </td>
                         <td className="py-space-md px-space-md">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-space-xs py-0.5 rounded-full font-label-sm text-label-sm font-medium ${
-                              tx.status === 'Pending'
-                                ? 'bg-amber-100 text-amber-800'
-                                : 'bg-secondary-container/30 text-secondary'
-                            }`}
-                          >
+                          {isUnpaidFixedCost ? (
+                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full font-label-sm text-[11px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                              Not spent yet
+                            </span>
+                          ) : (
                             <span
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                tx.status === 'Pending' ? 'bg-amber-600' : 'bg-secondary'
+                              className={`inline-flex items-center gap-1.5 px-space-xs py-0.5 rounded-full font-label-sm text-label-sm font-medium ${
+                                tx.status === 'Pending'
+                                  ? 'bg-amber-100 text-amber-800'
+                                  : 'bg-secondary-container/30 text-secondary'
                               }`}
-                            />
-                            {tx.status || 'Settled'}
-                          </span>
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  tx.status === 'Pending' ? 'bg-amber-600' : 'bg-secondary'
+                                }`}
+                              />
+                              {tx.status || 'Settled'}
+                            </span>
+                          )}
                         </td>
                         <td className="py-space-md px-space-lg text-right">
                           <span
                             className={`font-currency-md text-currency-md font-bold ${
-                              isIncome ? 'text-secondary' : 'text-on-surface'
+                              isIncome
+                                ? 'text-secondary'
+                                : isUnpaidFixedCost
+                                ? 'text-amber-600 dark:text-amber-400'
+                                : tx.isFixedCost && tx.isPaid
+                                ? 'text-secondary line-through opacity-80'
+                                : 'text-on-surface'
                             }`}
                           >
                             {isIncome ? '+' : '-'}৳{Math.round(tx.amount).toLocaleString()}

@@ -275,26 +275,32 @@ export function FixedCostsCard({
             return (
               <div
                 key={item.id}
-                className="py-2.5 flex items-center justify-between gap-space-sm group hover:bg-surface-container-low/40 px-2 rounded-lg transition-colors"
+                className={`py-2.5 flex items-center justify-between gap-space-sm group px-2.5 rounded-lg transition-all border-l-2 ${
+                  isPaid
+                    ? 'border-l-transparent hover:bg-surface-container-low/40'
+                    : 'border-l-amber-500 bg-amber-500/[0.04] hover:bg-amber-500/[0.08]'
+                }`}
               >
                 {/* Checkmark Button and Details */}
                 <div className="flex items-center gap-space-sm min-w-0">
                   <button
                     type="button"
                     onClick={() => onToggle(item.id, !isPaid, currentMonthKey)}
-                    className={`w-6 h-6 rounded-md flex items-center justify-center transition-all ${isPaid
-                      ? 'bg-secondary text-on-secondary shadow-sm scale-105'
-                      : 'border-2 border-outline/50 hover:border-secondary text-transparent hover:text-secondary/40'
-                      }`}
-                    title={isPaid ? 'Mark as unpaid for this month' : 'Mark as paid for this month'}
+                    className={`w-6 h-6 rounded-md flex items-center justify-center transition-all ${
+                      isPaid
+                        ? 'bg-secondary text-on-secondary shadow-sm scale-105'
+                        : 'border-2 border-amber-500 bg-amber-500/10 text-transparent hover:text-amber-600 hover:bg-amber-500/20 shadow-xs'
+                    }`}
+                    title={isPaid ? 'Mark as unpaid (not spent yet)' : 'Mark as spent (settled)'}
                   >
                     <span className="material-symbols-outlined text-[16px] font-bold">check</span>
                   </button>
 
                   <div className="flex flex-col min-w-0">
                     <span
-                      className={`font-title-sm text-title-sm truncate font-semibold transition-all ${isPaid ? 'line-through text-outline' : 'text-on-surface'
-                        }`}
+                      className={`font-title-sm text-title-sm truncate font-semibold transition-all ${
+                        isPaid ? 'line-through text-outline' : 'text-on-surface'
+                      }`}
                     >
                       {item.title}
                     </span>
@@ -315,16 +321,20 @@ export function FixedCostsCard({
                 <div className="flex items-center gap-3 shrink-0">
                   <div className="text-right">
                     <span
-                      className={`font-currency-md text-currency-md font-bold block ${isPaid ? 'text-secondary' : 'text-on-surface'
-                        }`}
+                      className={`font-currency-md text-currency-md font-bold block ${
+                        isPaid ? 'text-secondary line-through opacity-75' : 'text-amber-600 dark:text-amber-400'
+                      }`}
                     >
                       ৳{Math.round(item.amount).toLocaleString()}
                     </span>
                     <span
-                      className={`text-[10px] uppercase font-bold tracking-wider ${isPaid ? 'text-secondary' : 'text-amber-700'
-                        }`}
+                      className={`text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded mt-0.5 inline-block ${
+                        isPaid
+                          ? 'text-secondary bg-secondary/15 border border-secondary/30'
+                          : 'text-amber-700 dark:text-amber-300 bg-amber-500/15 border border-amber-500/30'
+                      }`}
                     >
-                      {isPaid ? 'Paid' : 'Pending'}
+                      {isPaid ? 'Paid' : 'Not spent yet'}
                     </span>
                   </div>
 

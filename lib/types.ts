@@ -35,6 +35,9 @@ export interface Transaction {
   status?: string;
   brandIcon?: string;
   receiptUrl?: string;
+  isFixedCost?: boolean;
+  isPaid?: boolean;
+  fixedCostId?: string;
 }
 
 export interface SavingsGoal {
