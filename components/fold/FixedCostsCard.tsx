@@ -92,23 +92,27 @@ export function FixedCostsCard({
   return (
     <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB] flex flex-col gap-space-md">
       {/* Header */}
+      <span className="text-[11px] font-semibold text-secondary text-center px-2 py-0.5 rounded bg-secondary-container/30">
+        {currentMonthName}
+
+      </span>
       <div className="flex items-center justify-between">
+
         <div className="flex items-center gap-space-xs">
+
           <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
             <span className="material-symbols-outlined text-[18px]">event_repeat</span>
           </div>
+
           <div className="flex flex-col">
+
             <div className="flex items-center gap-2">
               <h3 className="font-title-sm text-title-sm text-on-surface font-bold">
                 Fixed Cost
               </h3>
-              <span className="text-[11px] font-semibold text-secondary px-2 py-0.5 rounded bg-secondary-container/30">
-                {currentMonthName}
-              </span>
+
             </div>
-            <p className="font-label-sm text-label-sm text-on-surface-variant">
-              Monthly obligations • auto-reloaded each cycle
-            </p>
+
           </div>
         </div>
 
@@ -278,11 +282,10 @@ export function FixedCostsCard({
                   <button
                     type="button"
                     onClick={() => onToggle(item.id, !isPaid, currentMonthKey)}
-                    className={`w-6 h-6 rounded-md flex items-center justify-center transition-all ${
-                      isPaid
-                        ? 'bg-secondary text-on-secondary shadow-sm scale-105'
-                        : 'border-2 border-outline/50 hover:border-secondary text-transparent hover:text-secondary/40'
-                    }`}
+                    className={`w-6 h-6 rounded-md flex items-center justify-center transition-all ${isPaid
+                      ? 'bg-secondary text-on-secondary shadow-sm scale-105'
+                      : 'border-2 border-outline/50 hover:border-secondary text-transparent hover:text-secondary/40'
+                      }`}
                     title={isPaid ? 'Mark as unpaid for this month' : 'Mark as paid for this month'}
                   >
                     <span className="material-symbols-outlined text-[16px] font-bold">check</span>
@@ -290,9 +293,8 @@ export function FixedCostsCard({
 
                   <div className="flex flex-col min-w-0">
                     <span
-                      className={`font-title-sm text-title-sm truncate font-semibold transition-all ${
-                        isPaid ? 'line-through text-outline' : 'text-on-surface'
-                      }`}
+                      className={`font-title-sm text-title-sm truncate font-semibold transition-all ${isPaid ? 'line-through text-outline' : 'text-on-surface'
+                        }`}
                     >
                       {item.title}
                     </span>
@@ -313,16 +315,14 @@ export function FixedCostsCard({
                 <div className="flex items-center gap-3 shrink-0">
                   <div className="text-right">
                     <span
-                      className={`font-currency-md text-currency-md font-bold block ${
-                        isPaid ? 'text-secondary' : 'text-on-surface'
-                      }`}
+                      className={`font-currency-md text-currency-md font-bold block ${isPaid ? 'text-secondary' : 'text-on-surface'
+                        }`}
                     >
                       ৳{Math.round(item.amount).toLocaleString()}
                     </span>
                     <span
-                      className={`text-[10px] uppercase font-bold tracking-wider ${
-                        isPaid ? 'text-secondary' : 'text-amber-700'
-                      }`}
+                      className={`text-[10px] uppercase font-bold tracking-wider ${isPaid ? 'text-secondary' : 'text-amber-700'
+                        }`}
                     >
                       {isPaid ? 'Paid' : 'Pending'}
                     </span>

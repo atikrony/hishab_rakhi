@@ -61,10 +61,10 @@ export function SpendView({
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [selectedSort, setSelectedSort] = useState<'newest' | 'highest' | 'lowest'>('newest');
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
-  const [showAddCatModal, setShowAddCatModal] = useState(false);
+  const [showEditCatModal, setShowEditCatModal] = useState(false);
   const [newCatName, setNewCatName] = useState('');
 
-  // Custom Categories list with local persistence
+  // Default initial categories
   const defaultCategories = [
     'Food & Dining',
     'Tech & Gadgets',
@@ -75,42 +75,60 @@ export function SpendView({
     'Shopping',
   ];
 
-  const [customCategories, setCustomCategories] = useState<string[]>(() => {
+  // Managed categories list with local persistence
+  const [categoryList, setCategoryList] = useState<string[]>(() => {
     if (typeof window !== 'undefined') {
       try {
-        const saved = localStorage.getItem('hr_custom_categories');
-        return saved ? JSON.parse(saved) : [];
-      } catch (e) {
-        return [];
-      }
+        const saved = localStorage.getItem('hr_managed_categories');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
     }
-    return [];
+    return defaultCategories;
   });
 
-  const allCategories = React.useMemo(() => {
-    const set = new Set([...defaultCategories, ...customCategories]);
-    transactions.forEach((t) => {
-      if (t.category) set.add(t.category);
-    });
-    return Array.from(set);
-  }, [customCategories, transactions]);
+  const allCategories = categoryList;
 
   const handleCreateCategory = (name: string) => {
     const trimmed = name.trim();
     if (!trimmed) return;
-    if (!allCategories.includes(trimmed)) {
-      const next = [...customCategories, trimmed];
-      setCustomCategories(next);
+    if (!categoryList.includes(trimmed)) {
+      const next = [...categoryList, trimmed];
+      setCategoryList(next);
       if (typeof window !== 'undefined') {
-        localStorage.setItem('hr_custom_categories', JSON.stringify(next));
+        localStorage.setItem('hr_managed_categories', JSON.stringify(next));
       }
+      setSelectedCategory(trimmed);
     }
-    setSelectedCategory(trimmed);
-    setFilterCategory(trimmed);
-    setSelectedTab('cat');
     setNewCatName('');
-    setShowAddCatModal(false);
-    setIsCategoryMenuOpen(false);
+  };
+
+  const handleRemoveCategory = (catToRemove: string) => {
+    if (categoryList.length <= 1) {
+      alert('You must have at least one category.');
+      return;
+    }
+    const next = categoryList.filter((c) => c !== catToRemove);
+    setCategoryList(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('hr_managed_categories', JSON.stringify(next));
+    }
+    if (selectedCategory === catToRemove) {
+      setSelectedCategory(next[0] || 'Other');
+    }
+    if (filterCategory === catToRemove) {
+      setFilterCategory('all');
+    }
+  };
+
+  const handleResetCategories = () => {
+    setCategoryList(defaultCategories);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('hr_managed_categories', JSON.stringify(defaultCategories));
+    }
+    setSelectedCategory(defaultCategories[0]);
   };
 
   const today = new Date().toISOString().split('T')[0];
@@ -470,18 +488,18 @@ export function SpendView({
                         ))}
                       </div>
 
-                      {/* Add Category button at the bottom of the category list */}
+                      {/* Edit Categories button at the bottom of the category list */}
                       <div className="border-t border-surface-container pt-1.5 px-2">
                         <button
                           type="button"
                           onClick={() => {
                             setIsCategoryMenuOpen(false);
-                            setShowAddCatModal(true);
+                            setShowEditCatModal(true);
                           }}
                           className="w-full px-2.5 py-2 text-xs font-bold text-primary hover:bg-primary/10 rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-dashed border-primary/40 hover:border-primary"
                         >
-                          <span className="material-symbols-outlined text-[16px]">add_circle</span>
-                          <span>+ Add Category</span>
+                          <span className="material-symbols-outlined text-[16px]">edit</span>
+                          <span>Edit Categories...</span>
                         </button>
                       </div>
                     </div>
@@ -721,7 +739,7 @@ export function SpendView({
                   />
                 </div>
 
-                {/* Category Selector Dropdown with Add Category Option */}
+                {/* Category Selector Dropdown with Edit Categories Option */}
                 <div className="flex flex-col gap-space-xs">
                   <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
                     Category
@@ -730,8 +748,8 @@ export function SpendView({
                     <select
                       value={selectedCategory}
                       onChange={(e) => {
-                        if (e.target.value === '__add_new__') {
-                          setShowAddCatModal(true);
+                        if (e.target.value === '__edit_categories__') {
+                          setShowEditCatModal(true);
                         } else {
                           setSelectedCategory(e.target.value);
                         }
@@ -741,8 +759,8 @@ export function SpendView({
                       {allCategories.map((c) => (
                         <option key={c} value={c}>{c}</option>
                       ))}
-                      <option value="__add_new__" className="text-primary font-bold">
-                        + Add Category...
+                      <option value="__edit_categories__" className="text-primary font-bold">
+                        ✏️ Edit Categories...
                       </option>
                     </select>
                     <span className="material-symbols-outlined text-[18px] text-on-surface-variant absolute right-space-md top-1/2 -translate-y-1/2 pointer-events-none">
@@ -774,67 +792,113 @@ export function SpendView({
           </div>
         </div>
 
-        {/* Add Category Dialog Modal */}
-        {showAddCatModal && (
-          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-            <div className="w-full max-w-sm bg-surface-container-lowest rounded-2xl p-6 shadow-2xl border border-surface-container flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[18px]">new_label</span>
+        {/* Edit / Manage Categories Dialog Modal */}
+        {showEditCatModal && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+            <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-6 shadow-2xl border border-surface-container flex flex-col gap-4 max-h-[85vh]">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-2 border-b border-surface-container">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[20px]">category</span>
                   </div>
-                  <h3 className="text-base font-bold text-on-surface">Add New Category</h3>
+                  <div>
+                    <h3 className="text-base font-bold text-on-surface">Manage Categories</h3>
+                    <p className="text-xs text-outline">Add new categories or delete existing ones</p>
+                  </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => {
-                    setShowAddCatModal(false);
+                    setShowEditCatModal(false);
                     setNewCatName('');
                   }}
-                  className="w-7 h-7 rounded-full hover:bg-surface-container flex items-center justify-center text-outline hover:text-on-surface"
+                  className="w-8 h-8 rounded-full hover:bg-surface-container flex items-center justify-center text-outline hover:text-on-surface transition-colors"
                 >
                   <span className="material-symbols-outlined text-[18px]">close</span>
                 </button>
               </div>
 
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant block mb-1">
-                  Category Name
+              {/* Add New Category Section */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+                  Add New Category
                 </label>
-                <input
-                  type="text"
-                  autoFocus
-                  placeholder="e.g. Subscriptions, Gym, Pets"
-                  value={newCatName}
-                  onChange={(e) => setNewCatName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      if (newCatName.trim()) handleCreateCategory(newCatName);
-                    }
-                  }}
-                  className="w-full bg-surface-container-low rounded-lg px-3 py-2 text-sm text-on-surface outline-none border border-surface-container focus:border-primary focus:ring-2 focus:ring-primary/20"
-                />
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="e.g. Subscriptions, Groceries, Gym"
+                    value={newCatName}
+                    onChange={(e) => setNewCatName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (newCatName.trim()) handleCreateCategory(newCatName);
+                      }
+                    }}
+                    className="flex-1 bg-surface-container-low rounded-lg px-3 py-2 text-sm text-on-surface outline-none border border-surface-container focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
+                  <button
+                    type="button"
+                    disabled={!newCatName.trim()}
+                    onClick={() => handleCreateCategory(newCatName)}
+                    className="h-9 px-4 rounded-lg bg-primary text-xs font-semibold text-on-primary hover:bg-primary-container transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-sm"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">add</span>
+                    <span>Add</span>
+                  </button>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2 pt-2">
+              {/* Existing Categories List */}
+              <div className="flex flex-col gap-2 mt-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+                    Active Categories ({allCategories.length})
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleResetCategories}
+                    className="text-[11px] font-medium text-outline hover:text-primary transition-colors underline"
+                  >
+                    Reset Defaults
+                  </button>
+                </div>
+
+                <div className="max-h-60 overflow-y-auto divide-y divide-surface-container/50 border border-surface-container rounded-xl bg-surface-container-low/40 p-1">
+                  {allCategories.map((cat) => (
+                    <div
+                      key={cat}
+                      className="flex items-center justify-between px-3 py-2.5 hover:bg-surface-container-low rounded-lg transition-colors group"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[16px] text-primary">label</span>
+                        <span className="text-xs font-medium text-on-surface">{cat}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveCategory(cat)}
+                        title={`Delete ${cat}`}
+                        className="w-7 h-7 rounded-lg flex items-center justify-center text-outline hover:text-error hover:bg-error/10 transition-colors opacity-80 group-hover:opacity-100"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">delete</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end pt-2 border-t border-surface-container">
                 <button
                   type="button"
                   onClick={() => {
-                    setShowAddCatModal(false);
+                    setShowEditCatModal(false);
                     setNewCatName('');
                   }}
-                  className="flex-1 py-2 rounded-lg bg-surface-container text-xs font-semibold text-on-surface hover:bg-surface-container-high transition-colors"
+                  className="px-5 py-2 rounded-lg bg-primary text-xs font-bold text-on-primary hover:bg-primary-container transition-colors shadow-sm"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  disabled={!newCatName.trim()}
-                  onClick={() => handleCreateCategory(newCatName)}
-                  className="flex-1 py-2 rounded-lg bg-primary text-xs font-semibold text-on-primary hover:bg-primary-container transition-colors disabled:opacity-50"
-                >
-                  Create Category
+                  Done
                 </button>
               </div>
             </div>
