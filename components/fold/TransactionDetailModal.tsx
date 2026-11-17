@@ -10,18 +10,34 @@ interface TransactionDetailModalProps {
   onUpdate?: (id: string, updates: Partial<Transaction>) => Promise<boolean | void>;
 }
 
-const DEFAULT_CATEGORIES = [
+const EXPENSE_CATEGORIES = [
   'Food & Dining',
   'Bills & Utilities',
   'Transportation',
   'Shopping',
   'Entertainment',
   'Healthcare',
+  'Tech & Gadgets',
+  'Other',
+];
+
+const INCOME_CATEGORIES = [
+  'Salary',
+  'Freelance',
+  'Business',
+  'Gift',
+  'Investment',
+  'Pocket Transfer',
+  'Bonus',
+  'Other',
+];
+
+const DEFAULT_CATEGORIES = [
+  ...EXPENSE_CATEGORIES,
   'Salary',
   'Freelance',
   'Gift',
   'Investment',
-  'Other',
 ];
 
 export function TransactionDetailModal({
@@ -96,13 +112,13 @@ export function TransactionDetailModal({
               : 'Expense Receipt'}
           </span>
           <div className="flex items-center gap-1">
-            {!isEditing && !isIncome && onUpdate && (
+            {!isEditing && onUpdate && (
               <button
                 type="button"
                 onClick={() => setIsEditing(true)}
                 className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-colors"
-                title="Edit expense"
-                aria-label="Edit expense"
+                title={isIncome ? 'Edit inbound transaction' : 'Edit expense'}
+                aria-label={isIncome ? 'Edit inbound transaction' : 'Edit expense'}
               >
                 <span className="material-symbols-outlined text-[18px]">edit</span>
               </button>
@@ -123,14 +139,14 @@ export function TransactionDetailModal({
             {/* Title */}
             <div className="flex flex-col gap-1">
               <label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">
-                Title / Merchant
+                {isIncome ? 'Source / Payer' : 'Title / Merchant'}
               </label>
               <input
                 type="text"
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Grocery Store"
+                placeholder={isIncome ? 'e.g. Monthly Salary / Client' : 'e.g. Grocery Store'}
                 className="w-full h-10 px-3 rounded-xl bg-surface-container-low text-on-surface text-label-md font-semibold outline-none border border-transparent focus:border-primary focus:bg-surface-container-lowest transition-all"
               />
             </div>
@@ -166,12 +182,12 @@ export function TransactionDetailModal({
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full h-10 px-2 rounded-xl bg-surface-container-low text-on-surface text-label-md font-medium outline-none border border-transparent focus:border-primary focus:bg-surface-container-lowest transition-all"
                 >
-                  {DEFAULT_CATEGORIES.map((cat) => (
+                  {(isIncome ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map((cat) => (
                     <option key={cat} value={cat}>
                       {cat}
                     </option>
                   ))}
-                  {!DEFAULT_CATEGORIES.includes(category) && category && (
+                  {!(isIncome ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).includes(category) && category && (
                     <option value={category}>{category}</option>
                   )}
                 </select>

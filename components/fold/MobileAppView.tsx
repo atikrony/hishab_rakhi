@@ -38,18 +38,22 @@ export function MobileAppView({
   const [sourceFilter, setSourceFilter] = useState('All');
   const [spendTab, setSpendTab] = useState('All Spends');
 
-  const inboundTransactions = transactions.filter((t) => {
-    if (t.type !== 'income') return false;
-    if (sourceFilter !== 'All') {
-      return (
-        t.category.toLowerCase() === sourceFilter.toLowerCase() ||
-        t.sourceStream?.toLowerCase() === sourceFilter.toLowerCase()
-      );
-    }
-    return true;
-  });
+  const inboundTransactions = transactions
+    .filter((t) => {
+      if (t.type !== 'income') return false;
+      if (sourceFilter !== 'All') {
+        return (
+          t.category.toLowerCase() === sourceFilter.toLowerCase() ||
+          t.sourceStream?.toLowerCase() === sourceFilter.toLowerCase()
+        );
+      }
+      return true;
+    })
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  const expenseTransactions = transactions.filter((t) => t.type === 'expense');
+  const expenseTransactions = transactions
+    .filter((t) => t.type === 'expense')
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const today = new Date().toISOString().split('T')[0];
 

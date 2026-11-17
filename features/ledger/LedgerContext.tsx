@@ -119,7 +119,10 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
       if (txRes.ok) {
         const txJson = await txRes.json();
         if (txJson.success && txJson.data) {
-          setTransactions(txJson.data);
+          const sorted = [...txJson.data].sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
+          setTransactions(sorted);
         }
       }
     } catch (err) {
@@ -152,15 +155,18 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Filtered transactions based on date range
+  // Filtered transactions based on date range, guaranteed sorted by date descending
   const filteredTransactions = useMemo(() => {
-    if (!startDate && !endDate) return transactions;
-    return transactions.filter((tx) => {
-      const txDate = tx.date.split('T')[0];
-      if (startDate && txDate < startDate) return false;
-      if (endDate && txDate > endDate) return false;
-      return true;
-    });
+    let list = transactions;
+    if (startDate || endDate) {
+      list = transactions.filter((tx) => {
+        const txDate = tx.date.split('T')[0];
+        if (startDate && txDate < startDate) return false;
+        if (endDate && txDate > endDate) return false;
+        return true;
+      });
+    }
+    return [...list].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [transactions, startDate, endDate]);
 
   // Recalibrated summary based on filtered transactions

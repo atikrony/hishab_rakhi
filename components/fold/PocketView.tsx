@@ -76,6 +76,9 @@ export function PocketView({
     return true;
   });
 
+  // Sort inbound transactions by date descending (newest first)
+  inboundTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
   const handleQuickSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const num = parseFloat(quickAmount);
