@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { DashboardSummary, Transaction } from '@/lib/types';
+import { DashboardSummary, Transaction, FixedCost } from '@/lib/types';
+import { FixedCostsCard } from './FixedCostsCard';
 
 interface MobileAppViewProps {
   summary: DashboardSummary;
@@ -17,6 +18,16 @@ interface MobileAppViewProps {
   onDateRangeChange?: (start: string, end: string) => void;
   onResetDateRange?: () => void;
   totalTransactionsCount?: number;
+  fixedCosts?: FixedCost[];
+  onAddFixedCost?: (data: {
+    title: string;
+    amount: number;
+    category: string;
+    dueDay?: number;
+    notes?: string;
+  }) => Promise<void>;
+  onToggleFixedCost?: (id: string, isPaid: boolean, month?: string) => Promise<void>;
+  onDeleteFixedCost?: (id: string) => Promise<void>;
 }
 
 export function MobileAppView({
@@ -32,6 +43,10 @@ export function MobileAppView({
   onDateRangeChange,
   onResetDateRange,
   totalTransactionsCount,
+  fixedCosts,
+  onAddFixedCost,
+  onToggleFixedCost,
+  onDeleteFixedCost,
 }: MobileAppViewProps) {
   const [activeMobileTab, setActiveMobileTab] = useState<'spend' | 'summary' | 'pocket'>('spend');
   const currentTab = activeTab || activeMobileTab;
@@ -468,6 +483,15 @@ export function MobileAppView({
               }))}
             </div>
 
+            {/* Fixed Cost Checklist Section */}
+            <FixedCostsCard
+              fixedCosts={fixedCosts && fixedCosts.length > 0 ? fixedCosts : summary.fixedCosts || []}
+              onToggle={onToggleFixedCost || (async () => {})}
+              onAdd={onAddFixedCost}
+              onDelete={onDeleteFixedCost}
+              variant="spend"
+            />
+
             {/* Floating Action Button (Add Expense) */}
             <div className="fixed bottom-20 right-4 sm:right-[calc(50%-14rem+1rem)] z-40">
               <button
@@ -536,6 +560,13 @@ export function MobileAppView({
                 </div>
               ))}
             </div>
+
+            {/* Fixed Cost Section Below Category Allocations */}
+            <FixedCostsCard
+              fixedCosts={fixedCosts && fixedCosts.length > 0 ? fixedCosts : summary.fixedCosts || []}
+              onToggle={onToggleFixedCost || (async () => {})}
+              variant="summary"
+            />
           </div>
         )}
       </main>

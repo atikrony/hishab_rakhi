@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { DashboardSummary, Transaction } from '@/lib/types';
+import { DashboardSummary, Transaction, FixedCost } from '@/lib/types';
+import { FixedCostsCard } from './FixedCostsCard';
 
 interface SpendViewProps {
   summary: DashboardSummary;
@@ -21,6 +22,16 @@ interface SpendViewProps {
   endDate?: string;
   onDateRangeChange?: (start: string, end: string) => void;
   onResetDate?: () => void;
+  fixedCosts?: FixedCost[];
+  onAddFixedCost?: (data: {
+    title: string;
+    amount: number;
+    category: string;
+    dueDay?: number;
+    notes?: string;
+  }) => Promise<void>;
+  onToggleFixedCost?: (id: string, isPaid: boolean, month?: string) => Promise<void>;
+  onDeleteFixedCost?: (id: string) => Promise<void>;
 }
 
 export function SpendView({
@@ -34,6 +45,10 @@ export function SpendView({
   endDate,
   onDateRangeChange,
   onResetDate,
+  fixedCosts,
+  onAddFixedCost,
+  onToggleFixedCost,
+  onDeleteFixedCost,
 }: SpendViewProps) {
   // Quick Expense Form State
   const [quickAmount, setQuickAmount] = useState('45');
@@ -747,6 +762,15 @@ export function SpendView({
                 </button>
               </form>
             </div>
+
+            {/* Fixed Cost Section with Checkmarks */}
+            <FixedCostsCard
+              fixedCosts={fixedCosts && fixedCosts.length > 0 ? fixedCosts : summary.fixedCosts || []}
+              onToggle={onToggleFixedCost || (async () => {})}
+              onAdd={onAddFixedCost}
+              onDelete={onDeleteFixedCost}
+              variant="spend"
+            />
           </div>
         </div>
 

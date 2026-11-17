@@ -238,6 +238,7 @@ export function initializeBlankUserLedger(userId: string, email: string): Databa
         type: 'info',
       },
     ],
+    fixedCosts: [],
   };
 
   writeUserLedgerData<DatabaseSchema>(userId, template);

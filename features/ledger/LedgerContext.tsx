@@ -2,13 +2,14 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
-import { DashboardSummary, Transaction, UserProfile } from '@/lib/types';
+import { DashboardSummary, Transaction, UserProfile, FixedCost } from '@/lib/types';
 
 interface LedgerContextType {
   summary: DashboardSummary | null;
   activeSummary: DashboardSummary | null;
   transactions: Transaction[];
   filteredTransactions: Transaction[];
+  fixedCosts: FixedCost[];
   loading: boolean;
   user: UserProfile;
   startDate: string;
@@ -34,6 +35,15 @@ interface LedgerContextType {
     notes?: string;
     paymentMethod?: string;
   }) => Promise<void>;
+  handleAddFixedCost: (data: {
+    title: string;
+    amount: number;
+    category: string;
+    dueDay?: number;
+    notes?: string;
+  }) => Promise<void>;
+  handleToggleFixedCost: (id: string, isPaid: boolean, month?: string) => Promise<void>;
+  handleDeleteFixedCost: (id: string) => Promise<void>;
   handleDeleteTransaction: (id: string) => Promise<void>;
   handleUpdateTransaction: (id: string, updates: Partial<Transaction>) => Promise<boolean>;
   handleResetDb: () => Promise<void>;
@@ -57,6 +67,7 @@ const LedgerContext = createContext<LedgerContextType | null>(null);
 export function LedgerProvider({ children }: { children: React.ReactNode }) {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [fixedCosts, setFixedCosts] = useState<FixedCost[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Date Range filter states
@@ -104,15 +115,19 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [dashRes, txRes] = await Promise.all([
+      const [dashRes, txRes, fcRes] = await Promise.all([
         fetch('/api/v1/dashboard', { cache: 'no-store' }),
         fetch('/api/v1/transactions?limit=100', { cache: 'no-store' }),
+        fetch('/api/v1/fixed-costs', { cache: 'no-store' }),
       ]);
 
       if (dashRes.ok) {
         const dashJson = await dashRes.json();
         if (dashJson.success && dashJson.data) {
           setSummary(dashJson.data);
+          if (dashJson.data.fixedCosts && Array.isArray(dashJson.data.fixedCosts)) {
+            setFixedCosts(dashJson.data.fixedCosts);
+          }
         }
       }
 
@@ -123,6 +138,15 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
             (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
           );
           setTransactions(sorted);
+        }
+      }
+
+      if (fcRes.ok) {
+        const fcJson = await fcRes.json();
+        if (fcJson.success && fcJson.data?.items) {
+          setFixedCosts(fcJson.data.items);
+        } else if (fcJson.success && Array.isArray(fcJson.data)) {
+          setFixedCosts(fcJson.data);
         }
       }
     } catch (err) {
@@ -335,6 +359,91 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Fixed Costs Handlers
+  const handleAddFixedCost = async (data: {
+    title: string;
+    amount: number;
+    category: string;
+    dueDay?: number;
+    notes?: string;
+  }) => {
+    try {
+      const res = await fetch('/api/v1/fixed-costs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (json.success) {
+        showToast(`Fixed cost "${data.title}" added`);
+        await fetchData();
+      } else {
+        showToast(json.error || 'Failed to add fixed cost');
+      }
+    } catch (err) {
+      showToast('Network error adding fixed cost');
+    }
+  };
+
+  const handleToggleFixedCost = async (id: string, isPaid: boolean, month?: string) => {
+    try {
+      const now = new Date();
+      const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const targetMonth = month || currentMonth;
+
+      // Optimistic state update
+      setFixedCosts((prev) =>
+        prev.map((fc) => {
+          if (fc.id !== id) return fc;
+          const months = new Set(fc.paidMonths || []);
+          if (isPaid) {
+            months.add(targetMonth);
+          } else {
+            months.delete(targetMonth);
+          }
+          return { ...fc, paidMonths: Array.from(months) };
+        })
+      );
+
+      const res = await fetch(`/api/v1/fixed-costs/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isPaid, month: targetMonth }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        showToast(isPaid ? 'Marked as settled this month' : 'Marked as pending');
+        await fetchData();
+      } else {
+        showToast(json.error || 'Failed to update fixed cost');
+        await fetchData();
+      }
+    } catch (err) {
+      showToast('Network error updating fixed cost status');
+      await fetchData();
+    }
+  };
+
+  const handleDeleteFixedCost = async (id: string) => {
+    try {
+      setFixedCosts((prev) => prev.filter((fc) => fc.id !== id));
+      const res = await fetch(`/api/v1/fixed-costs/${id}`, {
+        method: 'DELETE',
+      });
+      const json = await res.json();
+      if (json.success) {
+        showToast('Fixed cost removed');
+        await fetchData();
+      } else {
+        showToast(json.error || 'Failed to delete fixed cost');
+        await fetchData();
+      }
+    } catch (err) {
+      showToast('Network error deleting fixed cost');
+      await fetchData();
+    }
+  };
+
   // Reset Database
   const handleResetDb = async () => {
     try {
@@ -378,6 +487,7 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
         activeSummary,
         transactions,
         filteredTransactions,
+        fixedCosts,
         loading,
         user: defaultUser,
         startDate,
@@ -387,6 +497,9 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
         fetchData,
         handleAddInflow,
         handleAddExpense,
+        handleAddFixedCost,
+        handleToggleFixedCost,
+        handleDeleteFixedCost,
         handleDeleteTransaction,
         handleUpdateTransaction,
         handleResetDb,

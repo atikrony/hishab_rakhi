@@ -11,7 +11,11 @@ export function SpendFeature() {
     summary,
     filteredTransactions,
     transactions,
+    fixedCosts,
     handleAddExpense,
+    handleAddFixedCost,
+    handleToggleFixedCost,
+    handleDeleteFixedCost,
     setIsInflowModalOpen,
     setIsExpenseModalOpen,
     setIsSettingsOpen,
@@ -33,6 +37,10 @@ export function SpendFeature() {
         summary={currentSummary}
         transactions={filteredTransactions}
         activeTab="spend"
+        fixedCosts={fixedCosts}
+        onAddFixedCost={handleAddFixedCost}
+        onToggleFixedCost={handleToggleFixedCost}
+        onDeleteFixedCost={handleDeleteFixedCost}
         onOpenAddMoney={() => setIsInflowModalOpen(true)}
         onOpenAddExpense={() => setIsExpenseModalOpen(true)}
         onSelectTransaction={(tx) => setSelectedTx(tx)}
@@ -50,6 +58,10 @@ export function SpendFeature() {
     <SpendView
       summary={currentSummary}
       transactions={filteredTransactions}
+      fixedCosts={fixedCosts}
+      onAddFixedCost={handleAddFixedCost}
+      onToggleFixedCost={handleToggleFixedCost}
+      onDeleteFixedCost={handleDeleteFixedCost}
       searchQuery=""
       onAddExpense={handleAddExpense}
       onOpenAddModal={() => setIsExpenseModalOpen(true)}

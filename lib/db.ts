@@ -16,6 +16,7 @@ import {
   BudgetLimit,
   NotificationItem,
   DashboardSummary,
+  FixedCost,
 } from './types';
 
 export interface DatabaseSchema {
@@ -25,6 +26,7 @@ export interface DatabaseSchema {
   wallets: WalletAccount[];
   budgets: BudgetLimit[];
   notifications: NotificationItem[];
+  fixedCosts?: FixedCost[];
 }
 
 const defaultAvatar =
@@ -720,6 +722,7 @@ export function computeDashboardSummary(db: DatabaseSchema, userId?: string): Da
     dailyBurnRate,
     recentTransactions: db.transactions.slice(0, 20),
     wallets: db.wallets,
+    fixedCosts: db.fixedCosts || [],
     categoryBreakdown,
     sourceBreakdown,
     weeklyInflow,

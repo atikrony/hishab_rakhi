@@ -11,6 +11,8 @@ export function SummaryFeature() {
     summary,
     filteredTransactions,
     transactions,
+    fixedCosts,
+    handleToggleFixedCost,
     setIsInflowModalOpen,
     setIsExpenseModalOpen,
     setIsSettingsOpen,
@@ -32,6 +34,8 @@ export function SummaryFeature() {
         summary={currentSummary}
         transactions={filteredTransactions}
         activeTab="summary"
+        fixedCosts={fixedCosts}
+        onToggleFixedCost={handleToggleFixedCost}
         onOpenAddMoney={() => setIsInflowModalOpen(true)}
         onOpenAddExpense={() => setIsExpenseModalOpen(true)}
         onSelectTransaction={(tx) => setSelectedTx(tx)}
@@ -49,6 +53,8 @@ export function SummaryFeature() {
     <SummaryView
       summary={currentSummary}
       transactions={filteredTransactions}
+      fixedCosts={fixedCosts}
+      onToggleFixedCost={handleToggleFixedCost}
       searchQuery=""
       onOpenAddModal={() => setIsInflowModalOpen(true)}
       onSelectTransaction={(tx) => setSelectedTx(tx)}

@@ -87,6 +87,17 @@ export interface UserProfile {
   lastExpense?: number;
 }
 
+export interface FixedCost {
+  id: string;
+  title: string;
+  amount: number;
+  category: string;
+  dueDay?: number;
+  paidMonths?: string[];
+  notes?: string;
+  createdAt?: string;
+}
+
 export interface DashboardSummary {
   user: UserProfile;
   databaseMode?: 'dummy' | 'real';
@@ -103,6 +114,7 @@ export interface DashboardSummary {
   dailyBurnRate: number;
   recentTransactions: Transaction[];
   wallets: WalletAccount[];
+  fixedCosts?: FixedCost[];
   categoryBreakdown: {
     category: string;
     amount: number;

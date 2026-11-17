@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { DashboardSummary, Transaction } from '@/lib/types';
+import { DashboardSummary, Transaction, FixedCost } from '@/lib/types';
+import { FixedCostsCard } from './FixedCostsCard';
 
 interface SummaryViewProps {
   summary: DashboardSummary;
@@ -13,6 +14,8 @@ interface SummaryViewProps {
   endDate?: string;
   onDateRangeChange?: (start: string, end: string) => void;
   onResetDate?: () => void;
+  fixedCosts?: FixedCost[];
+  onToggleFixedCost?: (id: string, isPaid: boolean, month?: string) => Promise<void>;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -55,6 +58,8 @@ export function SummaryView({
   endDate,
   onDateRangeChange,
   onResetDate,
+  fixedCosts,
+  onToggleFixedCost,
 }: SummaryViewProps) {
   // Cadence Scope & Filter States
   const [cadenceScope, setCadenceScope] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Month');
@@ -796,106 +801,116 @@ export function SummaryView({
             </div>
           </div>
 
-          {/* Category Distribution (Right 4 Cols) */}
-          <div className="lg:col-span-4 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB] flex flex-col gap-space-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex flex-col">
-                <h2 className="font-title-sm text-title-sm text-on-surface font-bold">
-                  Category Distribution
-                </h2>
-                <span className="font-label-md text-label-md text-on-surface-variant">
-                  {periodLabel} allocation
+          {/* Right 4 Cols: Category Distribution + Fixed Cost */}
+          <div className="lg:col-span-4 flex flex-col gap-space-lg">
+            {/* Category Distribution */}
+            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB] flex flex-col gap-space-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <h2 className="font-title-sm text-title-sm text-on-surface font-bold">
+                    Category Distribution
+                  </h2>
+                  <span className="font-label-md text-label-md text-on-surface-variant">
+                    {periodLabel} allocation
+                  </span>
+                </div>
+                <span className="font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-surface-container text-on-surface-variant font-semibold">
+                  {periodCategoryBreakdown.length} Categories
                 </span>
               </div>
-              <span className="font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-surface-container text-on-surface-variant font-semibold">
-                {periodCategoryBreakdown.length} Categories
-              </span>
-            </div>
 
-            {/* Breakdown List */}
-            <div className="flex flex-col gap-space-md">
-              {periodCategoryBreakdown.length === 0 ? (
-                <div className="py-8 text-center text-outline">
-                  <span className="material-symbols-outlined text-[32px] block mb-1 text-outline">
-                    category
-                  </span>
-                  <p className="text-body-md text-on-surface font-medium">No expenses this period</p>
-                  <p className="text-label-sm text-on-surface-variant mt-0.5">
-                    Select another timeframe or record an expense.
-                  </p>
-                </div>
-              ) : (
-                periodCategoryBreakdown.slice(0, 5).map((cat) => {
-                  const iconMap: Record<string, string> = {
-                    'Food & Dining': 'restaurant',
-                    'Tech & Gadgets': 'devices',
-                    'Bills & Utilities': 'bolt',
-                    Transportation: 'commute',
-                    'Health & Meds': 'medical_services',
-                    Healthcare: 'medical_services',
-                    Shopping: 'shopping_bag',
-                    Entertainment: 'movie',
-                  };
-                  const icon = iconMap[cat.category] || 'sell';
-                  const isSelected = selectedCategoryFilter === cat.category;
+              {/* Breakdown List */}
+              <div className="flex flex-col gap-space-md">
+                {periodCategoryBreakdown.length === 0 ? (
+                  <div className="py-8 text-center text-outline">
+                    <span className="material-symbols-outlined text-[32px] block mb-1 text-outline">
+                      category
+                    </span>
+                    <p className="text-body-md text-on-surface font-medium">No expenses this period</p>
+                    <p className="text-label-sm text-on-surface-variant mt-0.5">
+                      Select another timeframe or record an expense.
+                    </p>
+                  </div>
+                ) : (
+                  periodCategoryBreakdown.slice(0, 5).map((cat) => {
+                    const iconMap: Record<string, string> = {
+                      'Food & Dining': 'restaurant',
+                      'Tech & Gadgets': 'devices',
+                      'Bills & Utilities': 'bolt',
+                      Transportation: 'commute',
+                      'Health & Meds': 'medical_services',
+                      Healthcare: 'medical_services',
+                      Shopping: 'shopping_bag',
+                      Entertainment: 'movie',
+                    };
+                    const icon = iconMap[cat.category] || 'sell';
+                    const isSelected = selectedCategoryFilter === cat.category;
 
-                  return (
-                    <div
-                      key={cat.category}
-                      onClick={() =>
-                        setSelectedCategoryFilter((prev) =>
-                          prev === cat.category ? null : cat.category
-                        )
-                      }
-                      className={`flex flex-col gap-space-xs p-2 rounded-xl transition-all cursor-pointer ${
-                        isSelected
-                          ? 'bg-primary/5 ring-1 ring-primary/30'
-                          : 'hover:bg-surface-container-low'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-space-xs">
-                          <span
-                            className="w-7 h-7 rounded-lg flex items-center justify-center"
+                    return (
+                      <div
+                        key={cat.category}
+                        onClick={() =>
+                          setSelectedCategoryFilter((prev) =>
+                            prev === cat.category ? null : cat.category
+                          )
+                        }
+                        className={`flex flex-col gap-space-xs p-2 rounded-xl transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-primary/5 ring-1 ring-primary/30'
+                            : 'hover:bg-surface-container-low'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-space-xs">
+                            <span
+                              className="w-7 h-7 rounded-lg flex items-center justify-center"
+                              style={{
+                                backgroundColor: `${cat.color}20`,
+                                color: cat.color,
+                              }}
+                            >
+                              <span className="material-symbols-outlined text-[16px]">{icon}</span>
+                            </span>
+                            <div className="flex flex-col">
+                              <span className="font-title-sm text-title-sm text-on-surface leading-tight font-semibold">
+                                {cat.category}
+                              </span>
+                              <span className="font-label-sm text-label-sm text-outline">
+                                {cat.count} transaction{cat.count > 1 ? 's' : ''}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-currency-md text-currency-md text-on-surface font-bold">
+                              ৳{Math.round(cat.amount).toLocaleString()}
+                            </div>
+                            <div className="font-label-sm text-label-sm text-on-surface-variant font-medium">
+                              {cat.percentage}%
+                            </div>
+                          </div>
+                        </div>
+                        <div className="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
                             style={{
-                              backgroundColor: `${cat.color}20`,
-                              color: cat.color,
+                              width: `${Math.min(100, Math.max(8, cat.percentage))}%`,
+                              backgroundColor: cat.color,
                             }}
-                          >
-                            <span className="material-symbols-outlined text-[16px]">{icon}</span>
-                          </span>
-                          <div className="flex flex-col">
-                            <span className="font-title-sm text-title-sm text-on-surface leading-tight font-semibold">
-                              {cat.category}
-                            </span>
-                            <span className="font-label-sm text-label-sm text-outline">
-                              {cat.count} transaction{cat.count > 1 ? 's' : ''}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-currency-md text-currency-md text-on-surface font-bold">
-                            ৳{Math.round(cat.amount).toLocaleString()}
-                          </div>
-                          <div className="font-label-sm text-label-sm text-on-surface-variant font-medium">
-                            {cat.percentage}%
-                          </div>
+                          />
                         </div>
                       </div>
-                      <div className="w-full bg-surface-container h-2 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{
-                            width: `${Math.min(100, Math.max(8, cat.percentage))}%`,
-                            backgroundColor: cat.color,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })
-              )}
+                    );
+                  })
+                )}
+              </div>
             </div>
+
+            {/* Fixed Cost Section Below Category Distribution */}
+            <FixedCostsCard
+              fixedCosts={fixedCosts && fixedCosts.length > 0 ? fixedCosts : summary.fixedCosts || []}
+              onToggle={onToggleFixedCost || (async () => {})}
+              variant="summary"
+            />
           </div>
         </div>
 
