@@ -787,3 +787,140 @@ export async function findUserByEmailFromPostgres(email: string): Promise<UserRe
     return null;
   }
 }
+
+/**
+ * Retrieves all user records from PostgreSQL.
+ */
+export async function getAllUsersFromPostgres(): Promise<UserRecord[]> {
+  if (!isPostgresAvailable()) return [];
+
+  try {
+    const pool = getPostgresPool();
+    lastConnectFailureTime = 0;
+    const res = await pool.query(`SELECT * FROM users ORDER BY created_at DESC`);
+    return res.rows.map((row) => ({
+      id: row.id,
+      email: row.email,
+      passwordHash: row.password_hash,
+      salt: row.salt,
+      createdAt: row.created_at,
+      onboardingCompleted: row.onboarding_completed,
+      profile: row.name
+        ? {
+            name: row.name,
+            occupation: row.occupation || '',
+            monthlyIncome: Number(row.monthly_income) || 0,
+            salaryDate: row.salary_date || '',
+            lastExpense: Number(row.last_expense) || 0,
+          }
+        : undefined,
+    }));
+  } catch (err: any) {
+    handlePostgresError('getAllUsers Warning', err);
+    return [];
+  }
+}
+
+/**
+ * Retrieves master summary statistics from PostgreSQL.
+ */
+export async function getPostgresMasterStats(): Promise<{
+  connected: boolean;
+  database?: string;
+  userCount: number;
+  ledgerCount: number;
+  tables: string[];
+  totalTransactions: number;
+  totalFixedCosts: number;
+  totalInflow: number;
+  totalExpense: number;
+}> {
+  if (!isPostgresAvailable()) {
+    return {
+      connected: false,
+      userCount: 0,
+      ledgerCount: 0,
+      tables: [],
+      totalTransactions: 0,
+      totalFixedCosts: 0,
+      totalInflow: 0,
+      totalExpense: 0,
+    };
+  }
+
+  try {
+    const pool = getPostgresPool();
+    const client = await pool.connect();
+    lastConnectFailureTime = 0;
+
+    try {
+      const dbRes = await client.query('SELECT current_database() as db_name');
+      const dbName = dbRes.rows[0]?.db_name || 'hishab_rakhi';
+
+      const userCountRes = await client.query('SELECT COUNT(*)::int as count FROM users');
+      const userCount = userCountRes.rows[0]?.count || 0;
+
+      const ledgerCountRes = await client.query(
+        `SELECT COUNT(*)::int as count FROM information_schema.tables WHERE table_name = 'user_ledgers'`
+      );
+      let ledgerCount = 0;
+      let totalTransactions = 0;
+      let totalFixedCosts = 0;
+      let totalInflow = 0;
+      let totalExpense = 0;
+
+      if (ledgerCountRes.rows[0]?.count > 0) {
+        const ledgersRes = await client.query('SELECT raw_json FROM user_ledgers');
+        ledgerCount = ledgersRes.rows.length;
+        for (const row of ledgersRes.rows) {
+          try {
+            const raw = typeof row.raw_json === 'string' ? JSON.parse(row.raw_json) : row.raw_json;
+            if (raw) {
+              if (Array.isArray(raw.transactions)) {
+                totalTransactions += raw.transactions.length;
+                raw.transactions.forEach((tx: any) => {
+                  if (tx.type === 'income') totalInflow += Number(tx.amount) || 0;
+                  if (tx.type === 'expense') totalExpense += Number(tx.amount) || 0;
+                });
+              }
+              if (Array.isArray(raw.fixedCosts)) {
+                totalFixedCosts += raw.fixedCosts.length;
+              }
+            }
+          } catch (e) {}
+        }
+      }
+
+      const tablesRes = await client.query(
+        `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name`
+      );
+      const tables = tablesRes.rows.map((r: any) => r.table_name);
+
+      return {
+        connected: true,
+        database: dbName,
+        userCount,
+        ledgerCount,
+        tables,
+        totalTransactions,
+        totalFixedCosts,
+        totalInflow,
+        totalExpense,
+      };
+    } finally {
+      client.release();
+    }
+  } catch (err: any) {
+    handlePostgresError('getPostgresMasterStats', err);
+    return {
+      connected: false,
+      userCount: 0,
+      ledgerCount: 0,
+      tables: [],
+      totalTransactions: 0,
+      totalFixedCosts: 0,
+      totalInflow: 0,
+      totalExpense: 0,
+    };
+  }
+}

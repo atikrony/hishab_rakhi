@@ -27,6 +27,25 @@ interface RecentVisit {
   userAgent?: string;
 }
 
+interface DatabaseInfo {
+  engine: string;
+  isPostgresConnected: boolean;
+  databaseName: string;
+  databaseMode: 'dummy' | 'real';
+  databaseFilePath: string;
+  storageDirectory: string;
+  connectionStatus: string;
+  tables: string[];
+  userCount: number;
+  ledgerCount: number;
+  transactionCount: number;
+  fixedCostCount: number;
+  inflowVolume: number;
+  expenseVolume: number;
+  netVolume: number;
+  serverTime: string;
+}
+
 interface KotojonStats {
   totalUsers: number;
   activeUsers: number;
@@ -41,6 +60,7 @@ interface KotojonStats {
   dailyHistory: DailyRecord[];
   recentVisits: RecentVisit[];
   userRoster: UserItem[];
+  databaseInfo?: DatabaseInfo;
   meta: {
     generatedAt: string;
     environment: string;
@@ -96,6 +116,8 @@ export default function KotojonPage() {
     1
   );
 
+  const db = stats?.databaseInfo;
+
   return (
     <div className="min-h-screen bg-surface text-on-surface antialiased p-4 sm:p-6 lg:p-10 flex flex-col gap-8">
       {/* Top Banner / Navigation */}
@@ -113,7 +135,7 @@ export default function KotojonPage() {
             <span className="text-sm font-normal text-outline">/kotojon</span>
           </h1>
           <p className="text-xs sm:text-sm text-on-surface-variant max-w-2xl">
-            Live telemetry on user adoption, active subscribers, and anonymous visitor traffic across Hishab Rakhi.
+            Live telemetry on user adoption, active subscribers, anonymous visitor traffic, and active database architecture.
           </p>
         </div>
 
@@ -262,27 +284,128 @@ export default function KotojonPage() {
             </div>
           </div>
 
-          {/* Card 6: Health / Environment */}
+          {/* Card 6: Database Engine & Health */}
           <div className="bg-surface-container-lowest rounded-2xl p-5 border border-surface-container shadow-xs flex flex-col justify-between hover:shadow-sm transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-bold uppercase tracking-wider text-outline">
-                System Health
+                Active Database
               </span>
               <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[20px]">verified</span>
+                <span className="material-symbols-outlined text-[20px]">database</span>
               </div>
             </div>
             <div>
-              <div className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight">
-                Operational
+              <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight truncate">
+                {loading ? '...' : db?.engine || 'Local Database'}
               </div>
-              <div className="mt-1.5 flex items-center gap-1 text-xs text-outline font-medium">
-                <span className="material-symbols-outlined text-[14px]">dns</span>
-                <span>Next.js 15 App Router • Node.js</span>
+              <div className="mt-1.5 flex items-center gap-1 text-xs text-outline font-medium truncate">
+                <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                <span>{db?.connectionStatus || 'Active (Read/Write Ready)'}</span>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Dedicated Database Information Section */}
+        <section className="bg-surface-container-lowest rounded-2xl p-5 sm:p-6 border border-surface-container shadow-xs flex flex-col gap-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-surface-container">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[24px]">database</span>
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-on-surface">Database &amp; Storage Architecture</h2>
+                <p className="text-xs text-on-surface-variant">
+                  Active database configuration, connection health, and stored ledger entities
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                  db?.isPostgresConnected
+                    ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30'
+                    : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                }`}
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                {db?.isPostgresConnected ? 'PostgreSQL Connected' : 'Local JSON Engine Online'}
+              </span>
+            </div>
+          </div>
+
+          {/* Database Specs Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Box 1 */}
+            <div className="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col gap-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-outline">
+                Database Engine
+              </span>
+              <span className="text-base font-bold text-on-surface">{db?.engine || 'Local File DB'}</span>
+              <span className="text-xs text-on-surface-variant mt-1">
+                Mode: <strong className="text-on-surface">{db?.databaseMode?.toUpperCase() || 'REAL'}</strong>
+              </span>
+            </div>
+
+            {/* Box 2 */}
+            <div className="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col gap-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-outline">
+                Target Database / File
+              </span>
+              <span className="text-base font-bold text-on-surface truncate" title={db?.databaseName}>
+                {db?.databaseName || 'hishab_real.json'}
+              </span>
+              <span className="text-xs text-on-surface-variant mt-1 truncate" title={db?.storageDirectory}>
+                Dir: {db?.storageDirectory ? db.storageDirectory.split(/[\/\\]/).slice(-2).join('/') : 'data'}
+              </span>
+            </div>
+
+            {/* Box 3 */}
+            <div className="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col gap-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-outline">
+                Total Ledgers Indexed
+              </span>
+              <span className="text-base font-bold text-on-surface">
+                {db?.ledgerCount || 0} User {db?.ledgerCount === 1 ? 'Ledger' : 'Ledgers'}
+              </span>
+              <span className="text-xs text-on-surface-variant mt-1">
+                {db?.transactionCount || 0} transactions • {db?.fixedCostCount || 0} fixed costs
+              </span>
+            </div>
+
+            {/* Box 4 */}
+            <div className="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col gap-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-outline">
+                Master Database Volume
+              </span>
+              <span className="text-base font-bold text-on-surface">
+                ৳{(db?.netVolume || 0).toLocaleString()}
+              </span>
+              <span className="text-xs text-on-surface-variant mt-1">
+                +৳{(db?.inflowVolume || 0).toLocaleString()} in / -৳{(db?.expenseVolume || 0).toLocaleString()} out
+              </span>
+            </div>
+          </div>
+
+          {/* Tables & Collections Pills */}
+          <div className="flex flex-col gap-2 pt-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-outline">
+              Active Tables &amp; Schemas ({db?.tables?.length || 0})
+            </span>
+            <div className="flex items-center flex-wrap gap-2">
+              {(db?.tables || ['users', 'user_ledgers', 'wallets', 'transactions', 'fixed_costs', 'budgets', 'visitors']).map((t) => (
+                <span
+                  key={t}
+                  className="px-2.5 py-1 rounded-lg text-xs font-mono font-semibold bg-surface-container text-on-surface border border-surface-container-high flex items-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-[14px] text-primary">table_chart</span>
+                  <span>{t}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* Daily Visitor Traffic Breakdown (If available) */}
         {stats?.dailyHistory && stats.dailyHistory.length > 0 && (
@@ -336,7 +459,7 @@ export default function KotojonPage() {
                 </span>
               </div>
               <p className="text-xs text-on-surface-variant">
-                Individuals currently registered to use Hishab Rakhi
+                Individuals currently registered in the database
               </p>
             </div>
 
@@ -434,9 +557,8 @@ export default function KotojonPage() {
 
       {/* Footer */}
       <footer className="max-w-7xl mx-auto w-full pt-6 border-t border-surface-container text-center text-xs text-outline">
-        Hishab Rakhi Private Telemetry • Route: <code>/kotojon</code> • Real-time visitor and user tracker
+        Hishab Rakhi Private Telemetry • Route: <code>/kotojon</code> • Real-time visitor and database intelligence
       </footer>
     </div>
   );
 }
-
