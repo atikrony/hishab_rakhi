@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -16,6 +17,11 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!name.trim()) {
+      setError('Please enter your full name.');
+      return;
+    }
 
     if (!email.trim() || !email.includes('@')) {
       setError('Please enter a valid email address.');
@@ -38,6 +44,7 @@ export default function RegisterPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          name: name.trim(),
           email: email.trim(),
           password,
         }),
@@ -88,6 +95,26 @@ export default function RegisterPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-space-md">
+          {/* Full Name */}
+          <div className="flex flex-col gap-1">
+            <label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">
+              Full Name *
+            </label>
+            <div className="relative flex items-center">
+              <span className="absolute left-3.5 text-on-surface-variant material-symbols-outlined text-[20px]">
+                person
+              </span>
+              <input
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Atiqur Rahman"
+                className="w-full h-12 pl-11 pr-4 rounded-xl bg-surface-container-low text-on-surface text-body-md font-medium outline-none border border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 transition-all"
+              />
+            </div>
+          </div>
+
           {/* Email */}
           <div className="flex flex-col gap-1">
             <label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">

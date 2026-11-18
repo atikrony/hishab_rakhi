@@ -19,12 +19,27 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Verify authentication on mount; if unauthorized, navigate to login
+  // Verify authentication on mount; if unauthorized, navigate to login; pre-populate user name if provided during registration
   useEffect(() => {
     fetch('/api/v1/auth/profile')
       .then((res) => {
         if (res.status === 401) {
           window.location.href = '/auth/login';
+          return null;
+        }
+        return res.json();
+      })
+      .then((json) => {
+        if (json?.success && json?.data?.name) {
+          const fetchedName = String(json.data.name).trim();
+          if (
+            fetchedName &&
+            !fetchedName.toLowerCase().startsWith('usr_') &&
+            fetchedName !== 'Solo User' &&
+            fetchedName !== 'Not set'
+          ) {
+            setName(fetchedName);
+          }
         }
       })
       .catch(() => {});

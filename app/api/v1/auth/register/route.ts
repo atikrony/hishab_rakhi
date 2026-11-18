@@ -15,7 +15,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { email, password } = body;
+    const { name, email, password } = body;
+
+    const rawName = typeof name === 'string' ? name.trim() : '';
+    if (!rawName) {
+      return NextResponse.json(
+        { success: false, error: 'Please enter your full name.' },
+        { status: 400 }
+      );
+    }
 
     if (!email || typeof email !== 'string' || !email.includes('@')) {
       return NextResponse.json(
@@ -46,7 +54,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const newUser = await createUserAsync(email, password);
+    const newUser = await createUserAsync(email, password, rawName);
 
     return NextResponse.json({
       success: true,

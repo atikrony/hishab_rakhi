@@ -534,14 +534,36 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const defaultUser: UserProfile = summary?.user || {
-    id: '',
-    name: 'Account Holder',
-    email: '',
-    avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=User',
-    plan: 'Solo Ledger',
-    currency: 'BDT',
-    currencySymbol: '৳',
+  const rawUser = summary?.user;
+  const resolvedName = useMemo(() => {
+    if (!rawUser) return 'Account Holder';
+    if (rawUser.name && !rawUser.name.toLowerCase().startsWith('usr_') && rawUser.name !== 'Solo User' && rawUser.name !== 'Not set') {
+      return rawUser.name;
+    }
+    if (rawUser.email) {
+      const prefix = rawUser.email.split('@')[0] || '';
+      return prefix
+        .replace(/[._-]+/g, ' ')
+        .split(' ')
+        .filter(Boolean)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ') || prefix;
+    }
+    return 'Account Holder';
+  }, [rawUser]);
+
+  const defaultUser: UserProfile = {
+    id: rawUser?.id || '',
+    name: resolvedName,
+    email: rawUser?.email || '',
+    avatar: rawUser?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(resolvedName)}`,
+    plan: rawUser?.plan || 'Solo Ledger',
+    currency: rawUser?.currency || 'BDT',
+    currencySymbol: rawUser?.currencySymbol || '৳',
+    occupation: rawUser?.occupation,
+    monthlyIncome: rawUser?.monthlyIncome,
+    salaryDate: rawUser?.salaryDate,
+    lastExpense: rawUser?.lastExpense,
   };
 
   return (

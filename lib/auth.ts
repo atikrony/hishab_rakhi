@@ -28,6 +28,21 @@ export interface UserRecord {
   profile?: OnboardingProfile;
 }
 
+export function formatEmailToActualName(email: string): string {
+  if (!email || !email.includes('@')) return 'Solo User';
+  const localPart = email.split('@')[0];
+  const clean = localPart.replace(/[\._\-0-9]+/g, ' ').trim();
+  if (!clean || clean.toLowerCase().startsWith('usr_')) {
+    const rawLocal = email.split('@')[0].replace(/[^a-zA-Z]/g, '');
+    return rawLocal ? rawLocal.charAt(0).toUpperCase() + rawLocal.slice(1).toLowerCase() : 'Solo User';
+  }
+  return clean
+    .split(' ')
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
+}
+
 export function getAllUsers(): UserRecord[] {
   return readUsersData<UserRecord>();
 }
@@ -116,7 +131,7 @@ export function hashPassword(password: string, salt: string): string {
   return crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
 }
 
-export function createUser(email: string, password: string): UserRecord {
+export function createUser(email: string, password: string, name?: string): UserRecord {
   const existing = findUserByEmail(email);
   if (existing) {
     throw new Error('An account with this email already exists. Please log in.');
@@ -125,6 +140,7 @@ export function createUser(email: string, password: string): UserRecord {
   const salt = crypto.randomBytes(16).toString('hex');
   const passwordHash = hashPassword(password, salt);
   const now = new Date().toISOString();
+  const actualName = (name && name.trim()) || formatEmailToActualName(email);
 
   const newUser: UserRecord = {
     id: `usr_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`,
@@ -133,27 +149,34 @@ export function createUser(email: string, password: string): UserRecord {
     salt,
     createdAt: now,
     onboardingCompleted: false,
+    profile: {
+      name: actualName,
+      occupation: '',
+      monthlyIncome: 0,
+      salaryDate: '',
+      lastExpense: 0,
+    },
   };
 
   const users = getAllUsers();
   users.push(newUser);
   saveUsers(users);
 
-  // Initialize a blank solo ledger file for the new user
-  const initialLedger = initializeBlankUserLedger(newUser.id, newUser.email);
+  // Initialize a blank solo ledger file for the new user with actual name
+  const initialLedger = initializeBlankUserLedger(newUser.id, newUser.email, actualName);
 
   // Persist user and create dedicated user table in PostgreSQL
   import('./postgres')
     .then(({ saveUserToPostgres, createDedicatedUserTable }) => {
       saveUserToPostgres(newUser).catch(() => {});
-      createDedicatedUserTable(newUser.id, newUser.email, initialLedger).catch(() => {});
+      createDedicatedUserTable(newUser.id, newUser.email, initialLedger, newUser.profile).catch(() => {});
     })
     .catch(() => {});
 
   return newUser;
 }
 
-export async function createUserAsync(email: string, password: string): Promise<UserRecord> {
+export async function createUserAsync(email: string, password: string, name?: string): Promise<UserRecord> {
   const existing = await findUserByEmailAsync(email);
   if (existing) {
     throw new Error('An account with this email already exists. Please log in.');
@@ -162,6 +185,7 @@ export async function createUserAsync(email: string, password: string): Promise<
   const salt = crypto.randomBytes(16).toString('hex');
   const passwordHash = hashPassword(password, salt);
   const now = new Date().toISOString();
+  const actualName = (name && name.trim()) || formatEmailToActualName(email);
 
   const newUser: UserRecord = {
     id: `usr_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`,
@@ -170,19 +194,26 @@ export async function createUserAsync(email: string, password: string): Promise<
     salt,
     createdAt: now,
     onboardingCompleted: false,
+    profile: {
+      name: actualName,
+      occupation: '',
+      monthlyIncome: 0,
+      salaryDate: '',
+      lastExpense: 0,
+    },
   };
 
   const users = getAllUsers();
   users.push(newUser);
   saveUsers(users);
 
-  // Initialize a blank solo ledger file for the new user
-  const initialLedger = initializeBlankUserLedger(newUser.id, newUser.email);
+  // Initialize a blank solo ledger file for the new user with actual name
+  const initialLedger = initializeBlankUserLedger(newUser.id, newUser.email, actualName);
 
   try {
     const { saveUserToPostgres, createDedicatedUserTable } = await import('./postgres');
     await saveUserToPostgres(newUser);
-    await createDedicatedUserTable(newUser.id, newUser.email, initialLedger);
+    await createDedicatedUserTable(newUser.id, newUser.email, initialLedger, newUser.profile);
   } catch (err) {
     // safe fallback
   }
@@ -301,7 +332,10 @@ export function getUserLedgerPath(userId: string): string {
 }
 
 export function initializeBlankUserLedger(userId: string, email: string, name?: string): DatabaseSchema {
-  const safeName = name || (email && email.includes('@') ? email.split('@')[0] : 'Solo User');
+  let safeName = name?.trim();
+  if (!safeName || safeName.toLowerCase().startsWith('usr_') || safeName === 'Not set' || safeName === 'Solo User') {
+    safeName = formatEmailToActualName(email);
+  }
   const template: DatabaseSchema = {
     user: {
       id: userId,

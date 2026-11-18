@@ -97,18 +97,25 @@ export async function GET(request: NextRequest) {
     const visitorData = getVisitorAnalytics();
 
     // 5. User roster details (sorted newest first, password/salt omitted)
+    const { formatEmailToActualName } = await import('@/lib/auth');
     const userRoster = [...mergedUsers]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .map((u) => ({
-        id: u.id,
-        email: u.email,
-        createdAt: u.createdAt,
-        onboardingCompleted: u.onboardingCompleted,
-        name: u.profile?.name || 'Not set',
-        occupation: u.profile?.occupation || 'Not set',
-        monthlyIncome: u.profile?.monthlyIncome || 0,
-        salaryDate: u.profile?.salaryDate || '',
-      }));
+      .map((u) => {
+        let actualName = u.profile?.name?.trim();
+        if (!actualName || actualName.toLowerCase().startsWith('usr_') || actualName === 'Not set' || actualName === 'Solo User') {
+          actualName = formatEmailToActualName(u.email);
+        }
+        return {
+          id: u.id,
+          email: u.email,
+          createdAt: u.createdAt,
+          onboardingCompleted: u.onboardingCompleted,
+          name: actualName,
+          occupation: u.profile?.occupation || 'Not set',
+          monthlyIncome: u.profile?.monthlyIncome || 0,
+          salaryDate: u.profile?.salaryDate || '',
+        };
+      });
 
     // 6. Comprehensive Database Information
     const databaseInfo = {

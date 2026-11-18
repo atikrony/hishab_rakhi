@@ -487,19 +487,41 @@ export function getDb(userId?: string): DatabaseSchema {
   if (userId) {
     const userLedger = readUserLedgerData<DatabaseSchema>(userId);
     if (userLedger) {
+      // Ensure user.name is an actual human-readable name, never USR_... or undefined
+      if (
+        !userLedger.user.name ||
+        userLedger.user.name.toLowerCase().startsWith('usr_') ||
+        userLedger.user.name === 'Solo User' ||
+        userLedger.user.name === 'Not set'
+      ) {
+        try {
+          const { findUserById, formatEmailToActualName } = require('./auth');
+          const user = findUserById(userId);
+          const resolvedName =
+            (user?.profile?.name && !user.profile.name.toLowerCase().startsWith('usr_') ? user.profile.name : null) ||
+            formatEmailToActualName(userLedger.user.email || user?.email || '');
+          userLedger.user.name = resolvedName;
+          userLedger.user.avatar = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(resolvedName)}`;
+          writeUserLedgerData(userId, userLedger);
+        } catch (e) {}
+      }
       return JSON.parse(JSON.stringify(userLedger));
     }
 
     // Ledger for this specific user does not exist in local storage yet.
-    // Initialize a pristine, isolated blank solo ledger strictly for this user!
+    // Initialize a pristine, isolated blank solo ledger strictly for this user with their actual name!
     // NEVER fall back to shared dummy database or another user's data!
     try {
-      const { findUserById, initializeBlankUserLedger } = require('./auth');
+      const { findUserById, initializeBlankUserLedger, formatEmailToActualName } = require('./auth');
       const user = findUserById(userId);
+      const email = user?.email || `${userId}@user.hishabrakhi.com`;
+      const actualName =
+        (user?.profile?.name && !user.profile.name.toLowerCase().startsWith('usr_') ? user.profile.name : null) ||
+        formatEmailToActualName(email);
       const freshLedger = initializeBlankUserLedger(
         userId,
-        user?.email || `${userId}@user.hishabrakhi.com`,
-        user?.profile?.name
+        email,
+        actualName
       );
       return JSON.parse(JSON.stringify(freshLedger));
     } catch (err) {
@@ -529,6 +551,22 @@ export async function getDbAsync(userId?: string): Promise<DatabaseSchema> {
       const { getUserLedgerFromPostgres } = await import('./postgres');
       const pgData = await getUserLedgerFromPostgres(userId);
       if (pgData) {
+        if (
+          !pgData.user.name ||
+          pgData.user.name.toLowerCase().startsWith('usr_') ||
+          pgData.user.name === 'Solo User' ||
+          pgData.user.name === 'Not set'
+        ) {
+          try {
+            const { findUserByIdAsync, formatEmailToActualName } = await import('./auth');
+            const user = await findUserByIdAsync(userId);
+            const resolvedName =
+              (user?.profile?.name && !user.profile.name.toLowerCase().startsWith('usr_') ? user.profile.name : null) ||
+              formatEmailToActualName(pgData.user.email || user?.email || '');
+            pgData.user.name = resolvedName;
+            pgData.user.avatar = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(resolvedName)}`;
+          } catch (e) {}
+        }
         writeUserLedgerData<DatabaseSchema>(userId, pgData);
         return JSON.parse(JSON.stringify(pgData));
       }

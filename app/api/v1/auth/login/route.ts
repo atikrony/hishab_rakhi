@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyUserPasswordAsync } from '@/lib/auth';
+import { verifyUserPasswordAsync, formatEmailToActualName } from '@/lib/auth';
 import { signSession, SESSION_COOKIE_NAME } from '@/lib/auth-token';
 import { checkRateLimit } from '@/lib/security';
 
@@ -32,11 +32,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Resolve actual human name, never USR_...
+    const resolvedName =
+      user.profile?.name && !user.profile.name.toLowerCase().startsWith('usr_') && user.profile.name !== 'Not set'
+        ? user.profile.name
+        : formatEmailToActualName(user.email);
+
     // Sign session token
     const token = await signSession({
       userId: user.id,
       email: user.email,
-      name: user.profile?.name,
+      name: resolvedName,
       onboardingCompleted: user.onboardingCompleted,
     });
 
@@ -45,7 +51,7 @@ export async function POST(request: NextRequest) {
       data: {
         userId: user.id,
         email: user.email,
-        name: user.profile?.name,
+        name: resolvedName,
         onboardingCompleted: user.onboardingCompleted,
       },
       message: 'Signed in successfully',

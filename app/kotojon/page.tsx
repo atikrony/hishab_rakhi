@@ -500,9 +500,27 @@ export default function KotojonPage() {
                   </tr>
                 ) : (
                   filteredUsers.map((user) => {
-                    const initials = (user.name || user.email || 'U')
-                      .slice(0, 2)
-                      .toUpperCase();
+                    const cleanName =
+                      user.name &&
+                      !user.name.toLowerCase().startsWith('usr_') &&
+                      user.name !== 'Not set' &&
+                      user.name !== 'Solo User'
+                        ? user.name
+                        : (user.email || '')
+                            .split('@')[0]
+                            .replace(/[._-]+/g, ' ')
+                            .trim()
+                            .split(' ')
+                            .filter(Boolean)
+                            .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+                            .join(' ') || 'User';
+
+                    const nameParts = cleanName.trim().split(/\s+/).filter(Boolean);
+                    const initials =
+                      nameParts.length >= 2
+                        ? (nameParts[0][0] + nameParts[1][0]).toUpperCase()
+                        : cleanName.slice(0, 2).toUpperCase() || 'U';
+
                     const formattedDate = new Date(user.createdAt).toLocaleDateString('en-GB', {
                       day: '2-digit',
                       month: 'short',
@@ -518,7 +536,7 @@ export default function KotojonPage() {
                             </div>
                             <div className="flex flex-col min-w-0">
                               <span className="font-semibold text-on-surface truncate">
-                                {user.name !== 'Not set' ? user.name : user.email.split('@')[0]}
+                                {cleanName}
                               </span>
                               <span className="text-[11px] text-outline truncate">{user.email}</span>
                             </div>

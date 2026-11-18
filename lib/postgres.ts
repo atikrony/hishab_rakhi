@@ -108,10 +108,24 @@ export function isPostgresConfigured(): boolean {
 }
 
 /**
- * Sanitizes user ID into a valid PostgreSQL table name.
- * e.g., 'usr_1731339891000_abcde' -> 'user_usr_1731339891000_abcde'
+ * Sanitizes user ID and actual name into a friendly, valid PostgreSQL table name.
+ * e.g., 'usr_1731339891000_abcde', 'Atiqur' -> 'user_atiqur_abcde'
  */
-export function getSafeUserTableName(userId: string): string {
+export function getSafeUserTableName(userId: string, nameOrEmail?: string): string {
+  const shortId = (userId || '').replace(/[^a-zA-Z0-9]/g, '').slice(-6).toLowerCase();
+  if (nameOrEmail) {
+    const raw = nameOrEmail.includes('@') ? nameOrEmail.split('@')[0] : nameOrEmail;
+    const clean = raw
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .replace(/_+/g, '_')
+      .substring(0, 20);
+    if (clean && !clean.startsWith('usr_') && clean !== 'solo_user' && clean !== 'guest') {
+      return `user_${clean}_${shortId || 'live'}`;
+    }
+  }
+
   const sanitized = (userId || '')
     .toLowerCase()
     .replace(/[^a-z0-9_]/g, '_')
@@ -253,7 +267,7 @@ export async function createDedicatedUserTable(
     const client = await pool.connect();
     lastConnectFailureTime = 0;
 
-    const tableName = getSafeUserTableName(userId);
+    const tableName = getSafeUserTableName(userId, profile?.name || ledger.user.name || email);
 
     try {
       await client.query('BEGIN');
@@ -442,7 +456,17 @@ export async function getUserLedgerFromPostgres(userId: string): Promise<Databas
     const pool = getPostgresPool();
     const client = await pool.connect();
     lastConnectFailureTime = 0;
-    const tableName = getSafeUserTableName(userId);
+    let tableName = getSafeUserTableName(userId);
+    try {
+      const uRes = await client.query('SELECT table_name, name, email FROM users WHERE id = $1 LIMIT 1', [userId]);
+      if (uRes.rows.length > 0) {
+        if (uRes.rows[0].table_name) {
+          tableName = uRes.rows[0].table_name;
+        } else if (uRes.rows[0].name || uRes.rows[0].email) {
+          tableName = getSafeUserTableName(userId, uRes.rows[0].name || uRes.rows[0].email);
+        }
+      }
+    } catch (e) {}
 
     try {
       // 1. Try querying the user's dedicated separate table
@@ -481,12 +505,30 @@ export async function getUserLedgerFromPostgres(userId: string): Promise<Databas
       const parsedIncome = row.monthly_income !== null && row.monthly_income !== undefined ? Number(row.monthly_income) : fullData?.user?.monthlyIncome || 0;
       const parsedExpense = row.last_expense !== null && row.last_expense !== undefined ? Number(row.last_expense) : fullData?.user?.lastExpense || 0;
 
+      let resolvedName = (row.name && !row.name.toLowerCase().startsWith('usr_') && row.name !== 'Solo User' && row.name !== 'Not set')
+        ? row.name
+        : (fullData?.user?.name && !fullData.user.name.toLowerCase().startsWith('usr_') && fullData.user.name !== 'Solo User' && fullData.user.name !== 'Not set')
+          ? fullData.user.name
+          : '';
+
+      if (!resolvedName) {
+        const emailVal = row.email || fullData?.user?.email || '';
+        const local = (emailVal || '').split('@')[0] || '';
+        resolvedName = local
+          .replace(/[._-]+/g, ' ')
+          .trim()
+          .split(' ')
+          .filter(Boolean)
+          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+          .join(' ') || 'User';
+      }
+
       const base: DatabaseSchema = {
         user: {
           id: row.user_id,
-          name: row.name || fullData?.user?.name || 'User',
+          name: resolvedName,
           email: row.email || fullData?.user?.email || '',
-          avatar: row.avatar || fullData?.user?.avatar || '',
+          avatar: row.avatar || fullData?.user?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(resolvedName)}`,
           plan: row.plan || fullData?.user?.plan || 'Solo Ledger',
           currency: row.currency || fullData?.user?.currency || 'BDT',
           currencySymbol: row.currency_symbol || fullData?.user?.currencySymbol || '৳',
@@ -547,7 +589,7 @@ export async function saveUserLedgerToPostgres(
     const pool = getPostgresPool();
     const client = await pool.connect();
     lastConnectFailureTime = 0;
-    const tableName = getSafeUserTableName(userId);
+    const tableName = getSafeUserTableName(userId, ledger.user.name || ledger.user.email);
 
     try {
       await client.query('BEGIN');
@@ -765,6 +807,10 @@ export async function findUserByEmailFromPostgres(email: string): Promise<UserRe
     if (res.rows.length === 0) return null;
     const row = res.rows[0];
 
+    const resolvedName = (row.name && !row.name.toLowerCase().startsWith('usr_') && row.name !== 'Solo User' && row.name !== 'Not set')
+      ? row.name
+      : (row.email || '').split('@')[0].replace(/[._-]+/g, ' ').trim().split(' ').filter(Boolean).map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') || 'User';
+
     return {
       id: row.id,
       email: row.email,
@@ -772,15 +818,13 @@ export async function findUserByEmailFromPostgres(email: string): Promise<UserRe
       salt: row.salt,
       createdAt: row.created_at,
       onboardingCompleted: row.onboarding_completed,
-      profile: row.name
-        ? {
-            name: row.name,
-            occupation: row.occupation || '',
-            monthlyIncome: Number(row.monthly_income) || 0,
-            salaryDate: row.salary_date || '',
-            lastExpense: Number(row.last_expense) || 0,
-          }
-        : undefined,
+      profile: {
+        name: resolvedName,
+        occupation: row.occupation || '',
+        monthlyIncome: Number(row.monthly_income) || 0,
+        salaryDate: row.salary_date || '',
+        lastExpense: Number(row.last_expense) || 0,
+      },
     };
   } catch (err: any) {
     handlePostgresError('findUser Warning', err);
@@ -798,23 +842,27 @@ export async function getAllUsersFromPostgres(): Promise<UserRecord[]> {
     const pool = getPostgresPool();
     lastConnectFailureTime = 0;
     const res = await pool.query(`SELECT * FROM users ORDER BY created_at DESC`);
-    return res.rows.map((row) => ({
-      id: row.id,
-      email: row.email,
-      passwordHash: row.password_hash,
-      salt: row.salt,
-      createdAt: row.created_at,
-      onboardingCompleted: row.onboarding_completed,
-      profile: row.name
-        ? {
-            name: row.name,
-            occupation: row.occupation || '',
-            monthlyIncome: Number(row.monthly_income) || 0,
-            salaryDate: row.salary_date || '',
-            lastExpense: Number(row.last_expense) || 0,
-          }
-        : undefined,
-    }));
+    return res.rows.map((row) => {
+      const resolvedName = (row.name && !row.name.toLowerCase().startsWith('usr_') && row.name !== 'Solo User' && row.name !== 'Not set')
+        ? row.name
+        : (row.email || '').split('@')[0].replace(/[._-]+/g, ' ').trim().split(' ').filter(Boolean).map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') || 'User';
+
+      return {
+        id: row.id,
+        email: row.email,
+        passwordHash: row.password_hash,
+        salt: row.salt,
+        createdAt: row.created_at,
+        onboardingCompleted: row.onboarding_completed,
+        profile: {
+          name: resolvedName,
+          occupation: row.occupation || '',
+          monthlyIncome: Number(row.monthly_income) || 0,
+          salaryDate: row.salary_date || '',
+          lastExpense: Number(row.last_expense) || 0,
+        },
+      };
+    });
   } catch (err: any) {
     handlePostgresError('getAllUsers Warning', err);
     return [];
