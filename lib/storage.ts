@@ -63,7 +63,7 @@ export function safeReadJson<T>(primaryPath: string, fallbackBundledRelativePath
   // 1. Try reading from primary path (writable storage)
   try {
     if (fs.existsSync(primaryPath)) {
-      const raw = fs.readFileSync(primaryPath, 'utf-8');
+      const raw = fs.readFileSync(primaryPath, 'utf-8').replace(/^\uFEFF/, '');
       return JSON.parse(raw) as T;
     }
   } catch (err: any) {
@@ -75,7 +75,7 @@ export function safeReadJson<T>(primaryPath: string, fallbackBundledRelativePath
     try {
       const bundledPath = path.join(process.cwd(), fallbackBundledRelativePath);
       if (bundledPath !== primaryPath && fs.existsSync(bundledPath)) {
-        const raw = fs.readFileSync(bundledPath, 'utf-8');
+        const raw = fs.readFileSync(bundledPath, 'utf-8').replace(/^\uFEFF/, '');
         return JSON.parse(raw) as T;
       }
     } catch (err: any) {
@@ -88,10 +88,11 @@ export function safeReadJson<T>(primaryPath: string, fallbackBundledRelativePath
 
 // Global in-memory storage to survive warm lambda invocations and provide
 // zero-500 fallback when filesystem writes are prohibited or ephemeral.
+// STRICT ISOLATION: Each user's ledger is strictly keyed by userId in the ledgers Map.
+// No shared global database object is ever stored or exposed.
 interface MemoryStore {
   users?: any[];
   ledgers: Map<string, any>;
-  db?: any;
 }
 
 const globalStore = globalThis as unknown as { __HR_MEMORY_STORE__?: MemoryStore };
@@ -99,7 +100,6 @@ if (!globalStore.__HR_MEMORY_STORE__) {
   globalStore.__HR_MEMORY_STORE__ = {
     users: undefined,
     ledgers: new Map<string, any>(),
-    db: undefined,
   };
 }
 
@@ -108,7 +108,6 @@ export function getMemoryStore(): MemoryStore {
     globalStore.__HR_MEMORY_STORE__ = {
       users: undefined,
       ledgers: new Map<string, any>(),
-      db: undefined,
     };
   }
   return globalStore.__HR_MEMORY_STORE__;
@@ -139,9 +138,11 @@ export function writeUsersData<T>(users: T[]): void {
 }
 
 export function readUserLedgerData<T>(userId: string): T | null {
+  if (!userId) return null;
   const store = getMemoryStore();
   if (store.ledgers.has(userId)) {
-    return store.ledgers.get(userId) as T;
+    const item = store.ledgers.get(userId);
+    return item ? (JSON.parse(JSON.stringify(item)) as T) : null;
   }
 
   const safeId = (userId || '').replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -150,7 +151,8 @@ export function readUserLedgerData<T>(userId: string): T | null {
 
   const diskLedger = safeReadJson<T>(primaryPath, fallbackPath);
   if (diskLedger) {
-    store.ledgers.set(userId, diskLedger);
+    // Store deep copy to prevent reference leakage
+    store.ledgers.set(userId, JSON.parse(JSON.stringify(diskLedger)));
     return diskLedger;
   }
 
@@ -158,11 +160,14 @@ export function readUserLedgerData<T>(userId: string): T | null {
 }
 
 export function writeUserLedgerData<T>(userId: string, ledger: T): void {
+  if (!userId) return;
+  // Always clone to isolate memory reference per user
+  const clone = JSON.parse(JSON.stringify(ledger));
   const store = getMemoryStore();
-  store.ledgers.set(userId, ledger);
+  store.ledgers.set(userId, clone);
 
   const safeId = (userId || '').replace(/[^a-zA-Z0-9_-]/g, '_');
   const filePath = path.join(getUserLedgersDirectory(), `${safeId}.json`);
-  safeWriteJson(filePath, ledger);
+  safeWriteJson(filePath, clone);
 }
 

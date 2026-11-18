@@ -121,6 +121,15 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
         fetch('/api/v1/fixed-costs', { cache: 'no-store' }),
       ]);
 
+      if (dashRes.status === 401 || txRes.status === 401) {
+        // Unauthenticated or expired session
+        setLoading(false);
+        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/auth')) {
+          window.location.href = '/auth/login';
+        }
+        return;
+      }
+
       if (dashRes.ok) {
         const dashJson = await dashRes.json();
         if (dashJson.success && dashJson.data) {
@@ -526,12 +535,11 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
   };
 
   const defaultUser: UserProfile = summary?.user || {
-    id: 'usr_atiqur_01',
-    name: 'Atiqur',
-    email: 'atiqur@hishabrakhi.com',
-    avatar:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuAGbe-PGr5FQv2oeTce8zWB0Rhh8gLQWtLLOSGRW2FKp1bwXwnCcWU0lR4hMV1MdQAaBamQvkWdPLbeuAnN8DD4HJCgzggnnEgNT5GyNl0LO7KqelGlysdZnh2Wa4FHMx4Inu5VyOMi4blUPrrWF20O4qENbQag0AkgsI7Pdqj3uY6cmXxnX5n3StoThWFweCLXBa5-clEAH9HP9JYdRKIjuRmcA9OwnNSCUYgg6S0m',
-    plan: 'Premium Plan',
+    id: '',
+    name: 'Account Holder',
+    email: '',
+    avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=User',
+    plan: 'Solo Ledger',
     currency: 'BDT',
     currencySymbol: '৳',
   };

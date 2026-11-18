@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createUser, findUserByEmail } from '@/lib/auth';
+import { createUserAsync, findUserByEmailAsync } from '@/lib/auth';
 import { signSession, SESSION_COOKIE_NAME } from '@/lib/auth-token';
 import { checkRateLimit } from '@/lib/security';
 
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const existing = findUserByEmail(email);
+    const existing = await findUserByEmailAsync(email);
     if (existing) {
       return NextResponse.json(
         { success: false, error: 'An account with this email already exists. Please log in.' },
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const newUser = createUser(email, password);
+    const newUser = await createUserAsync(email, password);
 
     return NextResponse.json({
       success: true,

@@ -361,11 +361,11 @@ export const dummyInitialData: DatabaseSchema = {
 
 export const realInitialData: DatabaseSchema = {
   user: {
-    id: 'usr_real_01',
-    name: 'Atiqur',
-    email: 'atiqur@hishabrakhi.com',
-    avatar: defaultAvatar,
-    plan: 'Real Ledger',
+    id: 'usr_guest',
+    name: 'Solo User',
+    email: 'user@hishabrakhi.com',
+    avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=User',
+    plan: 'Solo Ledger',
     currency: 'BDT',
     currencySymbol: '৳',
   },
@@ -420,8 +420,8 @@ export const realInitialData: DatabaseSchema = {
   notifications: [
     {
       id: 'notif_welcome',
-      title: 'Real Database Initialized',
-      message: 'Hishab Rakhi is running in Real Database mode with 0 static records. Every transaction you add is saved to hishab_real.json.',
+      title: 'Solo Ledger Initialized',
+      message: 'Your private solo ledger is active with zero external data. Every transaction you record is strictly private to your account.',
       date: new Date().toISOString(),
       read: false,
       type: 'info',
@@ -456,15 +456,13 @@ export function getActiveDbConfig(): {
     ''
   ).toLowerCase().trim();
 
-  let mode: 'dummy' | 'real' = 'dummy';
+  let mode: 'dummy' | 'real' = 'real';
 
-  if (rawMode === 'real' || rawName.includes('real')) {
-    mode = 'real';
-  } else if (rawMode === 'dummy' || rawName.includes('dummy')) {
+  if (rawMode === 'dummy' || rawName.includes('dummy')) {
     mode = 'dummy';
   } else {
-    // Default fallback to dummy
-    mode = 'dummy';
+    // Default fallback to real (clean slate, zero data leak)
+    mode = 'real';
   }
 
   const fileName =
@@ -489,38 +487,34 @@ export function getDb(userId?: string): DatabaseSchema {
   if (userId) {
     const userLedger = readUserLedgerData<DatabaseSchema>(userId);
     if (userLedger) {
-      return userLedger;
+      return JSON.parse(JSON.stringify(userLedger));
+    }
+
+    // Ledger for this specific user does not exist in local storage yet.
+    // Initialize a pristine, isolated blank solo ledger strictly for this user!
+    // NEVER fall back to shared dummy database or another user's data!
+    try {
+      const { findUserById, initializeBlankUserLedger } = require('./auth');
+      const user = findUserById(userId);
+      const freshLedger = initializeBlankUserLedger(
+        userId,
+        user?.email || `${userId}@user.hishabrakhi.com`,
+        user?.profile?.name
+      );
+      return JSON.parse(JSON.stringify(freshLedger));
+    } catch (err) {
+      const fallbackLedger: DatabaseSchema = JSON.parse(JSON.stringify(realInitialData));
+      fallbackLedger.user.id = userId;
+      fallbackLedger.user.name = 'Solo User';
+      fallbackLedger.user.email = `${userId}@user.hishabrakhi.com`;
+      writeUserLedgerData(userId, fallbackLedger);
+      return fallbackLedger;
     }
   }
 
-  const { mode, fileName, filePath, dbDir } = getActiveDbConfig();
-  const defaultTemplate = mode === 'real' ? realInitialData : dummyInitialData;
-
-  const memoryStore = getMemoryStore();
-  if (memoryStore.db) {
-    return memoryStore.db;
-  }
-
-  const diskDb = safeReadJson<DatabaseSchema>(filePath, path.join('data', fileName));
-  if (diskDb) {
-    memoryStore.db = diskDb;
-    return diskDb;
-  }
-
-  // Fallback check legacy hishab_db.json if in dummy mode
-  if (mode === 'dummy') {
-    const legacyDb = safeReadJson<DatabaseSchema>(path.join(dbDir, 'hishab_db.json'), 'data/hishab_db.json');
-    if (legacyDb) {
-      memoryStore.db = legacyDb;
-      safeWriteJson(filePath, legacyDb);
-      return legacyDb;
-    }
-  }
-
-  const clone = JSON.parse(JSON.stringify(defaultTemplate));
-  memoryStore.db = clone;
-  safeWriteJson(filePath, clone);
-  return clone;
+  // Unauthenticated/guest fallback: always return a fresh deep copy of clean realInitialData
+  // Never expose or mutate a shared database object!
+  return JSON.parse(JSON.stringify(realInitialData));
 }
 
 /**
@@ -536,7 +530,7 @@ export async function getDbAsync(userId?: string): Promise<DatabaseSchema> {
       const pgData = await getUserLedgerFromPostgres(userId);
       if (pgData) {
         writeUserLedgerData<DatabaseSchema>(userId, pgData);
-        return pgData;
+        return JSON.parse(JSON.stringify(pgData));
       }
     } catch (err) {
       // PostgreSQL read skipped or failed, fallback to local storage
@@ -560,9 +554,8 @@ export function saveDb(data: DatabaseSchema, userId?: string): void {
     return;
   }
 
+  // If NO userId is provided, do NOT overwrite any user's ledger
   const { filePath } = getActiveDbConfig();
-  const store = getMemoryStore();
-  store.db = data;
   safeWriteJson(filePath, data);
 }
 
@@ -581,14 +574,19 @@ export async function saveDbAsync(data: DatabaseSchema, userId?: string): Promis
   }
 }
 
-export function resetDb(): DatabaseSchema {
-  const { mode, filePath } = getActiveDbConfig();
-  const defaultTemplate = mode === 'real' ? realInitialData : dummyInitialData;
-  const clone = JSON.parse(JSON.stringify(defaultTemplate));
-  const store = getMemoryStore();
-  store.db = clone;
-  safeWriteJson(filePath, clone);
-  return clone;
+export function resetDb(userId?: string): DatabaseSchema {
+  if (userId) {
+    try {
+      const { initializeBlankUserLedger, findUserById } = require('./auth');
+      const user = findUserById(userId);
+      return initializeBlankUserLedger(
+        userId,
+        user?.email || `${userId}@user.hishabrakhi.com`,
+        user?.profile?.name
+      );
+    } catch (e) {}
+  }
+  return JSON.parse(JSON.stringify(realInitialData));
 }
 
 export function computeDashboardSummary(db: DatabaseSchema, userId?: string): DashboardSummary {
@@ -709,41 +707,46 @@ export function computeDashboardSummary(db: DatabaseSchema, userId?: string): Da
     };
   });
 
-  // Weekly liquidity data (simulated 4-week cadence from real transactions)
-  const weeklyLiquidity = [
-    {
-      label: 'Week 1',
-      dateRange: 'Nov 01 – Nov 07',
-      inflow: 1500,
-      outflow: 140,
-      inflowPercent: 70,
-      outflowPercent: 15,
-    },
-    {
-      label: 'Week 2',
-      dateRange: 'Nov 08 – Nov 14',
-      inflow: 750,
-      outflow: 210,
-      inflowPercent: 45,
-      outflowPercent: 22,
-    },
-    {
-      label: 'Week 3',
-      dateRange: 'Oct 22 – Oct 28',
-      inflow: 150,
-      outflow: 120,
-      inflowPercent: 25,
-      outflowPercent: 18,
-    },
-    {
-      label: 'Week 4',
-      dateRange: 'Oct 15 – Oct 21',
-      inflow: 100,
-      outflow: 180,
-      inflowPercent: 18,
-      outflowPercent: 25,
-    },
-  ];
+  // Weekly liquidity data: dynamically computed for the past 4 weeks from user's actual transactions
+  const weeklyLiquidity = [];
+  const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+  const nowMs = Date.now();
+
+  for (let i = 0; i < 4; i++) {
+    const endMs = nowMs - i * oneWeekMs;
+    const startMs = endMs - oneWeekMs;
+    const startD = new Date(startMs);
+    const endD = new Date(endMs);
+
+    const startStr = startD.toISOString().split('T')[0];
+    const endStr = endD.toISOString().split('T')[0];
+
+    const weekTxs = db.transactions.filter((tx) => {
+      const txD = tx.date ? tx.date.split('T')[0] : '';
+      return txD >= startStr && txD <= endStr;
+    });
+
+    const weekInflow = weekTxs
+      .filter((t) => t.type === 'income')
+      .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+    const weekOutflow = weekTxs
+      .filter((t) => t.type === 'expense')
+      .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+    const formatMonthDay = (d: Date) =>
+      d.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+
+    weeklyLiquidity.push({
+      label: `Week ${4 - i}`,
+      dateRange: `${formatMonthDay(startD)} – ${formatMonthDay(endD)}`,
+      inflow: Math.round(weekInflow),
+      outflow: Math.round(weekOutflow),
+      inflowPercent: totalInflow > 0 ? Math.min(100, Math.round((weekInflow / totalInflow) * 100)) : 0,
+      outflowPercent: totalExpense > 0 ? Math.min(100, Math.round((weekOutflow / totalExpense) * 100)) : 0,
+    });
+  }
+  weeklyLiquidity.reverse();
 
   const { mode, fileName } = getActiveDbConfig();
 

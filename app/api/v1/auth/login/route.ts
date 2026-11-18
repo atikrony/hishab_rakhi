@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyUserPassword } from '@/lib/auth';
+import { verifyUserPasswordAsync } from '@/lib/auth';
 import { signSession, SESSION_COOKIE_NAME } from '@/lib/auth-token';
 import { checkRateLimit } from '@/lib/security';
 
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = verifyUserPassword(email, password);
+    const user = await verifyUserPasswordAsync(email, password);
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'Invalid email or password.' },

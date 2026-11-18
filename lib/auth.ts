@@ -42,9 +42,74 @@ export function findUserByEmail(email: string): UserRecord | null {
   return users.find((u) => u.email.toLowerCase() === normalized) || null;
 }
 
+export async function findUserByEmailAsync(email: string): Promise<UserRecord | null> {
+  const local = findUserByEmail(email);
+  if (local) return local;
+
+  try {
+    const { findUserByEmailFromPostgres } = await import('./postgres');
+    const pgUser = await findUserByEmailFromPostgres(email);
+    if (pgUser) {
+      const users = getAllUsers();
+      if (!users.some((u) => u.id === pgUser.id)) {
+        users.push(pgUser);
+        saveUsers(users);
+      }
+      return pgUser;
+    }
+  } catch (err) {
+    // safe fallback
+  }
+
+  return null;
+}
+
 export function findUserById(id: string): UserRecord | null {
   const users = getAllUsers();
   return users.find((u) => u.id === id) || null;
+}
+
+export async function findUserByIdAsync(id: string): Promise<UserRecord | null> {
+  const local = findUserById(id);
+  if (local) return local;
+
+  try {
+    const { getPostgresPool, isPostgresAvailable } = await import('./postgres');
+    if (isPostgresAvailable()) {
+      const pool = getPostgresPool();
+      const res = await pool.query('SELECT * FROM users WHERE id = $1 LIMIT 1', [id]);
+      if (res.rows.length > 0) {
+        const row = res.rows[0];
+        const pgUser: UserRecord = {
+          id: row.id,
+          email: row.email,
+          passwordHash: row.password_hash,
+          salt: row.salt,
+          createdAt: row.created_at,
+          onboardingCompleted: row.onboarding_completed,
+          profile: row.name
+            ? {
+                name: row.name,
+                occupation: row.occupation || '',
+                monthlyIncome: Number(row.monthly_income) || 0,
+                salaryDate: row.salary_date || '',
+                lastExpense: Number(row.last_expense) || 0,
+              }
+            : undefined,
+        };
+        const users = getAllUsers();
+        if (!users.some((u) => u.id === pgUser.id)) {
+          users.push(pgUser);
+          saveUsers(users);
+        }
+        return pgUser;
+      }
+    }
+  } catch (err) {
+    // safe fallback
+  }
+
+  return null;
 }
 
 export function hashPassword(password: string, salt: string): string {
@@ -88,8 +153,59 @@ export function createUser(email: string, password: string): UserRecord {
   return newUser;
 }
 
+export async function createUserAsync(email: string, password: string): Promise<UserRecord> {
+  const existing = await findUserByEmailAsync(email);
+  if (existing) {
+    throw new Error('An account with this email already exists. Please log in.');
+  }
+
+  const salt = crypto.randomBytes(16).toString('hex');
+  const passwordHash = hashPassword(password, salt);
+  const now = new Date().toISOString();
+
+  const newUser: UserRecord = {
+    id: `usr_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`,
+    email: email.trim().toLowerCase(),
+    passwordHash,
+    salt,
+    createdAt: now,
+    onboardingCompleted: false,
+  };
+
+  const users = getAllUsers();
+  users.push(newUser);
+  saveUsers(users);
+
+  // Initialize a blank solo ledger file for the new user
+  const initialLedger = initializeBlankUserLedger(newUser.id, newUser.email);
+
+  try {
+    const { saveUserToPostgres, createDedicatedUserTable } = await import('./postgres');
+    await saveUserToPostgres(newUser);
+    await createDedicatedUserTable(newUser.id, newUser.email, initialLedger);
+  } catch (err) {
+    // safe fallback
+  }
+
+  return newUser;
+}
+
 export function verifyUserPassword(email: string, password: string): UserRecord | null {
   const user = findUserByEmail(email);
+  if (!user) return null;
+
+  const candidateHash = hashPassword(password, user.salt);
+  const bufA = Buffer.from(candidateHash);
+  const bufB = Buffer.from(user.passwordHash);
+
+  if (bufA.length === bufB.length && crypto.timingSafeEqual(bufA, bufB)) {
+    return user;
+  }
+  return null;
+}
+
+export async function verifyUserPasswordAsync(email: string, password: string): Promise<UserRecord | null> {
+  const user = await findUserByEmailAsync(email);
   if (!user) return null;
 
   const candidateHash = hashPassword(password, user.salt);
@@ -184,13 +300,14 @@ export function getUserLedgerPath(userId: string): string {
   return path.join(getUserLedgersDirectory(), `${safeId}.json`);
 }
 
-export function initializeBlankUserLedger(userId: string, email: string): DatabaseSchema {
+export function initializeBlankUserLedger(userId: string, email: string, name?: string): DatabaseSchema {
+  const safeName = name || (email && email.includes('@') ? email.split('@')[0] : 'Solo User');
   const template: DatabaseSchema = {
     user: {
       id: userId,
-      name: email.split('@')[0],
+      name: safeName,
       email: email,
-      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(email)}`,
+      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(safeName)}`,
       plan: 'Solo Ledger',
       currency: 'BDT',
       currencySymbol: '৳',
