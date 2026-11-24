@@ -4,7 +4,6 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import { useLedger } from '@/features/ledger/LedgerContext';
 import { HishabSidebar } from './HishabSidebar';
-import { MobileNavigation } from './MobileNavigation';
 import { AddInflowModal } from '@/components/fold/AddInflowModal';
 import { AddExpenseModal } from '@/components/fold/AddExpenseModal';
 import { TransactionDetailModal } from '@/components/fold/TransactionDetailModal';
@@ -42,9 +41,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
-  if (loading && !summary) {
+  if ((loading && !summary) || isMobileDeviceView === null) {
     return (
-      <div className="min-h-screen bg-primary-container flex flex-col items-center justify-center text-white">
+      <div className="min-h-[100dvh] bg-primary-container flex flex-col items-center justify-center text-white">
         <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center font-bold text-xl shadow-xl animate-pulse">
           HR
         </div>
@@ -63,7 +62,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-surface text-on-surface flex flex-col antialiased">
       {/* Toast Notification Banner */}
       {toastMessage && (
-        <div className="fixed top-6 right-6 z-50 bg-primary-container text-on-primary px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-secondary/30 animate-fadeIn">
+        <div role="status" aria-live="polite" className="fixed z-50 left-4 right-4 top-[calc(1rem+env(safe-area-inset-top))] mx-auto max-w-sm lg:left-auto lg:right-6 lg:top-6 lg:mx-0 bg-primary-container text-on-primary px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-secondary/30 animate-fadeIn">
           <span className="w-2 h-2 rounded-full bg-secondary-fixed animate-pulse" />
           <span className="font-label-md text-label-md font-semibold">{toastMessage}</span>
         </div>

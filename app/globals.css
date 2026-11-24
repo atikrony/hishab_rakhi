@@ -51,3 +51,24 @@
 ::-webkit-scrollbar {
   display: none;
 }
+
+/* Mobile polish: no grey tap flash, respect reduced motion */
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button,
+  a,
+  [role='button'] {
+    touch-action: manipulation;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

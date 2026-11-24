@@ -56,7 +56,8 @@ interface LedgerContextType {
   setIsExpenseModalOpen: (open: boolean) => void;
   isSettingsOpen: boolean;
   setIsSettingsOpen: (open: boolean) => void;
-  isMobileDeviceView: boolean;
+  /** null until the viewport has been measured on the client */
+  isMobileDeviceView: boolean | null;
   setIsMobileDeviceView: (val: boolean) => void;
   toastMessage: string | null;
   showToast: (msg: string) => void;
@@ -81,7 +82,8 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
 
   // Device view preview
-  const [isMobileDeviceView, setIsMobileDeviceView] = useState(false);
+  // null until measured on the client, so phones never flash the desktop layout
+  const [isMobileDeviceView, setIsMobileDeviceView] = useState<boolean | null>(null);
 
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -94,7 +96,8 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setDateRange = useCallback((start: string, end: string) => {
-    const today = new Date().toISOString().split('T')[0];
+    const n = new Date();
+    const today = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
     let safeStart = start;
     let safeEnd = end;
     if (safeStart && safeStart > today) safeStart = today;
@@ -178,14 +181,13 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
     fetchData();
   }, [fetchData, isAuthOrOnboarding]);
 
-  // Viewport resize detection
+  // Viewport breakpoint detection (fires only when crossing 1024px, not on every resize)
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobileDeviceView(window.innerWidth < 1024);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const mq = window.matchMedia('(max-width: 1023.98px)');
+    const update = () => setIsMobileDeviceView(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
   }, []);
 
   // Synthesize fixed cost expenses for the active monthly cycle

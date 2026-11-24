@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { DashboardSummary, Transaction, FixedCost } from '@/lib/types';
 import { FixedCostsCard } from './FixedCostsCard';
@@ -30,6 +30,14 @@ interface MobileAppViewProps {
   onDeleteFixedCost?: (id: string) => Promise<void>;
 }
 
+const FAB_POS =
+  'fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 sm:right-[calc(50%-14rem+1rem)] z-40';
+
+function localToday() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 export function MobileAppView({
   summary,
   transactions,
@@ -53,34 +61,49 @@ export function MobileAppView({
   const [sourceFilter, setSourceFilter] = useState('All');
   const [spendTab, setSpendTab] = useState('All Spends');
 
-  const inboundTransactions = transactions
-    .filter((t) => {
-      if (t.type !== 'income') return false;
-      if (sourceFilter !== 'All') {
-        return (
-          t.category.toLowerCase() === sourceFilter.toLowerCase() ||
-          t.sourceStream?.toLowerCase() === sourceFilter.toLowerCase()
-        );
-      }
-      return true;
-    })
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const byDateDesc = (a: Transaction, b: Transaction) =>
+    new Date(b.date).getTime() - new Date(a.date).getTime();
 
-  const expenseTransactions = transactions
-    .filter((t) => t.type === 'expense')
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const inboundTransactions = useMemo(() => {
+    const src = sourceFilter.toLowerCase();
+    return transactions
+      .filter(
+        (t) =>
+          t.type === 'income' &&
+          (sourceFilter === 'All' ||
+            t.category.toLowerCase() === src ||
+            t.sourceStream?.toLowerCase() === src)
+      )
+      .sort(byDateDesc);
+  }, [transactions, sourceFilter]);
 
-  const today = new Date().toISOString().split('T')[0];
+  const expenseTransactions = useMemo(() => {
+    const now = new Date();
+    return transactions
+      .filter((t) => {
+        if (t.type !== 'expense') return false;
+        if (spendTab === 'Recurring') return !!t.isFixedCost;
+        if (spendTab === 'This Month') {
+          const d = new Date(t.date);
+          return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+        }
+        return true;
+      })
+      .sort(byDateDesc);
+  }, [transactions, spendTab]);
+
+  // Local-date "today" (toISOString is UTC and lags behind in UTC+ timezones)
+  const today = localToday();
 
   const safeToSpend = Math.max(0, summary.availablePocketCash - summary.totalExpense);
   const spentPercent = summary.availablePocketCash > 0
     ? Math.min(100, Math.round((summary.totalExpense / summary.availablePocketCash) * 100))
-    : 65;
+    : summary.totalExpense > 0 ? 100 : 0;
 
   return (
     <div className="w-full max-w-md mx-auto min-h-screen bg-surface flex flex-col relative antialiased sm:border-x sm:border-[#E5E7EB]">
       {/* Main Tab View Content */}
-      <main className="flex-1 flex flex-col relative w-full pt-4 pb-28 bg-surface">
+      <main className="flex-1 flex flex-col relative w-full pt-4 pb-[calc(7rem+env(safe-area-inset-bottom))] bg-surface">
         {/* --- POCKET (MONEY IN) TAB --- */}
         {currentTab === 'pocket' && (
           <div className="flex flex-col w-full px-margin pt-4 gap-4 animate-fadeIn">
@@ -303,7 +326,7 @@ export function MobileAppView({
             </div>
 
             {/* Floating Action Button (Add Money) */}
-            <div className="fixed bottom-20 right-4 z-40 max-w-[430px]">
+            <div className={FAB_POS}>
               <button
                 type="button"
                 onClick={onOpenAddMoney}
@@ -437,7 +460,7 @@ export function MobileAppView({
               {expenseTransactions.length === 0 ? (
                 <div className="bg-surface-container-lowest p-6 rounded-2xl text-center text-outline text-xs border border-[#E5E7EB]">
                   <span className="material-symbols-outlined text-[28px] text-outline block mb-1">receipt_long</span>
-                  No expense records recorded yet. Tap + to record an expense.
+                  {spendTab === 'All Spends' ? 'No expense records recorded yet. Tap + to record an expense.' : `No expenses match "${spendTab}".`}
                 </div>
               ) : (
                 expenseTransactions.map((tx) => {
@@ -538,7 +561,7 @@ export function MobileAppView({
             />
 
             {/* Floating Action Button (Add Expense) */}
-            <div className="fixed bottom-20 right-4 sm:right-[calc(50%-14rem+1rem)] z-40">
+            <div className={FAB_POS}>
               <button
                 type="button"
                 onClick={onOpenAddExpense}
@@ -617,12 +640,13 @@ export function MobileAppView({
       </main>
 
       {/* Sticky Bottom Navigation Bar (Spend -> Summary -> Add Money) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-4px_24px_rgba(23,25,29,0.06)] border-t border-[#E5E7EB]">
+      <nav aria-label="Primary" className="fixed bottom-0 left-0 right-0 z-40 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-4px_24px_rgba(23,25,29,0.06)] border-t border-[#E5E7EB]">
         <div className="h-16 max-w-md mx-auto px-space-md flex items-center justify-around">
           <Link
             href="/spend"
             onClick={() => setActiveMobileTab('spend')}
-            className={`flex flex-col items-center justify-center gap-1 w-20 h-12 rounded-xl transition-all active:scale-95 ${
+            aria-current={currentTab === 'spend' ? 'page' : undefined}
+            className={`flex flex-col items-center justify-center gap-1 flex-1 h-14 rounded-xl transition-all active:scale-95 ${
               currentTab === 'spend' ? 'text-primary font-bold' : 'text-on-surface-variant'
             }`}
           >
@@ -639,7 +663,8 @@ export function MobileAppView({
           <Link
             href="/summary"
             onClick={() => setActiveMobileTab('summary')}
-            className={`flex flex-col items-center justify-center gap-1 w-20 h-12 rounded-xl transition-all active:scale-95 ${
+            aria-current={currentTab === 'summary' ? 'page' : undefined}
+            className={`flex flex-col items-center justify-center gap-1 flex-1 h-14 rounded-xl transition-all active:scale-95 ${
               currentTab === 'summary' ? 'text-primary font-bold' : 'text-on-surface-variant'
             }`}
           >
@@ -656,7 +681,8 @@ export function MobileAppView({
           <Link
             href="/pocket"
             onClick={() => setActiveMobileTab('pocket')}
-            className={`flex flex-col items-center justify-center gap-1 w-20 h-12 rounded-xl transition-all active:scale-95 ${
+            aria-current={currentTab === 'pocket' ? 'page' : undefined}
+            className={`flex flex-col items-center justify-center gap-1 flex-1 h-14 rounded-xl transition-all active:scale-95 ${
               currentTab === 'pocket' ? 'text-primary font-bold' : 'text-on-surface-variant'
             }`}
           >
@@ -673,7 +699,7 @@ export function MobileAppView({
           <button
             type="button"
             onClick={onOpenSettings}
-            className="flex flex-col items-center justify-center gap-1 w-20 h-12 rounded-xl transition-all active:scale-95 text-on-surface-variant hover:text-primary"
+            className="flex flex-col items-center justify-center gap-1 flex-1 h-14 rounded-xl transition-all active:scale-95 text-on-surface-variant hover:text-primary"
           >
             <span className="material-symbols-outlined text-[22px]">settings</span>
             <span className="font-label-sm text-[11px] tracking-tight">Settings</span>

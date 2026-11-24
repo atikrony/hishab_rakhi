@@ -10,6 +10,15 @@ module.exports = {
   darkMode: "class",
   theme: {
     extend: {
+      keyframes: {
+        fadeIn: {
+          from: { opacity: '0', transform: 'translateY(4px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        fadeIn: 'fadeIn 180ms ease-out both',
+      },
       colors: {
         "surface-container": "#eaeef8",
         "error-container": "#ffdad6",
