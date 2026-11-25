@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { GoogleSignInButton } from '@/components/GoogleSignInButton';
 import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
@@ -91,6 +92,8 @@ export default function RegisterPage() {
         )}
 
         {/* Form */}
+        <GoogleSignInButton label="Sign up with Google" />
+
         <form onSubmit={handleSubmit} className="flex flex-col gap-space-md">
           {/* Full Name */}
           <div className="flex flex-col gap-1">

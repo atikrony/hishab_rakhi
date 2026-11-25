@@ -18,6 +18,16 @@ import {
   DashboardSummary,
   FixedCost,
 } from './types';
+import { decodeEntities, decodeRecordText } from './html-entities';
+
+/** Undo legacy HTML-escaping of user text (React escapes on render). */
+function decodeLedgerText(db: DatabaseSchema): DatabaseSchema {
+  db.transactions = (db.transactions || []).map(decodeRecordText);
+  if (db.fixedCosts) db.fixedCosts = db.fixedCosts.map(decodeRecordText);
+  if (db.budgets) db.budgets = db.budgets.map((b) => ({ ...b, category: decodeEntities(b.category) }));
+  if (db.user) db.user = { ...db.user, name: decodeEntities(db.user.name) };
+  return db;
+}
 
 export interface DatabaseSchema {
   user: UserProfile;
@@ -505,7 +515,7 @@ export function getDb(userId?: string): DatabaseSchema {
           writeUserLedgerData(userId, userLedger);
         } catch (e) {}
       }
-      return JSON.parse(JSON.stringify(userLedger));
+      return decodeLedgerText(JSON.parse(JSON.stringify(userLedger)));
     }
 
     // Ledger for this specific user does not exist in local storage yet.
@@ -546,6 +556,20 @@ export function getDb(userId?: string): DatabaseSchema {
  * are immediately reflected in the application!
  */
 export async function getDbAsync(userId?: string): Promise<DatabaseSchema> {
+  const db = await loadDbAsync(userId);
+  // Credit any salary paydays that have passed (idempotent; see lib/salary.ts)
+  if (userId) {
+    try {
+      const { applyDueSalary } = await import('./salary');
+      if (applyDueSalary(db)) await saveDbAsync(db, userId);
+    } catch (err) {
+      console.warn('[Salary auto-credit]', (err as Error)?.message);
+    }
+  }
+  return db;
+}
+
+async function loadDbAsync(userId?: string): Promise<DatabaseSchema> {
   if (userId) {
     try {
       const { getUserLedgerFromPostgres } = await import('./postgres');
@@ -568,7 +592,7 @@ export async function getDbAsync(userId?: string): Promise<DatabaseSchema> {
           } catch (e) {}
         }
         writeUserLedgerData<DatabaseSchema>(userId, pgData);
-        return JSON.parse(JSON.stringify(pgData));
+        return decodeLedgerText(JSON.parse(JSON.stringify(pgData)));
       }
     } catch (err) {
       // PostgreSQL read skipped or failed, fallback to local storage

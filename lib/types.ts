@@ -88,6 +88,12 @@ export interface UserProfile {
   monthlyIncome?: number;
   salaryDate?: string;
   lastExpense?: number;
+  /** Day of month (1–31) salary is paid; enables automatic monthly credit */
+  salaryDay?: number;
+  /** Only paydays after this moment are credited (set when the schedule changes) */
+  salaryAutoFrom?: string;
+  /** Last month (YYYY-MM) salary was auto-credited */
+  salaryLastCredited?: string;
 }
 
 export interface FixedCost {

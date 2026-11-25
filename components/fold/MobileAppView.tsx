@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { DashboardSummary, Transaction, FixedCost } from '@/lib/types';
 import { FixedCostsCard } from './FixedCostsCard';
+import { SavingsPlanCard } from './SavingsPlanCard';
 
 interface MobileAppViewProps {
   summary: DashboardSummary;
@@ -103,7 +104,7 @@ export function MobileAppView({
   return (
     <div className="w-full max-w-md mx-auto min-h-screen bg-surface flex flex-col relative antialiased sm:border-x sm:border-hairline">
       {/* Main Tab View Content */}
-      <main className="flex-1 flex flex-col relative w-full pt-0 pb-[calc(7rem+env(safe-area-inset-bottom))] bg-surface">
+      <main className="flex-1 flex flex-col relative w-full pt-0 pb-[calc(10.5rem+env(safe-area-inset-bottom))] bg-surface">
         {/* --- POCKET (MONEY IN) TAB --- */}
         {currentTab === 'pocket' && (
           <div className="flex flex-col w-full px-margin pt-4 gap-4 animate-fadeIn">
@@ -314,6 +315,7 @@ export function MobileAppView({
                 type="button"
                 onClick={onOpenAddMoney}
                 aria-label="Add money"
+                data-tour="add-money-btn"
                 className="w-14 h-14 rounded-full bg-secondary hover:bg-secondary/90 text-on-secondary shadow-lg flex items-center justify-center active:scale-95 transition-transform font-bold"
               >
                 <span className="material-symbols-outlined text-[28px]">add</span>
@@ -549,6 +551,7 @@ export function MobileAppView({
                 type="button"
                 onClick={onOpenAddExpense}
                 aria-label="Add Expense"
+                data-tour="add-expense-btn"
                 className="w-14 h-14 rounded-full bg-primary-container text-on-primary shadow-xl flex items-center justify-center active:scale-95 transition-all hover:bg-primary-container/90 font-bold"
               >
                 <span className="material-symbols-outlined text-[28px]">add</span>
@@ -576,17 +579,20 @@ export function MobileAppView({
               </div>
             </div>
 
-            {/* Net Balance Card */}
-            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline">
-              <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">
-                Balance
-              </span>
-              <div className="font-currency-display text-currency-display text-on-surface font-bold mt-1">
-                ৳{Math.round(summary.netRemaining).toLocaleString()}
+            {/* Net Balance + Savings plan */}
+            <div className="grid grid-cols-2 gap-space-sm">
+              <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-hairline flex flex-col justify-between">
+                <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">
+                  Balance
+                </span>
+                <div className="font-headline-lg text-headline-lg text-on-surface font-bold mt-1 truncate">
+                  ৳{Math.round(summary.netRemaining).toLocaleString()}
+                </div>
+                <p className="font-label-sm text-label-sm text-secondary font-semibold mt-1">
+                  {summary.retainedPercent}% retained
+                </p>
               </div>
-              <p className="font-label-sm text-label-sm text-secondary font-semibold mt-1">
-                {summary.retainedPercent}% retained
-              </p>
+              <SavingsPlanCard compact />
             </div>
 
             {/* Category Breakdown */}
@@ -623,10 +629,11 @@ export function MobileAppView({
       </main>
 
       {/* Bottom navigation */}
-      <nav aria-label="Primary" className="fixed bottom-0 left-0 right-0 z-40 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-4px_24px_rgba(0,0,0,0.06)] border-t border-hairline">
+      <nav aria-label="Primary" className="fixed bottom-0 left-0 right-0 z-40 pb-safe glass-bar border-t">
         <div className="h-16 max-w-md mx-auto px-space-md flex items-center justify-around">
           <Link
             href="/spend"
+            data-tour="nav-spend"
             onClick={() => setActiveMobileTab('spend')}
             aria-current={currentTab === 'spend' ? 'page' : undefined}
             className={`flex flex-col items-center justify-center gap-1 flex-1 h-14 rounded-xl transition-all active:scale-95 ${
@@ -645,6 +652,7 @@ export function MobileAppView({
 
           <Link
             href="/summary"
+            data-tour="nav-summary"
             onClick={() => setActiveMobileTab('summary')}
             aria-current={currentTab === 'summary' ? 'page' : undefined}
             className={`flex flex-col items-center justify-center gap-1 flex-1 h-14 rounded-xl transition-all active:scale-95 ${
@@ -663,6 +671,7 @@ export function MobileAppView({
 
           <Link
             href="/pocket"
+            data-tour="nav-pocket"
             onClick={() => setActiveMobileTab('pocket')}
             aria-current={currentTab === 'pocket' ? 'page' : undefined}
             className={`flex flex-col items-center justify-center gap-1 flex-1 h-14 rounded-xl transition-all active:scale-95 ${
@@ -682,6 +691,7 @@ export function MobileAppView({
           <button
             type="button"
             onClick={onOpenSettings}
+            data-tour="settings"
             className="flex flex-col items-center justify-center gap-1 flex-1 h-14 rounded-xl transition-all active:scale-95 text-on-surface-variant hover:text-primary"
           >
             <span className="material-symbols-outlined text-[22px]">settings</span>

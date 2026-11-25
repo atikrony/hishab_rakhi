@@ -83,13 +83,8 @@ export function sanitizeString(
     .replace(/onclick\s*=/gi, '')
     .trim();
 
-  // 2. Escape HTML entities
-  sanitized = sanitized
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
+  // 2. No HTML-entity escaping here: values are stored as plain text and React
+  //    escapes them when rendering. (Escaping on save showed up as "&amp;" in the UI.)
 
   // 3. Enforce maximum character bound
   if (sanitized.length > maxLength) {

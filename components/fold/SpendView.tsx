@@ -723,7 +723,7 @@ export function SpendView({
 
           {/* Right 4 Cols: Quick Expense Creation Panel */}
           <div className="lg:col-span-4 flex flex-col gap-space-md sticky top-20">
-            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col gap-space-md">
+            <div data-tour="add-expense-btn" className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col gap-space-md">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-title-sm text-title-sm text-on-surface font-bold">
@@ -844,7 +844,7 @@ export function SpendView({
 
         {/* Edit / Manage Categories Dialog Modal */}
         {showEditCatModal && (
-          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="modal-overlay">
             <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-6 shadow-2xl border border-surface-container flex flex-col gap-4 max-h-[85vh]">
               {/* Header */}
               <div className="flex items-center justify-between pb-2 border-b border-surface-container">

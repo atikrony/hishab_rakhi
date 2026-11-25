@@ -536,23 +536,20 @@ export async function getUserLedgerFromPostgres(userId: string): Promise<Databas
           monthlyIncome: Math.round(parsedIncome),
           salaryDate: row.salary_date || fullData?.user?.salaryDate || '',
           lastExpense: Math.round(parsedExpense),
+          salaryDay: fullData?.user?.salaryDay,
+          salaryAutoFrom: fullData?.user?.salaryAutoFrom,
+          salaryLastCredited: fullData?.user?.salaryLastCredited,
         },
         wallets: Array.isArray(wallets) && wallets.length > 0 ? wallets : fullData?.wallets || [],
         transactions: Array.isArray(transactions) ? transactions : fullData?.transactions || [],
         budgets: Array.isArray(budgets) ? budgets : fullData?.budgets || [],
         savingsGoals: Array.isArray(savingsGoals) ? savingsGoals : fullData?.savingsGoals || [],
         notifications: Array.isArray(notifications) ? notifications : fullData?.notifications || [],
+        fixedCosts: Array.isArray(fullData?.fixedCosts) ? fullData.fixedCosts : [],
       };
 
-      // If user modified 'monthly_income' in DBeaver directly, sync the salary transaction
-      if (parsedIncome > 0 && base.transactions.length > 0) {
-        const salaryTx = base.transactions.find(
-          (t) => t.type === 'income' && (t.category === 'Salary' || t.sourceStream === 'Salary')
-        );
-        if (salaryTx && salaryTx.amount !== Math.round(parsedIncome)) {
-          salaryTx.amount = Math.round(parsedIncome);
-        }
-      }
+      // Note: monthly_income is the salary *setting*; past salary transactions are
+      // history and are intentionally not rewritten when it changes.
 
       // If user modified 'balance' column in DBeaver directly, ensure the pocket wallet balance reflects it
       if (row.balance !== null && row.balance !== undefined && base.wallets.length > 0) {

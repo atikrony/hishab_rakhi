@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { GoogleSignInButton } from '@/components/GoogleSignInButton';
+import { safeNextPath } from '@/lib/safe-redirect';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -10,18 +12,20 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successNotice, setSuccessNotice] = useState<string | null>(null);
+  const [nextPath, setNextPath] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
+      setNextPath(safeNextPath(params.get('next')));
       const emailParam = params.get('email');
       if (emailParam) {
         setEmail(emailParam);
       }
       if (params.get('registered') === 'true') {
-        setSuccessNotice('Account created successfully! Please sign in to access your ledger.');
+        setSuccessNotice('Account created. Please sign in.');
       } else if (params.get('reset') === 'true') {
-        setSuccessNotice('Password reset successfully! Please sign in with your new password.');
+        setSuccessNotice('Password updated. Please sign in.');
       }
       const errParam = params.get('error');
       if (errParam) {
@@ -56,12 +60,8 @@ export default function LoginPage() {
         return;
       }
 
-      // If onboarding is not completed, route to onboarding, otherwise spend page
-      if (data.data?.onboardingCompleted === false) {
-        window.location.href = '/onboarding';
-      } else {
-        window.location.href = '/spend';
-      }
+      // New users see a short in-app tour on their first visit
+      window.location.href = nextPath || '/spend';
     } catch (err) {
       setError('Network connection error. Please try again.');
     } finally {
@@ -105,6 +105,8 @@ export default function LoginPage() {
 
 
         {/* Form */}
+        <GoogleSignInButton next={nextPath} />
+
         <form onSubmit={handleSubmit} className="flex flex-col gap-space-md">
           {/* Email */}
           <div className="flex flex-col gap-1">

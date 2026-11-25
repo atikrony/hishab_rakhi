@@ -19,7 +19,7 @@ export function NotificationsModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+    <div className="modal-overlay">
       <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-space-lg shadow-2xl flex flex-col space-y-space-md border border-hairline">
         <div className="flex items-center justify-between border-b border-surface-container pb-space-sm">
           <div className="flex items-center gap-2">

@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { DashboardSummary, Transaction, FixedCost } from '@/lib/types';
 import { FixedCostsCard } from './FixedCostsCard';
+import { SavingsPlanCard } from './SavingsPlanCard';
 
 interface SummaryViewProps {
   summary: DashboardSummary;
@@ -387,7 +388,7 @@ export function SummaryView({
       {/* Main Daylight Canvas */}
       <div className="max-w-7xl mx-auto w-full px-margin-desktop py-space-xl flex flex-col gap-space-xl bg-surface">
         {/* Top Overview Metric Cards (3 Clean Cards) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter-desktop -mt-10 relative z-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-gutter-desktop -mt-10 relative z-20">
           {/* Card 1: Total Received */}
           <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col justify-between hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-space-md">
@@ -462,6 +463,9 @@ export function SummaryView({
               </div>
             </div>
           </div>
+
+          {/* Card 4: Savings plan assistant */}
+          <SavingsPlanCard />
         </div>
 
         {/* Main Analytics Section (Bento Grid) */}

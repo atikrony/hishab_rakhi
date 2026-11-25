@@ -4,11 +4,10 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLedger } from '@/features/ledger/LedgerContext';
-import { ThemeToggle } from '@/components/ThemeToggle';
 
 export function HishabSidebar() {
   const pathname = usePathname();
-  const { user, setIsSettingsOpen, handleLogout } = useLedger();
+  const { user, setIsSettingsOpen, setIsShareOpen, handleLogout } = useLedger();
 
   const isCurrent = (path: string) => {
     if (!pathname) return false;
@@ -56,6 +55,7 @@ export function HishabSidebar() {
         <nav className="flex flex-col gap-1.5">
           <Link
             href="/spend"
+            data-tour="nav-spend"
             className={`w-full flex items-center gap-space-md px-space-md py-space-sm rounded-xl transition-all text-left ${
               isCurrent('/spend')
                 ? 'bg-primary-container text-on-primary font-semibold shadow-sm'
@@ -74,6 +74,7 @@ export function HishabSidebar() {
 
           <Link
             href="/summary"
+            data-tour="nav-summary"
             className={`w-full flex items-center gap-space-md px-space-md py-space-sm rounded-xl transition-all text-left ${
               isCurrent('/summary')
                 ? 'bg-primary-container text-on-primary font-semibold shadow-sm'
@@ -92,6 +93,7 @@ export function HishabSidebar() {
 
           <Link
             href="/pocket"
+            data-tour="nav-pocket"
             className={`w-full flex items-center gap-space-md px-space-md py-space-sm rounded-xl transition-all text-left ${
               isCurrent('/pocket')
                 ? 'bg-primary-container text-on-primary font-semibold shadow-sm'
@@ -115,6 +117,7 @@ export function HishabSidebar() {
         {/* Settings Button */}
         <button
           onClick={() => setIsSettingsOpen(true)}
+          data-tour="settings"
           className="w-full flex items-center gap-space-md px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface text-left transition-colors font-medium"
           type="button"
         >
@@ -122,8 +125,14 @@ export function HishabSidebar() {
           <span className="font-label-md text-label-md">Settings</span>
         </button>
 
-        {/* Theme */}
-        <ThemeToggle variant="row" />
+        <button
+          onClick={() => setIsShareOpen(true)}
+          className="w-full flex items-center gap-space-md px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface text-left transition-colors font-medium"
+          type="button"
+        >
+          <span className="material-symbols-outlined text-[20px]">ios_share</span>
+          <span className="font-label-md text-label-md">Share spending</span>
+        </button>
 
         {/* Sign Out Button */}
         <button

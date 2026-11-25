@@ -46,7 +46,6 @@ interface LedgerContextType {
   handleDeleteFixedCost: (id: string) => Promise<void>;
   handleDeleteTransaction: (id: string) => Promise<void>;
   handleUpdateTransaction: (id: string, updates: Partial<Transaction>) => Promise<boolean>;
-  handleResetDb: () => Promise<void>;
   handleLogout: () => Promise<void>;
   selectedTx: Transaction | null;
   setSelectedTx: (tx: Transaction | null) => void;
@@ -56,6 +55,10 @@ interface LedgerContextType {
   setIsExpenseModalOpen: (open: boolean) => void;
   isSettingsOpen: boolean;
   setIsSettingsOpen: (open: boolean) => void;
+  isShareOpen: boolean;
+  setIsShareOpen: (open: boolean) => void;
+  isSavingsPlanOpen: boolean;
+  setIsSavingsPlanOpen: (open: boolean) => void;
   /** null until the viewport has been measured on the client */
   isMobileDeviceView: boolean | null;
   setIsMobileDeviceView: (val: boolean) => void;
@@ -79,6 +82,8 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
   const [isInflowModalOpen, setIsInflowModalOpen] = useState(false);
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isSavingsPlanOpen, setIsSavingsPlanOpen] = useState(false);
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
 
   // Device view preview
@@ -171,7 +176,8 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
 
   const pathname = usePathname();
   const safePath = pathname || '';
-  const isAuthOrOnboarding = safePath.startsWith('/auth') || safePath.startsWith('/onboarding');
+  const isAuthOrOnboarding =
+    safePath.startsWith('/auth') || safePath.startsWith('/share');
 
   useEffect(() => {
     if (isAuthOrOnboarding) {
@@ -511,23 +517,6 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Reset Database
-  const handleResetDb = async () => {
-    try {
-      const res = await fetch('/api/v1/data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'reset' }),
-      });
-      if (res.ok) {
-        showToast('Database reset to clean state');
-        await fetchData();
-      }
-    } catch (err) {
-      showToast('Error resetting database');
-    }
-  };
-
   const handleLogout = async () => {
     try {
       await fetch('/api/v1/auth/logout', { method: 'POST' });
@@ -566,6 +555,7 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
     monthlyIncome: rawUser?.monthlyIncome,
     salaryDate: rawUser?.salaryDate,
     lastExpense: rawUser?.lastExpense,
+    salaryDay: rawUser?.salaryDay,
   };
 
   return (
@@ -590,7 +580,6 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
         handleDeleteFixedCost,
         handleDeleteTransaction,
         handleUpdateTransaction,
-        handleResetDb,
         handleLogout,
         selectedTx,
         setSelectedTx,
@@ -600,6 +589,10 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
         setIsExpenseModalOpen,
         isSettingsOpen,
         setIsSettingsOpen,
+        isShareOpen,
+        setIsShareOpen,
+        isSavingsPlanOpen,
+        setIsSavingsPlanOpen,
         isMobileDeviceView,
         setIsMobileDeviceView,
         toastMessage,

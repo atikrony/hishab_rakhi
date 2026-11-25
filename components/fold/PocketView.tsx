@@ -464,6 +464,7 @@ export function PocketView({
                   </button>
                   <button
                     onClick={onOpenAddModal}
+                    data-tour="add-money-btn"
                     className="h-9 px-space-md rounded-lg bg-primary text-on-primary font-label-md text-label-md flex items-center gap-space-xs hover:bg-primary-container transition-colors shadow-sm"
                     type="button"
                   >

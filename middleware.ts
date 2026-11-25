@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession, SESSION_COOKIE_NAME } from '@/lib/auth-token';
+import { safeNextPath } from '@/lib/safe-redirect';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -62,26 +63,23 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/auth/reset-password');
   if (isAuthRoute) {
     if (session) {
-      // If user is already authenticated
-      if (!session.onboardingCompleted) {
-        return withSecurityHeaders(NextResponse.redirect(new URL('/onboarding', request.url)));
-      }
-      return withSecurityHeaders(NextResponse.redirect(new URL('/spend', request.url)));
+      // Already signed in
+      const next = safeNextPath(request.nextUrl.searchParams.get('next'));
+      return withSecurityHeaders(NextResponse.redirect(new URL(next || '/spend', request.url)));
     }
     return withSecurityHeaders(NextResponse.next());
   }
 
-  // 4. Onboarding Route (/onboarding)
-  if (pathname.startsWith('/onboarding')) {
-    if (!session) {
-      // Must register or sign in first
-      return withSecurityHeaders(NextResponse.redirect(new URL('/auth/login', request.url)));
-    }
-    if (session.onboardingCompleted) {
-      // Already completed onboarding, send to main dashboard
-      return withSecurityHeaders(NextResponse.redirect(new URL('/spend', request.url)));
-    }
+  // Read-only share links: public page; the view API enforces who may see it
+  if (pathname.startsWith('/share/')) {
     return withSecurityHeaders(NextResponse.next());
+  }
+
+  // 4. Old onboarding URL: the setup form was replaced by an in-app tour
+  if (pathname.startsWith('/onboarding')) {
+    return withSecurityHeaders(
+      NextResponse.redirect(new URL(session ? '/spend' : '/auth/login', request.url))
+    );
   }
 
   // 5. API Routes handling
@@ -94,6 +92,7 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith('/api/v1/auth/forgot-password') ||
       pathname.startsWith('/api/v1/auth/reset-password') ||
       pathname.startsWith('/api/v1/auth/google') ||
+      pathname.startsWith('/api/v1/share/view/') ||
       pathname.startsWith('/api/v1/kotojon');
 
     if (isPublicAuth) {
@@ -125,11 +124,6 @@ export async function middleware(request: NextRequest) {
   if (!session) {
     // Redirect unauthenticated requests to login
     return withSecurityHeaders(NextResponse.redirect(new URL('/auth/login', request.url)));
-  }
-
-  if (!session.onboardingCompleted) {
-    // User must fill up the onboarding form before using the dashboard
-    return withSecurityHeaders(NextResponse.redirect(new URL('/onboarding', request.url)));
   }
 
   return withSecurityHeaders(NextResponse.next());

@@ -271,6 +271,20 @@ export function updateUserPassword(email: string, newPassword: string): boolean 
   return true;
 }
 
+/**
+ * Looks the user up in local storage AND Postgres before creating one, so a
+ * returning Google user on a fresh serverless instance keeps their account.
+ */
+export async function findOrCreateGoogleUserAsync(
+  email: string,
+  name: string,
+  avatar?: string
+): Promise<UserRecord> {
+  const existing = await findUserByEmailAsync(email.trim().toLowerCase());
+  if (existing) return existing;
+  return findOrCreateGoogleUser(email, name, avatar);
+}
+
 export function findOrCreateGoogleUser(
   email: string,
   name: string,
@@ -396,170 +410,26 @@ export function initializeBlankUserLedger(userId: string, email: string, name?: 
   return template;
 }
 
-export function completeOnboarding(
-  userId: string,
-  profileData: OnboardingProfile
-): { user: UserRecord; ledger: DatabaseSchema } {
+/**
+ * Marks the first-run tour as finished (stored in the existing
+ * onboarding_completed flag, so it survives across devices).
+ */
+export async function markTourCompletedAsync(userId: string): Promise<boolean> {
+  const user = await findUserByIdAsync(userId);
+  if (!user) return false;
+  if (user.onboardingCompleted) return true;
+  user.onboardingCompleted = true;
   const users = getAllUsers();
-  const index = users.findIndex((u) => u.id === userId);
-  if (index === -1) {
-    throw new Error('User not found');
-  }
-
-  const roundedIncome = Math.round(profileData.monthlyIncome);
-  const roundedExpense = Math.round(profileData.lastExpense);
-
-  const cleanProfile: OnboardingProfile = {
-    name: profileData.name.trim(),
-    occupation: profileData.occupation.trim(),
-    monthlyIncome: roundedIncome,
-    salaryDate: profileData.salaryDate,
-    lastExpense: roundedExpense,
-  };
-
-  users[index].profile = cleanProfile;
-  users[index].onboardingCompleted = true;
+  const idx = users.findIndex((u) => u.id === userId);
+  if (idx !== -1) users[idx].onboardingCompleted = true;
+  else users.push(user);
   saveUsers(users);
-
-  // Initialize and populate their isolated solo ledger file
-  const filePath = getUserLedgerPath(userId);
-  const today = new Date().toISOString();
-
-  // Initial pocket cash balance starts at: monthly income - last expense
-  const pocketBalance = Math.max(0, roundedIncome - roundedExpense);
-
-  const transactions = [];
-
-  // Inflow transaction from Monthly Salary
-  transactions.push({
-    id: `tx_in_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`,
-    title: `${cleanProfile.occupation || 'Monthly'} Salary`,
-    amount: roundedIncome,
-    type: 'income' as const,
-    category: 'Salary',
-    date: new Date(cleanProfile.salaryDate).toISOString(),
-    walletId: 'wal_pocket',
-    notes: `Monthly income recorded during onboarding for ${cleanProfile.name}`,
-    channel: 'Direct Deposit / Cash Payroll',
-    sourceStream: 'Salary',
-    status: 'Completed',
-    brandIcon: 'payments',
-  });
-
-  // Expense transaction from Last Expense (if > 0)
-  if (roundedExpense > 0) {
-    transactions.push({
-      id: `tx_out_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`,
-      title: 'Recent Outflow',
-      amount: roundedExpense,
-      type: 'expense' as const,
-      category: 'Food & Dining',
-      date: today,
-      walletId: 'wal_pocket',
-      notes: 'Initial expense recorded during account onboarding',
-      status: 'Completed',
-      brandIcon: 'receipt_long',
-    });
-  }
-
-  const ledger: DatabaseSchema = {
-    user: {
-      id: userId,
-      name: cleanProfile.name,
-      email: users[index].email,
-      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(cleanProfile.name)}`,
-      plan: 'Solo Ledger',
-      currency: 'BDT',
-      currencySymbol: '৳',
-    },
-    wallets: [
-      {
-        id: 'wal_pocket',
-        name: 'Main Pocket (Checking)',
-        type: 'bank',
-        balance: pocketBalance,
-        accountNumber: '•••• 1001',
-        color: '#16a36a',
-      },
-      {
-        id: 'wal_vault',
-        name: 'Reserve Vault',
-        type: 'digital',
-        balance: 0,
-        accountNumber: '•••• 1002',
-        color: '#006d44',
-      },
-      {
-        id: 'wal_cash',
-        name: 'Cash In Hand',
-        type: 'cash',
-        balance: 0,
-        accountNumber: 'Cash Wallet',
-        color: '#f59e0b',
-      },
-    ],
-    transactions,
-    savingsGoals: [],
-    budgets: [
-      {
-        id: 'bgt_food',
-        category: 'Food & Dining',
-        monthlyLimit: Math.round(roundedIncome * 0.3) || 5000,
-        spent: roundedExpense,
-      },
-      {
-        id: 'bgt_bills',
-        category: 'Bills & Utilities',
-        monthlyLimit: Math.round(roundedIncome * 0.2) || 3000,
-        spent: 0,
-      },
-      {
-        id: 'bgt_transport',
-        category: 'Transportation',
-        monthlyLimit: Math.round(roundedIncome * 0.15) || 2000,
-        spent: 0,
-      },
-    ],
-    notifications: [
-      {
-        id: `notif_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`,
-        title: 'Solo Ledger Active',
-        message: `Welcome ${cleanProfile.name}! Your account is initialized with ৳${roundedIncome.toLocaleString()} monthly salary and ৳${roundedExpense.toLocaleString()} recent expense.`,
-        date: today,
-        read: false,
-        type: 'success',
-      },
-    ],
-  };
-
-  writeUserLedgerData<DatabaseSchema>(userId, ledger);
-
-  // Persist user profile and create dedicated user table in PostgreSQL
-  import('./postgres')
-    .then(({ saveUserToPostgres, createDedicatedUserTable }) => {
-      saveUserToPostgres(users[index]).catch(() => {});
-      createDedicatedUserTable(userId, users[index].email, ledger, cleanProfile).catch(() => {});
-    })
-    .catch(() => {});
-
-  return {
-    user: users[index],
-    ledger,
-  };
-}
-
-export async function completeOnboardingAsync(
-  userId: string,
-  profileData: OnboardingProfile
-): Promise<{ user: UserRecord; ledger: DatabaseSchema }> {
-  const result = completeOnboarding(userId, profileData);
   try {
-    const { createDedicatedUserTable, saveUserToPostgres } = await import('./postgres');
-    await saveUserToPostgres(result.user);
-    await createDedicatedUserTable(userId, result.user.email, result.ledger, result.user.profile);
-  } catch (err: any) {
-    console.warn('[Postgres Dedicated User Table Async notice]:', err.message);
+    const { saveUserToPostgres } = await import('./postgres');
+    await saveUserToPostgres(user);
+  } catch {
+    /* file store already updated */
   }
-  return result;
+  return true;
 }
 
