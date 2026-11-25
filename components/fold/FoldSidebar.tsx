@@ -21,7 +21,7 @@ export function FoldSidebar({
   onToggleDeviceView,
 }: FoldSidebarProps) {
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between p-space-lg select-none border-r border-[#E5E7EB]">
+    <aside className="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between p-space-lg select-none border-r border-hairline">
       <div className="flex flex-col gap-space-xl">
         {/* Brand Header */}
         <div className="flex items-center gap-space-sm px-space-xs">

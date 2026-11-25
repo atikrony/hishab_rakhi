@@ -69,7 +69,7 @@ export function AddInflowModal({ isOpen, onClose, onSubmit }: AddInflowModalProp
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fadeIn">
-      <div className="w-full max-w-md bg-surface-container-lowest rounded-t-3xl sm:rounded-2xl p-space-lg shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto border border-[#E5E7EB]">
+      <div className="w-full max-w-md bg-surface-container-lowest rounded-t-3xl sm:rounded-2xl p-space-lg shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto border border-hairline">
         {/* Handle for mobile */}
         <div className="w-12 h-1.5 bg-surface-container rounded-full mx-auto mb-space-md sm:hidden" />
 
@@ -80,7 +80,7 @@ export function AddInflowModal({ isOpen, onClose, onSubmit }: AddInflowModalProp
               <span className="material-symbols-outlined text-[18px]">south_west</span>
             </div>
             <h3 className="font-headline-md text-headline-md text-on-surface font-bold">
-              Add Inbound Money
+              Add Money
             </h3>
           </div>
           <button
@@ -171,7 +171,7 @@ export function AddInflowModal({ isOpen, onClose, onSubmit }: AddInflowModalProp
           {/* Date Picker */}
           <div className="flex flex-col gap-1">
             <label className="font-label-sm text-label-sm text-on-surface-variant font-semibold">
-              Date Received (No Future Dates) *
+              Date *
             </label>
             <div className={`relative flex items-center bg-surface-container-low rounded-xl px-space-md py-2 border ${
               dateError ? 'border-error' : 'border-surface-container'

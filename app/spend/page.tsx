@@ -2,7 +2,7 @@ import { SpendFeature } from '@/features/spend/SpendFeature';
 
 export const metadata = {
   title: 'Spend - Hishab Rakhi',
-  description: 'Expense ledger and category spend mosaic.',
+  description: 'Track your expenses.',
 };
 
 export default function SpendPage() {

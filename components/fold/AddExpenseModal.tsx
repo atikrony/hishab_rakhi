@@ -103,7 +103,7 @@ export function AddExpenseModal({ isOpen, onClose, onSubmit }: AddExpenseModalPr
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fadeIn">
-      <div className="w-full max-w-md bg-surface-container-lowest rounded-t-3xl sm:rounded-2xl p-space-lg shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto border border-[#E5E7EB]">
+      <div className="w-full max-w-md bg-surface-container-lowest rounded-t-3xl sm:rounded-2xl p-space-lg shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto border border-hairline">
         {/* Mobile handle */}
         <div className="w-12 h-1.5 bg-surface-container rounded-full mx-auto mb-space-md sm:hidden" />
 
@@ -134,9 +134,6 @@ export function AddExpenseModal({ isOpen, onClose, onSubmit }: AddExpenseModalPr
               <label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">
                 Amount *
               </label>
-              <span className="font-label-sm text-label-sm text-on-tertiary-container bg-tertiary-fixed px-2 py-0.5 rounded-full font-semibold">
-                Expense Outflow
-              </span>
             </div>
 
             <div className="relative flex items-baseline gap-1 my-1">
@@ -206,7 +203,7 @@ export function AddExpenseModal({ isOpen, onClose, onSubmit }: AddExpenseModalPr
           <div className="grid grid-cols-2 gap-space-sm">
             <div className="flex flex-col gap-1">
               <label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">
-                Date (No Future Dates) *
+                Date *
               </label>
               <input
                 type="date"

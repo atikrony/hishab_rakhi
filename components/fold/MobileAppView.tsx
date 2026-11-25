@@ -101,35 +101,18 @@ export function MobileAppView({
     : summary.totalExpense > 0 ? 100 : 0;
 
   return (
-    <div className="w-full max-w-md mx-auto min-h-screen bg-surface flex flex-col relative antialiased sm:border-x sm:border-[#E5E7EB]">
+    <div className="w-full max-w-md mx-auto min-h-screen bg-surface flex flex-col relative antialiased sm:border-x sm:border-hairline">
       {/* Main Tab View Content */}
-      <main className="flex-1 flex flex-col relative w-full pt-4 pb-[calc(7rem+env(safe-area-inset-bottom))] bg-surface">
+      <main className="flex-1 flex flex-col relative w-full pt-0 pb-[calc(7rem+env(safe-area-inset-bottom))] bg-surface">
         {/* --- POCKET (MONEY IN) TAB --- */}
         {currentTab === 'pocket' && (
           <div className="flex flex-col w-full px-margin pt-4 gap-4 animate-fadeIn">
             {/* Hero Pocket Overview Card */}
-            <div className="w-full bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm border border-[#E5E7EB]">
-              <div className="flex items-center justify-between pb-space-sm">
-                <div className="flex items-center gap-space-xs">
-                  <span className="w-2 h-2 rounded-full bg-secondary" />
-                  <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
-                    Pocket Status
-                  </span>
-                </div>
-                <div className="inline-flex items-center gap-1 bg-secondary-container/40 px-2.5 py-0.5 rounded-full">
-                  <span className="material-symbols-outlined text-secondary text-[14px]">
-                    trending_up
-                  </span>
-                  <span className="font-label-sm text-label-sm text-secondary font-semibold">
-                    +৳450 this week
-                  </span>
-                </div>
-              </div>
-
+            <div className="w-full bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm border border-hairline">
               {/* Main Metric: Total Received */}
-              <div className="mt-space-xs">
+              <div>
                 <p className="font-label-md text-label-md text-on-surface-variant font-medium">
-                  Total Money Received
+                  Total received
                 </p>
                 <div className="flex items-baseline gap-space-xs mt-0.5">
                   <span className="font-headline-xl-mobile text-headline-xl-mobile text-secondary font-bold tracking-tight">
@@ -153,7 +136,7 @@ export function MobileAppView({
                   </div>
                   <div className="min-w-0">
                     <p className="font-label-sm text-label-sm text-on-surface-variant truncate font-medium">
-                      Current Available Balance
+                      Available balance
                     </p>
                     <p className="font-headline-md text-headline-md text-on-surface font-bold tracking-tight">
                       ৳{Math.round(summary.availablePocketCash).toLocaleString()}
@@ -195,10 +178,10 @@ export function MobileAppView({
             <div className="flex items-center justify-between pt-2">
               <div>
                 <h2 className="font-title-sm text-title-sm text-on-surface font-bold">
-                  Income & Deposits
+                  Income
                 </h2>
                 <p className="font-label-sm text-label-sm text-on-surface-variant">
-                  {inboundTransactions.length} inbound transactions
+                  {inboundTransactions.length} entries
                 </p>
               </div>
               <div className="flex gap-1 overflow-x-auto">
@@ -219,7 +202,7 @@ export function MobileAppView({
               </div>
             </div>
 
-            {/* Date Filter (From Date to Date) Beside Nav Bar */}
+            {/* Date range filter */}
             {onDateRangeChange && (
               <div className="flex items-center gap-1.5 bg-surface-container-low px-2.5 py-1.5 rounded-xl border border-surface-container text-xs">
                 <span className="material-symbols-outlined text-primary text-[15px]">date_range</span>
@@ -264,9 +247,9 @@ export function MobileAppView({
             {/* Inbound Transaction Rows */}
             <div className="flex flex-col gap-space-sm pb-10">
               {inboundTransactions.length === 0 ? (
-                <div className="bg-surface-container-lowest p-6 rounded-2xl text-center text-outline text-xs border border-[#E5E7EB]">
+                <div className="bg-surface-container-lowest p-6 rounded-2xl text-center text-outline text-xs border border-hairline">
                   <span className="material-symbols-outlined text-[28px] text-outline block mb-1">search_off</span>
-                  No inbound money records recorded yet.
+                  No income yet.
                 </div>
               ) : (
                 inboundTransactions.map((tx) => {
@@ -277,7 +260,7 @@ export function MobileAppView({
                   <div
                     key={tx.id}
                     onClick={() => onSelectTransaction(tx)}
-                    className="w-full bg-surface-container-lowest p-space-md rounded-2xl shadow-sm border border-[#E5E7EB] flex items-center gap-space-md active:bg-surface-container-low transition-colors cursor-pointer"
+                    className="w-full bg-surface-container-lowest p-space-md rounded-2xl shadow-sm border border-hairline flex items-center gap-space-md active:bg-surface-container-low transition-colors cursor-pointer"
                   >
                     {/* Date Block */}
                     <div className="w-11 h-12 rounded-xl bg-surface-container-low flex flex-col items-center justify-center flex-shrink-0">
@@ -330,7 +313,7 @@ export function MobileAppView({
               <button
                 type="button"
                 onClick={onOpenAddMoney}
-                aria-label="Add Inbound Money"
+                aria-label="Add money"
                 className="w-14 h-14 rounded-full bg-secondary hover:bg-secondary/90 text-on-secondary shadow-lg flex items-center justify-center active:scale-95 transition-transform font-bold"
               >
                 <span className="material-symbols-outlined text-[28px]">add</span>
@@ -343,7 +326,7 @@ export function MobileAppView({
         {currentTab === 'spend' && (
           <div className="flex flex-col w-full px-margin pt-4 gap-4 animate-fadeIn">
             {/* Financial Overview Card */}
-            <section className="w-full bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB]">
+            <section className="w-full bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline">
               <div className="grid grid-cols-2 gap-space-md items-start">
                 <div className="flex flex-col space-y-space-xs min-w-0">
                   <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
@@ -402,7 +385,7 @@ export function MobileAppView({
               ))}
             </div>
 
-            {/* Date Filter (From Date to Date) Beside Nav Bar */}
+            {/* Date range filter */}
             {onDateRangeChange && (
               <div className="flex items-center gap-1.5 bg-surface-container-low px-2.5 py-1.5 rounded-xl border border-surface-container text-xs">
                 <span className="material-symbols-outlined text-primary text-[15px]">date_range</span>
@@ -458,9 +441,9 @@ export function MobileAppView({
               </div>
 
               {expenseTransactions.length === 0 ? (
-                <div className="bg-surface-container-lowest p-6 rounded-2xl text-center text-outline text-xs border border-[#E5E7EB]">
+                <div className="bg-surface-container-lowest p-6 rounded-2xl text-center text-outline text-xs border border-hairline">
                   <span className="material-symbols-outlined text-[28px] text-outline block mb-1">receipt_long</span>
-                  {spendTab === 'All Spends' ? 'No expense records recorded yet. Tap + to record an expense.' : `No expenses match "${spendTab}".`}
+                  {spendTab === 'All Spends' ? 'No expenses yet. Tap + to add one.' : `No expenses match "${spendTab}".`}
                 </div>
               ) : (
                 expenseTransactions.map((tx) => {
@@ -474,8 +457,8 @@ export function MobileAppView({
                       onClick={() => onSelectTransaction(tx)}
                       className={`w-full bg-surface-container-lowest rounded-xl p-space-md flex items-center gap-space-md shadow-sm border active:scale-[0.99] transition-transform cursor-pointer border-l-4 ${
                         isUnpaidFixedCost
-                          ? 'border-l-amber-500 bg-amber-500/[0.04] border-[#E5E7EB]'
-                          : 'border-[#E5E7EB] border-l-transparent'
+                          ? 'border-l-amber-500 bg-amber-500/[0.04] border-hairline'
+                          : 'border-hairline border-l-transparent'
                       }`}
                     >
                       {tx.isFixedCost && onToggleFixedCost ? (
@@ -566,7 +549,7 @@ export function MobileAppView({
                 type="button"
                 onClick={onOpenAddExpense}
                 aria-label="Add Expense"
-                className="w-14 h-14 rounded-full bg-primary-container text-on-primary shadow-xl flex items-center justify-center active:scale-95 transition-all hover:bg-primary font-bold"
+                className="w-14 h-14 rounded-full bg-primary-container text-on-primary shadow-xl flex items-center justify-center active:scale-95 transition-all hover:bg-primary-container/90 font-bold"
               >
                 <span className="material-symbols-outlined text-[28px]">add</span>
               </button>
@@ -579,14 +562,14 @@ export function MobileAppView({
           <div className="flex flex-col w-full px-margin pt-4 gap-4 pb-10 animate-fadeIn">
             {/* Top Aggregate Cards */}
             <div className="grid grid-cols-2 gap-space-sm">
-              <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-[#E5E7EB]">
-                <span className="font-label-sm text-label-sm text-on-surface-variant">Inflow MTD</span>
+              <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-hairline">
+                <span className="font-label-sm text-label-sm text-on-surface-variant">Received</span>
                 <div className="font-headline-md text-headline-md text-secondary font-bold mt-1">
                   +৳{Math.round(summary.totalInflow).toLocaleString()}
                 </div>
               </div>
-              <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-[#E5E7EB]">
-                <span className="font-label-sm text-label-sm text-on-surface-variant">Spent MTD</span>
+              <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-hairline">
+                <span className="font-label-sm text-label-sm text-on-surface-variant">Spent</span>
                 <div className="font-headline-md text-headline-md text-error font-bold mt-1">
                   -৳{Math.round(summary.totalExpense).toLocaleString()}
                 </div>
@@ -594,9 +577,9 @@ export function MobileAppView({
             </div>
 
             {/* Net Balance Card */}
-            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB]">
+            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline">
               <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">
-                Available Reserve
+                Balance
               </span>
               <div className="font-currency-display text-currency-display text-on-surface font-bold mt-1">
                 ৳{Math.round(summary.netRemaining).toLocaleString()}
@@ -607,9 +590,9 @@ export function MobileAppView({
             </div>
 
             {/* Category Breakdown */}
-            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB] flex flex-col gap-3">
+            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col gap-3">
               <h3 className="font-title-sm text-title-sm text-on-surface font-bold">
-                Category Allocations
+                Categories
               </h3>
               {summary.categoryBreakdown.map((c) => (
                 <div key={c.category} className="flex flex-col gap-1">
@@ -639,8 +622,8 @@ export function MobileAppView({
         )}
       </main>
 
-      {/* Sticky Bottom Navigation Bar (Spend -> Summary -> Add Money) */}
-      <nav aria-label="Primary" className="fixed bottom-0 left-0 right-0 z-40 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-4px_24px_rgba(23,25,29,0.06)] border-t border-[#E5E7EB]">
+      {/* Bottom navigation */}
+      <nav aria-label="Primary" className="fixed bottom-0 left-0 right-0 z-40 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-4px_24px_rgba(0,0,0,0.06)] border-t border-hairline">
         <div className="h-16 max-w-md mx-auto px-space-md flex items-center justify-around">
           <Link
             href="/spend"

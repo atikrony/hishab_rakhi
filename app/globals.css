@@ -3,6 +3,117 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --c-surface-container: 234 238 248;
+    --c-error-container: 255 218 214;
+    --c-surface-container-low: 240 243 253;
+    --c-on-tertiary: 255 255 255;
+    --c-tertiary-fixed: 255 218 217;
+    --c-tertiary-container: 65 0 8;
+    --c-surface-container-highest: 223 226 236;
+    --c-outline-variant: 198 198 203;
+    --c-on-tertiary-fixed: 65 0 8;
+    --c-outline: 118 119 123;
+    --c-on-background: 23 28 35;
+    --c-on-secondary: 255 255 255;
+    --c-surface-dim: 214 218 228;
+    --c-tertiary: 0 0 0;
+    --c-on-primary-fixed: 26 28 32;
+    --c-secondary: 0 109 68;
+    --c-error: 186 26 26;
+    --c-on-error-container: 147 0 10;
+    --c-surface-bright: 248 249 255;
+    --c-surface-container-lowest: 255 255 255;
+    --c-surface: 248 249 255;
+    --c-primary-fixed-dim: 198 198 203;
+    --c-surface-container-high: 229 232 242;
+    --c-secondary-container: 125 247 182;
+    --c-on-secondary-container: 0 113 71;
+    --c-secondary-fixed: 128 250 185;
+    --c-on-primary: 255 255 255;
+    --c-on-tertiary-fixed-variant: 146 0 31;
+    --c-tertiary-fixed-dim: 255 179 178;
+    --c-inverse-on-surface: 237 241 250;
+    --c-on-surface: 23 28 35;
+    --c-on-primary-container: 130 132 137;
+    --c-background: 248 249 255;
+    --c-primary-fixed: 226 226 232;
+    --c-primary: 0 0 0;
+    --c-on-secondary-fixed-variant: 0 82 50;
+    --c-on-primary-fixed-variant: 69 71 75;
+    --c-primary-container: 26 28 32;
+    --c-surface-tint: 93 94 99;
+    --c-on-surface-variant: 69 71 75;
+    --c-inverse-surface: 44 49 56;
+    --c-secondary-fixed-dim: 98 221 158;
+    --c-on-error: 255 255 255;
+    --c-surface-variant: 223 226 236;
+    --c-on-tertiary-container: 239 67 81;
+    --c-on-secondary-fixed: 0 33 17;
+    --c-inverse-primary: 198 198 203;
+    --c-hairline: 229 231 235;
+  }
+  
+  .dark {
+    color-scheme: dark;
+    --c-surface-container: 38 42 50;
+    --c-error-container: 147 0 10;
+    --c-surface-container-low: 31 34 41;
+    --c-on-tertiary: 0 0 0;
+    --c-tertiary-container: 92 0 18;
+    --c-surface-container-highest: 53 58 68;
+    --c-outline-variant: 69 72 80;
+    --c-outline: 141 144 153;
+    --c-on-background: 227 229 236;
+    --c-on-secondary: 0 57 32;
+    --c-surface-dim: 12 14 18;
+    --c-tertiary: 255 255 255;
+    --c-secondary: 79 211 148;
+    --c-error: 255 180 171;
+    --c-on-error-container: 255 218 214;
+    --c-surface-bright: 42 45 52;
+    --c-surface-container-lowest: 26 29 35;
+    --c-surface: 17 19 24;
+    --c-surface-container-high: 45 49 58;
+    --c-secondary-container: 11 81 54;
+    --c-on-secondary-container: 143 245 192;
+    --c-on-primary: 18 20 24;
+    --c-inverse-on-surface: 44 49 56;
+    --c-on-surface: 227 229 236;
+    --c-on-primary-container: 158 162 171;
+    --c-background: 17 19 24;
+    --c-primary: 230 232 238;
+    --c-primary-container: 42 46 55;
+    --c-surface-tint: 198 198 203;
+    --c-on-surface-variant: 180 183 192;
+    --c-inverse-surface: 227 229 236;
+    --c-on-error: 105 0 5;
+    --c-surface-variant: 53 58 68;
+    --c-on-tertiary-container: 255 107 118;
+    --c-inverse-primary: 69 71 75;
+    --c-hairline: 45 49 58;
+  }
+}
+
+/* Dark "chrome" slabs (banners, toasts, active nav, FAB) stay dark in both
+   themes, so re-scope the tokens their contents use back to light values. */
+.dark .bg-primary-container,
+.dark .hover\:bg-primary-container:hover {
+  --c-on-primary: 255 255 255;
+  --c-on-primary-container: 130 132 137;
+  --c-outline-variant: 198 198 203;
+  --c-surface-bright: 248 249 255;
+  --c-surface-container-lowest: 255 255 255;
+  --c-surface-container-highest: 223 226 236;
+}
+
+/* Smooth colour change when toggling theme */
+html.theme-transition,
+html.theme-transition * {
+  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease !important;
+}
+
+@layer base {
   html,
   body {
     width: 100%;

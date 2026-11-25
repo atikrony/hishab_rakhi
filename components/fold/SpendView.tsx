@@ -196,7 +196,6 @@ export function SpendView({
         category: selectedCategory,
         date: new Date().toISOString(),
         walletId: 'wal_pocket',
-        notes: `Quick recorded expense via Spend panel`,
       });
       setQuickAmount('25');
       setMerchantTitle('');
@@ -245,11 +244,8 @@ export function SpendView({
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
             <div className="flex items-center gap-space-md">
               <div>
-                <span className="font-label-sm text-label-sm uppercase tracking-widest text-on-primary-container font-semibold">
-                  Expenses & Outflows
-                </span>
-                <h1 className="font-headline-xl text-headline-xl text-on-primary tracking-tight font-bold mt-0.5">
-                  Spend & Cash Outflow
+                <h1 className="font-headline-xl text-headline-xl text-on-primary tracking-tight font-bold">
+                  Spend
                 </h1>
               </div>
             </div>
@@ -261,7 +257,7 @@ export function SpendView({
             <div className="bg-surface-container-lowest/5 rounded-xl p-space-lg backdrop-blur-sm flex flex-col justify-between border border-white/5">
               <div className="flex items-center justify-between">
                 <span className="font-label-md text-label-md text-outline-variant">
-                  Total Spent (Nov)
+                  Total spent
                 </span>
                 <span className="material-symbols-outlined text-outline-variant text-[20px]">
                   arrow_outward
@@ -272,7 +268,7 @@ export function SpendView({
                   ৳{Math.round(summary.totalExpense).toLocaleString()}
                 </span>
                 <p className="font-label-md text-label-md text-on-primary-container mt-1">
-                  {spentPercent}% of allocated funds consumed
+                  {spentPercent}% of available funds spent
                 </p>
               </div>
               <div className="w-full bg-surface-container-lowest/10 h-1.5 rounded-full overflow-hidden">
@@ -287,7 +283,7 @@ export function SpendView({
             <div className="bg-surface-container-lowest/5 rounded-xl p-space-lg backdrop-blur-sm flex flex-col justify-between border border-white/5">
               <div className="flex items-center justify-between">
                 <span className="font-label-md text-label-md text-outline-variant">
-                  Safe-To-Spend Balance
+                  Safe to spend
                 </span>
                 <span className="material-symbols-outlined text-secondary-fixed text-[20px]">
                   account_balance_wallet
@@ -298,12 +294,8 @@ export function SpendView({
                   ৳{Math.round(safeToSpend).toLocaleString()}
                 </span>
                 <p className="font-label-md text-label-md text-secondary-fixed mt-1">
-                  Total Pool: ৳{Math.round(summary.availablePocketCash).toLocaleString()}
+                  Available: ৳{Math.round(summary.availablePocketCash).toLocaleString()}
                 </p>
-              </div>
-              <div className="flex items-center justify-between font-label-sm text-label-sm text-outline-variant">
-                <span>Remaining Runway</span>
-                <span className="text-on-primary font-medium">21 days left</span>
               </div>
             </div>
           </div>
@@ -317,11 +309,8 @@ export function SpendView({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-title-sm text-title-sm text-on-surface font-bold">
-                Category Distribution
+                Categories
               </h2>
-              <p className="font-label-md text-label-md text-on-surface-variant">
-                Breakdown across {summary.categoryBreakdown.length} active expense sectors
-              </p>
             </div>
             {summary.categoryBreakdown[0] && (
               <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
@@ -343,7 +332,7 @@ export function SpendView({
               return (
                 <div
                   key={cat.category}
-                  className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-[#E5E7EB] hover:shadow transition-shadow flex flex-col justify-between"
+                  className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-hairline hover:shadow transition-shadow flex flex-col justify-between"
                 >
                   <div className="flex items-center justify-between">
                     <div className="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-on-surface">
@@ -378,7 +367,7 @@ export function SpendView({
           {/* Left 8 Cols: Expense Ledger Section */}
           <div className="lg:col-span-8 flex flex-col gap-space-md">
             {/* Controls & Filters Strip: Aligned All Spends, This Month, Recurring, Categories with Date Selector & Sort */}
-            <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-[#E5E7EB] flex flex-wrap items-center justify-between gap-3">
+            <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-hairline flex flex-wrap items-center justify-between gap-3">
               {/* Filter Pills & Categories Aligned */}
               <div className="flex items-center flex-wrap gap-1.5">
                 <button
@@ -574,14 +563,14 @@ export function SpendView({
             </div>
 
             {/* Ledger List Card */}
-            <div className="bg-surface-container-lowest rounded-xl shadow-sm border border-[#E5E7EB] overflow-hidden flex flex-col">
+            <div className="bg-surface-container-lowest rounded-xl shadow-sm border border-hairline overflow-hidden flex flex-col">
               {/* Section Subheader */}
               <div className="px-space-lg py-space-md bg-surface-container-low/50 flex items-center justify-between border-b border-surface-container">
                 <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
-                  November 2024 Transactions
+                  Transactions
                 </span>
                 <span className="font-label-sm text-label-sm text-on-surface-variant font-medium">
-                  {expenseList.length} Recorded Items
+                  {expenseList.length} items
                 </span>
               </div>
 
@@ -593,7 +582,7 @@ export function SpendView({
                       receipt_long
                     </span>
                     <p className="font-title-sm text-title-sm text-on-surface mt-2 font-semibold">
-                      No expense records found
+                      No expenses found
                     </p>
                   </div>
                 ) : (
@@ -734,15 +723,12 @@ export function SpendView({
 
           {/* Right 4 Cols: Quick Expense Creation Panel */}
           <div className="lg:col-span-4 flex flex-col gap-space-md sticky top-20">
-            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB] flex flex-col gap-space-md">
+            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col gap-space-md">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-title-sm text-title-sm text-on-surface font-bold">
-                    Record Expense
+                    Add Expense
                   </h3>
-                  <p className="font-label-sm text-label-sm text-on-surface-variant">
-                    Direct journal to personal expenses
-                  </p>
                 </div>
                 <div className="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-on-surface">
                   <span className="material-symbols-outlined text-[18px]">receipt_long</span>

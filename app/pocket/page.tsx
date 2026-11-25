@@ -2,7 +2,7 @@ import { PocketFeature } from '@/features/pocket/PocketFeature';
 
 export const metadata = {
   title: 'Pocket - Hishab Rakhi',
-  description: 'Inbound capital stream, verified deposits, and pocket liquidity.',
+  description: 'Record money you receive.',
 };
 
 export default function PocketPage() {

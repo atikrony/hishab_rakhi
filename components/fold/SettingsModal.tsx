@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { UserProfile } from '@/lib/types';
+import { useTheme } from '@/lib/theme';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -22,16 +23,18 @@ export function SettingsModal({
   databaseMode = 'dummy',
   databaseFile = 'hishab_dummy.json',
 }: SettingsModalProps) {
+  const { theme, toggleTheme } = useTheme();
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-      <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-space-lg shadow-2xl flex flex-col space-y-space-md border border-[#E5E7EB]">
+      <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-space-lg shadow-2xl flex flex-col space-y-space-md border border-hairline">
         <div className="flex items-center justify-between border-b border-surface-container pb-space-sm">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[22px] text-on-surface">settings</span>
             <h3 className="font-title-sm text-title-sm text-on-surface font-bold">
-              Account & Ledger Settings
+              Settings
             </h3>
           </div>
           <button
@@ -55,42 +58,38 @@ export function SettingsModal({
             <span className="font-label-sm text-label-sm text-on-surface-variant font-mono">
               {user.email}
             </span>
-            <span className="hidden sm:inline-block font-label-sm text-[10px] text-secondary font-semibold uppercase mt-0.5">
-              {user.plan || 'Premium Plan'} • Currency: {user.currency || 'BDT'} ({user.currencySymbol || '৳'})
+          </div>
+        </div>
+
+        {/* Appearance */}
+        <button
+          type="button"
+          role="switch"
+          aria-checked={theme === 'dark'}
+          onClick={toggleTheme}
+          className="w-full flex items-center justify-between p-3 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors border border-surface-container text-left"
+        >
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px] text-on-surface">
+              {theme === 'dark' ? 'dark_mode' : 'light_mode'}
             </span>
+            <span className="font-label-md text-label-md font-semibold text-on-surface">Dark mode</span>
           </div>
-        </div>
-
-        {/* Data & Security Guarantees */}
-        <div className="flex flex-col gap-2">
-          <span className="font-label-sm text-label-sm text-on-surface-variant font-semibold uppercase tracking-wider">
-            Active Security Guarantees
+          <span
+            className={`relative w-10 h-6 rounded-full transition-colors ${theme === 'dark' ? 'bg-secondary' : 'bg-outline-variant'}`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-surface-container-lowest shadow-sm transition-transform ${theme === 'dark' ? 'translate-x-4' : ''}`}
+            />
           </span>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-surface-container-low font-semibold text-on-surface">
-              <span className="material-symbols-outlined text-[16px] text-emerald-600">verified_user</span>
-              <span>Git Excluded</span>
-            </div>
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-surface-container-low font-semibold text-on-surface">
-              <span className="material-symbols-outlined text-[16px] text-emerald-600">lock</span>
-              <span>Input Sanitized</span>
-            </div>
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-surface-container-low font-semibold text-on-surface">
-              <span className="material-symbols-outlined text-[16px] text-emerald-600">speed</span>
-              <span>Rate Limited</span>
-            </div>
-          </div>
-        </div>
+        </button>
 
-        {/* Database & Sync Options */}
+        {/* Data */}
         <div className="flex flex-col gap-2">
-          <span className="font-label-sm text-label-sm text-on-surface-variant font-semibold uppercase tracking-wider">
-            Ledger Data Maintenance
-          </span>
           <button
             type="button"
             onClick={async () => {
-              if (confirm(`Reset active ${databaseMode} database back to default template? This cannot be undone.`)) {
+              if (confirm('Reset all your data? This cannot be undone.')) {
                 await onResetDb();
                 onClose();
               }
@@ -100,10 +99,9 @@ export function SettingsModal({
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px] text-error">restart_alt</span>
               <span className="font-label-md text-label-md font-semibold text-on-surface">
-                Reset {databaseMode === 'real' ? 'Real Ledger' : 'Dummy Ledger'}
+                Reset data
               </span>
             </div>
-            <span className="text-outline text-xs">Restore defaults</span>
           </button>
         </div>
 
@@ -114,7 +112,7 @@ export function SettingsModal({
             className="w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-error-container/20 hover:bg-error-container/30 text-error font-label-md text-label-md font-bold transition-colors"
           >
             <span className="material-symbols-outlined text-[18px]">logout</span>
-            <span>Sign Out of Solo Account</span>
+            <span>Sign out</span>
           </button>
         )}
 

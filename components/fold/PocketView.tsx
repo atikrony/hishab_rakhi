@@ -98,7 +98,6 @@ export function PocketView({
         date: new Date(effectiveDate).toISOString(),
         walletId: targetAccount,
         sourceStream: selectedSource,
-        notes: `Quick express inflow logged via Pocket Intake`,
       });
       setQuickAmount('500');
     } finally {
@@ -149,24 +148,9 @@ export function PocketView({
         <div className="absolute left-1/3 -bottom-20 w-80 h-80 rounded-full bg-surface-tint/10 blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col gap-space-lg">
-          {/* Breadcrumb / Context Label */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-space-sm text-outline-variant">
-              <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary-fixed font-semibold">
-                Ledger Stream
-              </span>
-              <span className="text-xs">•</span>
-              <span className="font-label-md text-label-md text-on-primary">
-                Pocket / Inflow Intelligence
-              </span>
-            </div>
-            <div className="flex items-center gap-space-xs bg-surface-container-highest/10 px-space-md py-1 rounded-full text-surface-bright border border-white/5 backdrop-blur-sm">
-              <span className="w-2 h-2 rounded-full bg-secondary-fixed animate-pulse" />
-              <span className="font-label-sm text-label-sm tracking-wide">
-                Sync: Realtime Wire Connected
-              </span>
-            </div>
-          </div>
+          <h1 className="font-headline-xl text-headline-xl text-on-primary tracking-tight font-bold">
+            Add Money
+          </h1>
 
           {/* High-Impact 4-Metric Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-space-md">
@@ -174,7 +158,7 @@ export function PocketView({
             <div className="bg-surface-container-highest/10 rounded-xl p-space-lg backdrop-blur-md flex flex-col justify-between group hover:bg-surface-container-highest/15 transition-all border border-white/5">
               <div className="flex items-center justify-between">
                 <span className="font-label-md text-label-md text-outline-variant">
-                  Total Inflow (MTD)
+                  Total received
                 </span>
                 <div className="w-8 h-8 rounded-lg bg-secondary/20 text-secondary-fixed flex items-center justify-center">
                   <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
@@ -184,10 +168,6 @@ export function PocketView({
                 <div className="font-currency-display text-currency-display text-on-primary tracking-tight font-bold">
                   +৳{Math.round(summary.totalInflow).toLocaleString()}
                 </div>
-                <div className="flex items-center gap-1 mt-1 text-secondary-fixed font-label-sm text-label-sm">
-                  <span className="material-symbols-outlined text-[14px]">trending_up</span>
-                  <span>+৳450 this week</span>
-                </div>
               </div>
             </div>
 
@@ -195,7 +175,7 @@ export function PocketView({
             <div className="bg-surface-container-highest/10 rounded-xl p-space-lg backdrop-blur-md flex flex-col justify-between group hover:bg-surface-container-highest/15 transition-all border border-white/5">
               <div className="flex items-center justify-between">
                 <span className="font-label-md text-label-md text-outline-variant">
-                  Available Pocket Cash
+                  Available balance
                 </span>
                 <div className="w-8 h-8 rounded-lg bg-surface-container-highest/20 text-surface-bright flex items-center justify-center">
                   <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
@@ -205,9 +185,6 @@ export function PocketView({
                 <div className="font-currency-display text-currency-display text-on-primary tracking-tight font-bold">
                   ৳{Math.round(summary.availablePocketCash).toLocaleString()}
                 </div>
-                <div className="text-outline-variant font-label-sm text-label-sm mt-1">
-                  Ready for automated allocation
-                </div>
               </div>
             </div>
 
@@ -215,7 +192,7 @@ export function PocketView({
             <div className="bg-surface-container-highest/10 rounded-xl p-space-lg backdrop-blur-md flex flex-col justify-between group hover:bg-surface-container-highest/15 transition-all border border-white/5">
               <div className="flex items-center justify-between">
                 <span className="font-label-md text-label-md text-outline-variant">
-                  Active Channels
+                  Sources
                 </span>
                 <div className="w-8 h-8 rounded-lg bg-surface-container-highest/20 text-surface-bright flex items-center justify-center">
                   <span className="material-symbols-outlined text-[18px]">hub</span>
@@ -227,12 +204,8 @@ export function PocketView({
                     {summary.activeChannelsCount}
                   </span>
                   <span className="font-label-md text-label-md text-outline-variant">
-                    verified routes
+                    active
                   </span>
-                </div>
-                <div className="flex items-center gap-1 mt-1 text-surface-bright font-label-sm text-label-sm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-secondary-fixed" />
-                  <span>1 Direct ACH, {Math.max(1, summary.activeChannelsCount - 1)} P2P/API</span>
                 </div>
               </div>
             </div>
@@ -241,7 +214,7 @@ export function PocketView({
             <div className="bg-surface-container-highest/10 rounded-xl p-space-lg backdrop-blur-md flex flex-col justify-between group hover:bg-surface-container-highest/15 transition-all border border-white/5">
               <div className="flex items-center justify-between">
                 <span className="font-label-md text-label-md text-outline-variant">
-                  Net Savings Velocity
+                  Savings rate
                 </span>
                 <div className="w-8 h-8 rounded-lg bg-secondary/20 text-secondary-fixed flex items-center justify-center">
                   <span className="material-symbols-outlined text-[18px]">pie_chart</span>
@@ -269,14 +242,11 @@ export function PocketView({
           {/* LEFT ASYMMETRIC COLUMN: Analytics, Velocity & Source Mix (5 Cols) */}
           <div className="lg:col-span-5 flex flex-col gap-space-lg">
             {/* Inbound Allocation Donut & Legend */}
-            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB] flex flex-col gap-space-md">
+            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col gap-space-md">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline">
-                    Capital Sources
-                  </span>
                   <h3 className="font-headline-md text-headline-md text-on-surface font-bold">
-                    Source Allocation
+                    Sources
                   </h3>
                 </div>
                 <button
@@ -384,23 +354,20 @@ export function PocketView({
             </div>
 
             {/* Quick Inflow Intake (Express Form) */}
-            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB] flex flex-col gap-space-md">
+            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col gap-space-md">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-secondary" />
                   <h3 className="font-headline-md text-headline-md text-on-surface font-bold">
-                    Quick Inflow Intake
+                    Quick Add
                   </h3>
                 </div>
-                <span className="font-label-sm text-label-sm text-outline uppercase font-semibold">
-                  Express Form
-                </span>
               </div>
 
               <form onSubmit={handleQuickSubmit} className="flex flex-col gap-space-md">
                 <div>
                   <label className="font-label-sm text-label-sm text-on-surface-variant block mb-1 font-medium">
-                    Incoming Value
+                    Amount
                   </label>
                   <div className="relative flex items-center">
                     <span className="absolute left-3 font-title-sm text-title-sm text-outline font-bold">
@@ -435,7 +402,7 @@ export function PocketView({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
                   <div>
                     <label className="font-label-sm text-label-sm text-on-surface-variant block mb-1 font-medium">
-                      Source Stream
+                      Source
                     </label>
                     <input
                       type="text"
@@ -448,7 +415,7 @@ export function PocketView({
                   </div>
                   <div>
                     <label className="font-label-sm text-label-sm text-on-surface-variant block mb-1 font-medium">
-                      Effective Date (No Future Dates)
+                      Date
                     </label>
                     <input
                       type="date"
@@ -470,7 +437,7 @@ export function PocketView({
                   className="mt-space-xs h-11 w-full rounded-lg bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-primary-container shadow-sm transition-all active:scale-[0.99] disabled:opacity-50"
                 >
                   <span className="material-symbols-outlined text-[18px]">add_circle</span>
-                  <span>{isSubmitting ? 'Recording Inflow...' : 'Confirm & Log Inflow'}</span>
+                  <span>{isSubmitting ? 'Adding…' : 'Add Money'}</span>
                 </button>
               </form>
             </div>
@@ -479,14 +446,11 @@ export function PocketView({
           {/* RIGHT COLUMN: Ledger Directory & Inbound Transactions (7 Cols) */}
           <div className="lg:col-span-7 flex flex-col gap-space-lg">
             {/* Filter Toolbar & Directory Header */}
-            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB] flex flex-col gap-space-md">
+            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col gap-space-md">
               <div className="flex flex-wrap items-center justify-between gap-space-md">
                 <div>
-                  <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">
-                    Reconciliation
-                  </span>
                   <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold">
-                    Inbound Directory
+                    Income
                   </h2>
                 </div>
                 <div className="flex items-center gap-space-sm">
@@ -582,10 +546,10 @@ export function PocketView({
             {/* Inbound Transaction Stream Cards */}
             <div className="flex flex-col gap-space-sm">
               {inboundTransactions.length === 0 ? (
-                <div className="bg-surface-container-lowest rounded-xl p-space-xl text-center shadow-sm border border-[#E5E7EB]">
+                <div className="bg-surface-container-lowest rounded-xl p-space-xl text-center shadow-sm border border-hairline">
                   <span className="material-symbols-outlined text-[36px] text-outline">search_off</span>
                   <p className="font-title-sm text-title-sm text-on-surface mt-2 font-semibold">
-                    No inbound records found
+                    No income found
                   </p>
                   <p className="font-body-md text-body-md text-on-surface-variant mt-1">
                     Try adjusting your search or source filters.
@@ -596,7 +560,7 @@ export function PocketView({
                   <div
                     key={tx.id}
                     onClick={() => onSelectTransaction(tx)}
-                    className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm hover:shadow-md transition-all flex items-center justify-between group border border-[#E5E7EB] cursor-pointer"
+                    className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm hover:shadow-md transition-all flex items-center justify-between group border border-hairline cursor-pointer"
                   >
                     <div className="flex items-center gap-space-md min-w-0">
                       <div className="w-11 h-11 rounded-lg bg-secondary-container/40 text-on-secondary-container flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">

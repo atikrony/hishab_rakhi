@@ -18,7 +18,7 @@ export function MobileNavigation() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-4px_24px_rgba(23,25,29,0.06)] border-t border-[#E5E7EB]">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-4px_24px_rgba(23,25,29,0.06)] border-t border-hairline">
       <div className="h-16 max-w-md mx-auto px-space-md flex items-center justify-around">
         <Link
           href="/spend"

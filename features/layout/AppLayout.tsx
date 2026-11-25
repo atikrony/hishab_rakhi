@@ -4,6 +4,7 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import { useLedger } from '@/features/ledger/LedgerContext';
 import { HishabSidebar } from './HishabSidebar';
+import { MobileTopBar } from './MobileTopBar';
 import { AddInflowModal } from '@/components/fold/AddInflowModal';
 import { AddExpenseModal } from '@/components/fold/AddExpenseModal';
 import { TransactionDetailModal } from '@/components/fold/TransactionDetailModal';
@@ -52,7 +53,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
         <div className="font-label-md text-label-md text-white/60 mt-1 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-secondary-fixed animate-ping" />
-          <span>Synchronizing database ledger...</span>
+          <span>Loading…</span>
         </div>
       </div>
     );
@@ -72,6 +73,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       {isMobileDeviceView ? (
         /* Mobile Layout: Full-width responsive phone canvas */
         <div className="w-full min-h-screen bg-surface flex flex-col">
+          <MobileTopBar />
           {children}
         </div>
       ) : (

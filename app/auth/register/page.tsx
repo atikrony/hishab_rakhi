@@ -67,20 +67,17 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-surface flex flex-col justify-center items-center px-4 py-12 select-none">
-      <div className="w-full max-w-md bg-surface-container-lowest rounded-3xl p-space-xl shadow-2xl border border-[#E5E7EB] flex flex-col gap-space-lg animate-fadeIn">
+      <div className="w-full max-w-md bg-surface-container-lowest rounded-3xl p-space-xl shadow-2xl border border-hairline flex flex-col gap-space-lg animate-fadeIn">
         {/* Brand & Badge */}
         <div className="flex flex-col items-center text-center">
           <div className="w-14 h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center font-extrabold text-2xl shadow-md mb-space-md">
             HR
           </div>
-          <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold bg-secondary/10 px-3 py-1 rounded-full">
-            Private Solo Ledger
-          </span>
-          <h1 className="font-headline-lg text-headline-lg text-on-surface font-extrabold mt-space-sm tracking-tight">
+          <h1 className="font-headline-lg text-headline-lg text-on-surface font-extrabold tracking-tight">
             Create Your Account
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-            Sign up to track your solo income, expenses, and pocket money.
+            Start tracking your income and spending.
           </p>
         </div>
 
@@ -192,7 +189,7 @@ export default function RegisterPage() {
           >
             {loading ? (
               <>
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="w-4 h-4 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin" />
                 <span>Creating Account...</span>
               </>
             ) : (
@@ -218,11 +215,6 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Security notice */}
-      <div className="flex items-center gap-2 text-outline text-label-sm font-medium mt-6">
-        <span className="material-symbols-outlined text-[16px]">verified_user</span>
-        <span>Isolated Solo Ledger • Encrypted Session • Zero Data Leakage</span>
-      </div>
     </div>
   );
 }

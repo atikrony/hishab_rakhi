@@ -572,11 +572,6 @@ export default function KotojonPage() {
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="max-w-7xl mx-auto w-full pt-6 border-t border-surface-container text-center text-xs text-outline">
-        Hishab Rakhi Private Telemetry • Route: <code>/kotojon</code> • Real-time visitor and database intelligence
-      </footer>
     </div>
   );
 }

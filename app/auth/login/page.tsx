@@ -71,20 +71,17 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-surface flex flex-col justify-center items-center px-4 py-12 select-none">
-      <div className="w-full max-w-md bg-surface-container-lowest rounded-3xl p-space-xl shadow-2xl border border-[#E5E7EB] flex flex-col gap-space-lg animate-fadeIn">
+      <div className="w-full max-w-md bg-surface-container-lowest rounded-3xl p-space-xl shadow-2xl border border-hairline flex flex-col gap-space-lg animate-fadeIn">
         {/* Brand & Badge */}
         <div className="flex flex-col items-center text-center">
           <div className="w-14 h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center font-extrabold text-2xl shadow-md mb-space-md">
             HR
           </div>
-          <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold bg-secondary/10 px-3 py-1 rounded-full">
-            Welcome Back
-          </span>
-          <h1 className="font-headline-lg text-headline-lg text-on-surface font-extrabold mt-space-sm tracking-tight">
+          <h1 className="font-headline-lg text-headline-lg text-on-surface font-extrabold tracking-tight">
             Sign In to Hishab Rakhi
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-            Access your secure personal finance ledger.
+            Track your income and spending.
           </p>
         </div>
 
@@ -174,7 +171,7 @@ export default function LoginPage() {
           >
             {loading ? (
               <>
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="w-4 h-4 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin" />
                 <span>Signing In...</span>
               </>
             ) : (
@@ -200,11 +197,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Security notice */}
-      <div className="flex items-center gap-2 text-outline text-label-sm font-medium mt-6">
-        <span className="material-symbols-outlined text-[16px]">security</span>
-        <span>Secure Session • End-to-End Solo Account Privacy</span>
-      </div>
     </div>
   );
 }

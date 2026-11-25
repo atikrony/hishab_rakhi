@@ -90,7 +90,7 @@ export function FixedCostsCard({
   };
 
   return (
-    <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB] flex flex-col gap-space-md">
+    <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col gap-space-md">
       {/* Header */}
       <span className="text-[11px] font-semibold text-secondary text-center px-2 py-0.5 rounded bg-secondary-container/30">
         {currentMonthName}
@@ -174,7 +174,7 @@ export function FixedCostsCard({
 
           <div className="flex flex-col gap-1">
             <label className="text-[11px] uppercase tracking-wider font-bold text-on-surface-variant">
-              Title / Obligation *
+              Title *
             </label>
             <input
               type="text"

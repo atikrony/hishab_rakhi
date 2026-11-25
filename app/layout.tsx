@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Hishab Rakhi - Personal Ledger',
-  description: 'হিসাব রাখি — Modern personal finance ledger, inflow & spend intelligence, and real-time cashflow analytics.',
+  description: 'হিসাব রাখি — Track your income and spending.',
   manifest: '/manifest.json',
   icons: {
     icon: '/icon.svg',
@@ -17,7 +17,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#17191D',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f8f9ff' },
+    { media: '(prefers-color-scheme: dark)', color: '#111318' },
+  ],
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -28,6 +31,7 @@ export const viewport: Viewport = {
 import { LedgerProvider } from '@/features/ledger/LedgerContext';
 import { AppLayout } from '@/features/layout/AppLayout';
 import { VisitorTracker } from '@/components/fold/VisitorTracker';
+import { themeInitScript } from '@/lib/theme-script';
 
 export default function RootLayout({
   children,
@@ -35,8 +39,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

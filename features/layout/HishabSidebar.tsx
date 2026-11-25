@@ -4,10 +4,11 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLedger } from '@/features/ledger/LedgerContext';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export function HishabSidebar() {
   const pathname = usePathname();
-  const { user, summary, setIsSettingsOpen, showToast, handleLogout } = useLedger();
+  const { user, setIsSettingsOpen, handleLogout } = useLedger();
 
   const isCurrent = (path: string) => {
     if (!pathname) return false;
@@ -18,7 +19,7 @@ export function HishabSidebar() {
   };
 
   return (
-    <aside className="hidden lg:flex fixed left-0 top-0 h-full w-64 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex-col justify-between p-space-lg select-none border-r border-[#E5E7EB]">
+    <aside className="hidden lg:flex fixed left-0 top-0 h-full w-64 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex-col justify-between p-space-lg select-none border-r border-hairline">
       <div className="flex flex-col gap-space-xl">
         {/* Brand Header */}
         <div className="flex items-center gap-space-sm px-space-xs">
@@ -121,17 +122,8 @@ export function HishabSidebar() {
           <span className="font-label-md text-label-md">Settings</span>
         </button>
 
-        {/* Help / Verification Toast */}
-        <button
-          onClick={() =>
-            showToast('Hishab Rakhi Help: All ledger records are cryptographically verified.')
-          }
-          className="w-full flex items-center gap-space-md px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface text-left transition-colors font-medium"
-          type="button"
-        >
-          <span className="material-symbols-outlined text-[20px]">help</span>
-          <span className="font-label-md text-label-md">Help</span>
-        </button>
+        {/* Theme */}
+        <ThemeToggle variant="row" />
 
         {/* Sign Out Button */}
         <button

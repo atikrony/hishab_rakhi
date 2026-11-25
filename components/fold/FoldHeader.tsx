@@ -25,7 +25,7 @@ export function FoldHeader({
   unreadNotifsCount,
 }: FoldHeaderProps) {
   return (
-    <header className="fixed top-0 left-64 right-0 h-16 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-margin-desktop flex items-center justify-between border-b border-[#E5E7EB]">
+    <header className="fixed top-0 left-64 right-0 h-16 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-margin-desktop flex items-center justify-between border-b border-hairline">
       {/* Live Search Input */}
       <div className="flex items-center gap-space-md flex-1 max-w-md">
         <div className="flex items-center gap-space-sm bg-surface-container-lowest px-space-md py-space-xs rounded-lg w-full shadow-[0_1px_3px_0_rgba(23,25,29,0.03)] border border-surface-container">

@@ -99,7 +99,7 @@ export function TransactionDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-      <div className="w-full max-w-sm bg-surface-container-lowest rounded-2xl p-space-lg shadow-2xl flex flex-col space-y-space-md border border-[#E5E7EB]">
+      <div className="w-full max-w-sm bg-surface-container-lowest rounded-2xl p-space-lg shadow-2xl flex flex-col space-y-space-md border border-hairline">
         {/* Top Header */}
         <div className="flex items-center justify-between">
           <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
@@ -154,7 +154,7 @@ export function TransactionDetailModal({
             {/* Amount */}
             <div className="flex flex-col gap-1">
               <label className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">
-                Amount (৳ BDT)
+                Amount (৳)
               </label>
               <div className="relative flex items-center">
                 <span className="absolute left-3 text-on-surface-variant font-bold">৳</span>

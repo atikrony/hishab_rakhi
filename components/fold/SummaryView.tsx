@@ -378,7 +378,7 @@ export function SummaryView({
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-space-lg relative z-10">
           <div className="flex flex-col gap-space-xs">
             <h1 className="font-headline-xl text-headline-xl text-on-primary tracking-tight font-bold">
-              Summary Analytics
+              Summary
             </h1>
           </div>
         </div>
@@ -389,7 +389,7 @@ export function SummaryView({
         {/* Top Overview Metric Cards (3 Clean Cards) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter-desktop -mt-10 relative z-20">
           {/* Card 1: Total Received */}
-          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB] flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col justify-between hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-space-md">
               <span className="font-label-md text-label-md text-on-surface-variant font-medium">
                 Total Received
@@ -405,18 +405,17 @@ export function SummaryView({
               <div className="flex items-center gap-space-xs text-secondary font-label-sm text-label-sm font-semibold">
                 <span className="material-symbols-outlined text-[16px]">trending_up</span>
                 <span>
-                  {periodTransactions.filter((t) => t.type === 'income').length} settled inflows
+                  {periodTransactions.filter((t) => t.type === 'income').length} deposits
                 </span>
-                <span className="text-outline text-label-sm ml-auto font-normal">Active cycle</span>
               </div>
             </div>
           </div>
 
           {/* Card 2: Settled Outflow */}
-          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB] flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col justify-between hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-space-md">
               <span className="font-label-md text-label-md text-on-surface-variant font-medium">
-                Settled Outflow
+                Total Spent
               </span>
               <span className="w-8 h-8 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center">
                 <span className="material-symbols-outlined text-[18px]">north_east</span>
@@ -439,10 +438,10 @@ export function SummaryView({
           </div>
 
           {/* Card 3: Net Retained Funds */}
-          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB] flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col justify-between hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-space-md">
               <span className="font-label-md text-label-md text-on-surface-variant font-medium">
-                Net Retained Funds
+                Net Balance
               </span>
               <span className="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
                 <span className="material-symbols-outlined text-[18px]">verified</span>
@@ -460,9 +459,6 @@ export function SummaryView({
                 <span className="px-space-xs py-0.5 rounded bg-secondary-container/40 text-on-secondary-container font-medium">
                   {periodRetainedPercent}% retained
                 </span>
-                <span className="text-on-surface-variant font-normal">
-                  {periodNet >= 0 ? 'Positive balance' : 'Deficit volume'}
-                </span>
               </div>
             </div>
           </div>
@@ -471,21 +467,18 @@ export function SummaryView({
         {/* Main Analytics Section (Bento Grid) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop items-start">
           {/* Cashflow Ratio & Monthly Performance (Left 8 Cols) */}
-          <div className="lg:col-span-8 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB] flex flex-col gap-space-lg">
+          <div className="lg:col-span-8 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col gap-space-lg">
             {/* Header Controls: Cadence & Pie View Switchers */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
                   <h2 className="font-title-sm text-title-sm text-on-surface font-bold">
-                    Cash Flow & Diagnostics
+                    Cash Flow
                   </h2>
                   <span className="text-[11px] font-semibold text-primary px-2 py-0.5 rounded bg-primary/10">
                     {periodLabel}
                   </span>
                 </div>
-                <p className="font-label-md text-label-md text-on-surface-variant">
-                  Interactive breakdowns responding in real-time
-                </p>
               </div>
 
               {/* Functional Controls: Cadence Switcher (Day, Week, Month, Year) */}
@@ -662,7 +655,7 @@ export function SummaryView({
                       ) : (
                         <>
                           <span className="font-label-sm text-[11px] text-outline uppercase tracking-wider">
-                            Total Outflow
+                            Total Spent
                           </span>
                           <span className="font-headline-md text-headline-md text-on-surface leading-tight font-bold">
                             ৳{Math.round(periodOutflow).toLocaleString()}
@@ -746,7 +739,7 @@ export function SummaryView({
                       : 'Cadence Volume Liquidity'}
                   </span>
                   <span className="font-label-sm text-label-sm text-outline">
-                    Inflow vs. Outflow
+                    Income vs. Spending
                   </span>
                 </div>
 
@@ -790,7 +783,7 @@ export function SummaryView({
                   </div>
                   <div className="p-space-sm rounded-lg bg-secondary-container/30 flex flex-col border border-secondary-container/40">
                     <span className="font-label-sm text-label-sm text-secondary font-semibold">
-                      Surplus Net
+                      Net
                     </span>
                     <span className="font-currency-md text-currency-md text-secondary font-bold">
                       {periodNet >= 0 ? '+' : ''}৳{Math.round(periodNet).toLocaleString()}
@@ -804,11 +797,11 @@ export function SummaryView({
           {/* Right 4 Cols: Category Distribution + Fixed Cost */}
           <div className="lg:col-span-4 flex flex-col gap-space-lg">
             {/* Category Distribution */}
-            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#E5E7EB] flex flex-col gap-space-lg">
+            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col gap-space-lg">
               <div className="flex items-center justify-between">
                 <div className="flex flex-col">
                   <h2 className="font-title-sm text-title-sm text-on-surface font-bold">
-                    Category Distribution
+                    Categories
                   </h2>
                   <span className="font-label-md text-label-md text-on-surface-variant">
                     {periodLabel} allocation
@@ -915,16 +908,16 @@ export function SummaryView({
         </div>
 
         {/* Lower Section: Filterable Full Activity Ledger with Explicit Date & Amount Sorting */}
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm border border-[#E5E7EB] overflow-hidden flex flex-col">
+        <div className="bg-surface-container-lowest rounded-xl shadow-sm border border-hairline overflow-hidden flex flex-col">
           {/* Ledger Header Controls */}
           <div className="p-space-lg flex flex-col md:flex-row md:items-center justify-between gap-space-md border-b border-surface-container">
             <div className="flex flex-col">
               <div className="flex items-center gap-space-xs">
                 <h2 className="font-title-sm text-title-sm text-on-surface font-bold">
-                  Activity Ledger
+                  Transactions
                 </h2>
                 <span className="px-space-xs py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold">
-                  {filteredTransactions.length} Records
+                  {filteredTransactions.length}
                 </span>
                 {selectedCategoryFilter && (
                   <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center gap-1">
