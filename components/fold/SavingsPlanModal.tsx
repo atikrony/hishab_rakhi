@@ -6,14 +6,14 @@ import type { SavingsPlan } from '@/lib/savings-advisor';
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
 
 const BUCKET_STYLE: Record<string, { bar: string; dot: string }> = {
-  needs: { bar: 'bg-sky-500', dot: 'bg-sky-500' },
-  wants: { bar: 'bg-fuchsia-500', dot: 'bg-fuchsia-500' },
-  savings: { bar: 'bg-emerald-500', dot: 'bg-emerald-500' },
+  needs: { bar: 'bg-[#6f8fa6]', dot: 'bg-[#6f8fa6]' },
+  wants: { bar: 'bg-[#c0907a]', dot: 'bg-[#c0907a]' },
+  savings: { bar: 'bg-secondary', dot: 'bg-secondary' },
 };
 
 const TONE: Record<string, string> = {
-  good: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10',
-  warn: 'text-amber-600 dark:text-amber-400 bg-amber-500/10',
+  good: 'text-secondary bg-secondary/10',
+  warn: 'text-[#a07a3c] dark:text-[#d6b47a] bg-[#c2a36b]/15',
   info: 'text-primary bg-primary/10',
 };
 
@@ -194,17 +194,17 @@ export function SavingsPlanModal({ isOpen, onClose }: { isOpen: boolean; onClose
                       <span className="text-right">
                         <span className="block text-body-md font-bold text-on-surface tabular-nums">৳{fmt(c.suggested)}</span>
                         {c.change < 0 && (
-                          <span className="block text-label-sm font-bold text-amber-600 dark:text-amber-400 tabular-nums">
+                          <span className="block text-label-sm font-bold text-[#a07a3c] dark:text-[#d6b47a] tabular-nums">
                             −৳{fmt(-c.change)}
                           </span>
                         )}
                       </span>
                     </div>
                   ))}
-                  <div className="flex items-center gap-3 px-4 py-3 bg-emerald-500/10">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+                  <div className="flex items-center gap-3 px-4 py-3 bg-secondary/10">
+                    <span className="w-2 h-2 rounded-full bg-secondary flex-shrink-0" />
                     <span className="flex-1 text-body-md font-bold text-on-surface">Savings</span>
-                    <span className="text-body-md font-extrabold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                    <span className="text-body-md font-extrabold text-secondary tabular-nums">
                       ৳{fmt(plan.suggestedSavings)}
                     </span>
                   </div>

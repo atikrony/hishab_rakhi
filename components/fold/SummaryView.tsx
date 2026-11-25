@@ -20,33 +20,33 @@ interface SummaryViewProps {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Food & Dining': '#10b981',      // Emerald
-  'Tech & Gadgets': '#3b82f6',     // Blue
-  'Bills & Utilities': '#f59e0b',  // Amber
-  'Transportation': '#8b5cf6',     // Purple
-  'Healthcare': '#ec4899',         // Pink
-  'Health & Meds': '#ec4899',      // Pink
-  'Entertainment': '#06b6d4',      // Cyan
-  'Shopping': '#f97316',           // Orange
-  'Education': '#14b8a6',          // Teal
-  'Salary': '#16a34a',             // Green
-  'Freelance': '#0284c7',          // Sky
-  'Gift': '#e11d48',               // Rose
-  'Investment': '#6366f1',         // Indigo
-  'Other': '#64748b',              // Slate
+  'Food & Dining': '#6f9f88',
+  'Tech & Gadgets': '#6f8fa6',
+  'Bills & Utilities': '#c2a36b',
+  'Transportation': '#8f86a8',
+  'Healthcare': '#b98a92',
+  'Health & Meds': '#b98a92',
+  'Entertainment': '#6fa3a8',
+  'Shopping': '#c0907a',
+  'Education': '#7fa596',
+  'Salary': '#5f9478',
+  'Freelance': '#7895b0',
+  'Gift': '#b07f86',
+  'Investment': '#7d86a8',
+  'Other': '#8a9494',
 };
 
 const FALLBACK_PALETTE = [
-  '#10b981',
-  '#3b82f6',
-  '#f59e0b',
-  '#8b5cf6',
-  '#ec4899',
-  '#06b6d4',
-  '#f97316',
-  '#14b8a6',
-  '#6366f1',
-  '#64748b',
+  '#6f9f88',
+  '#6f8fa6',
+  '#c2a36b',
+  '#8f86a8',
+  '#b98a92',
+  '#6fa3a8',
+  '#c0907a',
+  '#7fa596',
+  '#7d86a8',
+  '#8a9494',
 ];
 
 export function SummaryView({
@@ -1175,8 +1175,8 @@ export function SummaryView({
                           <span
                             className="px-space-xs py-0.5 rounded font-label-sm text-label-sm font-medium"
                             style={{
-                              backgroundColor: `${CATEGORY_COLORS[tx.category] || '#64748b'}18`,
-                              color: CATEGORY_COLORS[tx.category] || '#64748b',
+                              backgroundColor: `${CATEGORY_COLORS[tx.category] || '#8a9494'}18`,
+                              color: CATEGORY_COLORS[tx.category] || '#8a9494',
                             }}
                           >
                             {tx.category}
