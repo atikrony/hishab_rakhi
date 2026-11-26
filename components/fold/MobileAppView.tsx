@@ -308,19 +308,6 @@ export function MobileAppView({
                 );
               }))}
             </div>
-
-            {/* Floating Action Button (Add Money) */}
-            <div className={FAB_POS}>
-              <button
-                type="button"
-                onClick={onOpenAddMoney}
-                aria-label="Add money"
-                data-tour="add-money-btn"
-                className="w-14 h-14 rounded-full bg-secondary hover:bg-secondary/90 text-on-secondary shadow-lg flex items-center justify-center active:scale-95 transition-transform font-bold"
-              >
-                <span className="material-symbols-outlined text-[28px]">add</span>
-              </button>
-            </div>
           </div>
         )}
 
@@ -544,19 +531,6 @@ export function MobileAppView({
               onDelete={onDeleteFixedCost}
               variant="spend"
             />
-
-            {/* Floating Action Button (Add Expense) */}
-            <div className={FAB_POS}>
-              <button
-                type="button"
-                onClick={onOpenAddExpense}
-                aria-label="Add Expense"
-                data-tour="add-expense-btn"
-                className="w-14 h-14 rounded-full bg-primary-container text-on-primary shadow-xl flex items-center justify-center active:scale-95 transition-all hover:bg-primary-container/90 font-bold"
-              >
-                <span className="material-symbols-outlined text-[28px]">add</span>
-              </button>
-            </div>
           </div>
         )}
 
@@ -627,6 +601,36 @@ export function MobileAppView({
           </div>
         )}
       </main>
+
+      {/* Floating Action Button (Add Money): outside the animated tab so `fixed` pins to the viewport */}
+      {currentTab === 'pocket' && (
+        <div className={FAB_POS}>
+          <button
+            type="button"
+            onClick={onOpenAddMoney}
+            aria-label="Add money"
+            data-tour="add-money-btn"
+            className="w-14 h-14 rounded-full bg-secondary hover:bg-secondary/90 text-on-secondary shadow-lg flex items-center justify-center active:scale-95 transition-transform font-bold"
+          >
+            <span className="material-symbols-outlined text-[28px]">add</span>
+          </button>
+        </div>
+      )}
+
+      {/* Floating Action Button (Add Expense): outside the animated tab so `fixed` pins to the viewport */}
+      {currentTab === 'spend' && (
+        <div className={FAB_POS}>
+          <button
+            type="button"
+            onClick={onOpenAddExpense}
+            aria-label="Add Expense"
+            data-tour="add-expense-btn"
+            className="w-14 h-14 rounded-full bg-primary-container text-on-primary shadow-xl flex items-center justify-center active:scale-95 transition-all hover:bg-primary-container/90 font-bold"
+          >
+            <span className="material-symbols-outlined text-[28px]">add</span>
+          </button>
+        </div>
+      )}
 
       {/* Bottom navigation */}
       <nav aria-label="Primary" className="fixed bottom-0 left-0 right-0 z-40 pb-safe glass-bar border-t">
