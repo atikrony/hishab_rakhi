@@ -1,6 +1,7 @@
 import path from 'path';
 import crypto from 'crypto';
 import { DatabaseSchema } from './db';
+import { isPlaceholderName, isPlaceholderEmail, isGeneratedAvatar } from './names';
 import {
   getUserLedgersDirectory,
   getUsersFilePath,
@@ -295,10 +296,12 @@ export async function findOrCreateGoogleUserAsync(
   const existing = await findUserByEmailAsync(email.trim().toLowerCase());
   if (existing) {
     // Signing in with Google proves ownership of the address
-    if (existing.emailVerified === false) {
-      return (await markEmailVerifiedAsync(existing.email)) || existing;
-    }
-    return existing;
+    const record =
+      existing.emailVerified === false
+        ? (await markEmailVerifiedAsync(existing.email)) || existing
+        : existing;
+    await syncGoogleIdentityAsync(record, name, avatar);
+    return record;
   }
   const newUser = findOrCreateGoogleUser(email, name, avatar, false);
 
@@ -314,6 +317,55 @@ export async function findOrCreateGoogleUserAsync(
     console.error('[Google user Postgres save failed]:', (err as any)?.message);
   }
   return newUser;
+}
+
+/**
+ * Brings the Google name and photo back on every Google sign-in, replacing
+ * only auto-generated values — a name or photo the person set themselves stays.
+ */
+async function syncGoogleIdentityAsync(user: UserRecord, googleName: string, picture?: string): Promise<void> {
+  const name = (googleName || '').trim();
+  // Auto-generated = a placeholder, or just the email turned into a name
+  const emailName = formatEmailToActualName(user.email);
+  const isAutoName = (n?: string | null) => isPlaceholderName(n) || n === emailName;
+  try {
+    if (name && !isPlaceholderName(name) && name !== user.profile?.name && isAutoName(user.profile?.name)) {
+      user.profile = {
+        occupation: '',
+        monthlyIncome: 0,
+        salaryDate: '',
+        lastExpense: 0,
+        ...user.profile,
+        name,
+      };
+      const users = getAllUsers();
+      const idx = users.findIndex((u) => u.id === user.id);
+      if (idx !== -1) users[idx] = user;
+      else users.push(user);
+      saveUsers(users);
+      const { saveUserToPostgres } = await import('./postgres');
+      await saveUserToPostgres(user);
+    }
+
+    const { getDbAsync, saveDbAsync } = await import('./db');
+    const db = await getDbAsync(user.id);
+    let changed = false;
+    if (name && !isPlaceholderName(name) && db.user.name !== name && isAutoName(db.user.name)) {
+      db.user.name = name;
+      changed = true;
+    }
+    if (!isPlaceholderEmail(user.email) && db.user.email !== user.email) {
+      db.user.email = user.email;
+      changed = true;
+    }
+    if (picture && isGeneratedAvatar(db.user.avatar)) {
+      db.user.avatar = picture;
+      changed = true;
+    }
+    if (changed) await saveDbAsync(db, user.id);
+  } catch (err) {
+    console.error('[Google profile sync failed]:', (err as any)?.message);
+  }
 }
 
 export function findOrCreateGoogleUser(

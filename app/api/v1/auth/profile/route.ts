@@ -5,9 +5,7 @@ import { getDbAsync, saveDbAsync } from '@/lib/db';
 
 const MAX_AVATAR_CHARS = 200_000; // ~150 KB image; the client resizes to 256px first
 const AVATAR_DATA_URL = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
-const initialsAvatar = (name: string) =>
-  `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`;
-const isGeneratedAvatar = (url?: string) => !url || url.startsWith('https://api.dicebear.com/');
+import { isPlaceholderName, isPlaceholderEmail, isGeneratedAvatar, initialsAvatar } from '@/lib/names';
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,18 +21,15 @@ export async function GET(request: NextRequest) {
     const db = await getDbAsync(session.userId);
 
     let cleanName = db.user.name;
-    if (
-      !cleanName ||
-      cleanName.toLowerCase().startsWith('usr_') ||
-      cleanName === 'Not set' ||
-      cleanName === 'Solo User'
-    ) {
-      cleanName =
-        (user?.profile?.name && !user.profile.name.toLowerCase().startsWith('usr_'))
-          ? user.profile.name
-          : formatEmailToActualName(user?.email || db.user.email || '');
+    if (isPlaceholderName(cleanName)) {
+      const realEmail = [user?.email, db.user.email].find((e) => !isPlaceholderEmail(e)) || '';
+      cleanName = !isPlaceholderName(user?.profile?.name)
+        ? user!.profile!.name
+        : realEmail
+          ? formatEmailToActualName(realEmail)
+          : cleanName;
       db.user.name = cleanName;
-      db.user.avatar = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(cleanName)}`;
+      if (isGeneratedAvatar(db.user.avatar)) db.user.avatar = initialsAvatar(cleanName);
     }
 
     return NextResponse.json({
@@ -75,7 +70,7 @@ export async function PUT(request: NextRequest) {
     let nameUpdated = false;
     if (body.name && typeof body.name === 'string') {
       const trimmed = body.name.trim().substring(0, 100);
-      if (trimmed && !trimmed.toLowerCase().startsWith('usr_')) {
+      if (trimmed && !isPlaceholderName(trimmed)) {
         db.user.name = trimmed;
         // Keep an uploaded / Google photo; only regenerate the initials avatar
         if (isGeneratedAvatar(db.user.avatar)) db.user.avatar = initialsAvatar(trimmed);
@@ -164,6 +159,9 @@ export async function PUT(request: NextRequest) {
         if (uIdx !== -1 && users[uIdx].profile) {
           users[uIdx].profile!.name = db.user.name;
           saveUsers(users);
+          // Keep Postgres in step, or a fresh server instance reloads the old name
+          const { saveUserToPostgres } = await import('@/lib/postgres');
+          await saveUserToPostgres(users[uIdx]);
         }
       } catch (e) {}
     }

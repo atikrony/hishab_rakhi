@@ -1,4 +1,5 @@
 import path from 'path';
+import { isPlaceholderName, isPlaceholderEmail, isGeneratedAvatar, initialsAvatar } from './names';
 import {
   getDataStorageDirectory,
   getUserLedgersDirectory,
@@ -498,21 +499,20 @@ export function getDb(userId?: string): DatabaseSchema {
     const userLedger = readUserLedgerData<DatabaseSchema>(userId);
     if (userLedger) {
       // Ensure user.name is an actual human-readable name, never USR_... or undefined
-      if (
-        !userLedger.user.name ||
-        userLedger.user.name.toLowerCase().startsWith('usr_') ||
-        userLedger.user.name === 'Solo User' ||
-        userLedger.user.name === 'Not set'
-      ) {
+      if (isPlaceholderName(userLedger.user.name)) {
         try {
           const { findUserById, formatEmailToActualName } = require('./auth');
           const user = findUserById(userId);
+          const realEmail = !isPlaceholderEmail(user?.email) ? user.email : !isPlaceholderEmail(userLedger.user.email) ? userLedger.user.email : '';
           const resolvedName =
-            (user?.profile?.name && !user.profile.name.toLowerCase().startsWith('usr_') ? user.profile.name : null) ||
-            formatEmailToActualName(userLedger.user.email || user?.email || '');
-          userLedger.user.name = resolvedName;
-          userLedger.user.avatar = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(resolvedName)}`;
-          writeUserLedgerData(userId, userLedger);
+            (!isPlaceholderName(user?.profile?.name) ? user.profile.name : null) ||
+            (realEmail ? formatEmailToActualName(realEmail) : '');
+          if (resolvedName && !isPlaceholderName(resolvedName)) {
+            userLedger.user.name = resolvedName;
+            if (realEmail) userLedger.user.email = realEmail;
+            if (isGeneratedAvatar(userLedger.user.avatar)) userLedger.user.avatar = initialsAvatar(resolvedName);
+            writeUserLedgerData(userId, userLedger);
+          }
         } catch (e) {}
       }
       return decodeLedgerText(JSON.parse(JSON.stringify(userLedger)));
@@ -524,10 +524,11 @@ export function getDb(userId?: string): DatabaseSchema {
     try {
       const { findUserById, initializeBlankUserLedger, formatEmailToActualName } = require('./auth');
       const user = findUserById(userId);
-      const email = user?.email || `${userId}@user.behishebi.com`;
+      // Never invent an address from the user id: it becomes a fake name ("Usr E…")
+      const email = user?.email || '';
       const actualName =
-        (user?.profile?.name && !user.profile.name.toLowerCase().startsWith('usr_') ? user.profile.name : null) ||
-        formatEmailToActualName(email);
+        (!isPlaceholderName(user?.profile?.name) ? user.profile.name : null) ||
+        (email ? formatEmailToActualName(email) : 'User');
       const freshLedger = initializeBlankUserLedger(
         userId,
         email,
@@ -538,7 +539,7 @@ export function getDb(userId?: string): DatabaseSchema {
       const fallbackLedger: DatabaseSchema = JSON.parse(JSON.stringify(realInitialData));
       fallbackLedger.user.id = userId;
       fallbackLedger.user.name = 'Solo User';
-      fallbackLedger.user.email = `${userId}@user.behishebi.com`;
+      fallbackLedger.user.email = '';
       writeUserLedgerData(userId, fallbackLedger);
       return fallbackLedger;
     }
@@ -575,20 +576,20 @@ async function loadDbAsync(userId?: string): Promise<DatabaseSchema> {
       const { getUserLedgerFromPostgres } = await import('./postgres');
       const pgData = await getUserLedgerFromPostgres(userId);
       if (pgData) {
-        if (
-          !pgData.user.name ||
-          pgData.user.name.toLowerCase().startsWith('usr_') ||
-          pgData.user.name === 'Solo User' ||
-          pgData.user.name === 'Not set'
-        ) {
+        if (isPlaceholderName(pgData.user.name) || isPlaceholderEmail(pgData.user.email)) {
           try {
             const { findUserByIdAsync, formatEmailToActualName } = await import('./auth');
             const user = await findUserByIdAsync(userId);
-            const resolvedName =
-              (user?.profile?.name && !user.profile.name.toLowerCase().startsWith('usr_') ? user.profile.name : null) ||
-              formatEmailToActualName(pgData.user.email || user?.email || '');
-            pgData.user.name = resolvedName;
-            pgData.user.avatar = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(resolvedName)}`;
+            if (user && !isPlaceholderEmail(user.email)) pgData.user.email = user.email;
+            if (isPlaceholderName(pgData.user.name)) {
+              const resolvedName =
+                (!isPlaceholderName(user?.profile?.name) ? user!.profile!.name : null) ||
+                (!isPlaceholderEmail(pgData.user.email) ? formatEmailToActualName(pgData.user.email) : '');
+              if (resolvedName && !isPlaceholderName(resolvedName)) {
+                pgData.user.name = resolvedName;
+                if (isGeneratedAvatar(pgData.user.avatar)) pgData.user.avatar = initialsAvatar(resolvedName);
+              }
+            }
           } catch (e) {}
         }
         writeUserLedgerData<DatabaseSchema>(userId, pgData);
@@ -599,6 +600,14 @@ async function loadDbAsync(userId?: string): Promise<DatabaseSchema> {
     }
   }
 
+  // Make sure the account record is cached locally (it may only exist in
+  // Postgres on a fresh server instance) so the ledger gets the real name.
+  if (userId) {
+    try {
+      const { findUserByIdAsync } = await import('./auth');
+      await findUserByIdAsync(userId);
+    } catch (e) {}
+  }
   return getDb(userId);
 }
 
@@ -643,7 +652,7 @@ export function resetDb(userId?: string): DatabaseSchema {
       const user = findUserById(userId);
       return initializeBlankUserLedger(
         userId,
-        user?.email || `${userId}@user.behishebi.com`,
+        user?.email || '',
         user?.profile?.name
       );
     } catch (e) {}
@@ -839,11 +848,6 @@ export function computeDashboardSummary(db: DatabaseSchema, userId?: string): Da
 export function getDashboardSummary(userId?: string): DashboardSummary {
   const db = getDb(userId);
   return computeDashboardSummary(db, userId);
-}
-
-function isPlaceholderName(name?: string | null): boolean {
-  const n = (name || '').trim();
-  return !n || n.toLowerCase().startsWith('usr_') || n === 'Solo User' || n === 'Not set' || n === 'User';
 }
 
 export async function getDashboardSummaryAsync(userId?: string): Promise<DashboardSummary> {

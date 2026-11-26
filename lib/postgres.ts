@@ -1,6 +1,7 @@
 import { Pool, PoolConfig } from 'pg';
 import { DatabaseSchema } from './db';
 import { OnboardingProfile, UserRecord } from './auth';
+import { isPlaceholderName, isPlaceholderEmail } from './names';
 
 /**
  * Behishebi - PostgreSQL Engine & DBeaver Direct Control Layer
@@ -518,15 +519,17 @@ export async function getUserLedgerFromPostgres(userId: string): Promise<Databas
       const parsedIncome = row.monthly_income !== null && row.monthly_income !== undefined ? Number(row.monthly_income) : fullData?.user?.monthlyIncome || 0;
       const parsedExpense = row.last_expense !== null && row.last_expense !== undefined ? Number(row.last_expense) : fullData?.user?.lastExpense || 0;
 
-      let resolvedName = (row.name && !row.name.toLowerCase().startsWith('usr_') && row.name !== 'Solo User' && row.name !== 'Not set')
+      let resolvedName = !isPlaceholderName(row.name)
         ? row.name
-        : (fullData?.user?.name && !fullData.user.name.toLowerCase().startsWith('usr_') && fullData.user.name !== 'Solo User' && fullData.user.name !== 'Not set')
+        : !isPlaceholderName(fullData?.user?.name)
           ? fullData.user.name
           : '';
 
       if (!resolvedName) {
+        const realEmail = [row.email, fullData?.user?.email].find((e) => !isPlaceholderEmail(e)) || '';
         const { formatEmailToActualName } = await import('./auth');
-        resolvedName = formatEmailToActualName(row.email || fullData?.user?.email || '') || 'User';
+        // An empty/placeholder name here is repaired by the caller (lib/db.ts)
+        resolvedName = realEmail ? formatEmailToActualName(realEmail) : 'User';
       }
 
       const base: DatabaseSchema = {

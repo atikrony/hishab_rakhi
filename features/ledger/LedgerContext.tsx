@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { DashboardSummary, Transaction, UserProfile, FixedCost } from '@/lib/types';
+import { isPlaceholderName, isPlaceholderEmail } from '@/lib/names';
 
 interface LedgerContextType {
   summary: DashboardSummary | null;
@@ -528,10 +529,10 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
   const rawUser = summary?.user;
   const resolvedName = useMemo(() => {
     if (!rawUser) return 'Account Holder';
-    if (rawUser.name && !rawUser.name.toLowerCase().startsWith('usr_') && rawUser.name !== 'Solo User' && rawUser.name !== 'Not set') {
+    if (!isPlaceholderName(rawUser.name)) {
       return rawUser.name;
     }
-    if (rawUser.email) {
+    if (rawUser.email && !isPlaceholderEmail(rawUser.email)) {
       const prefix = rawUser.email.split('@')[0] || '';
       return prefix
         .replace(/[._-]+/g, ' ')
