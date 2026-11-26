@@ -368,7 +368,7 @@ export function SpendView({
           {/* Left 8 Cols: Expense Ledger Section */}
           <div className="lg:col-span-8 flex flex-col gap-space-md">
             {/* Controls & Filters Strip: Aligned All Spends, This Month, Recurring, Categories with Date Selector & Sort */}
-            <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-hairline flex flex-wrap items-center justify-between gap-3">
+            <div className="relative z-30 bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-hairline flex flex-wrap items-center justify-between gap-3">
               {/* Filter Pills & Categories Aligned */}
               <div className="flex items-center flex-wrap gap-1.5">
                 <button
