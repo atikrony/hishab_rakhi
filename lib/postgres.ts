@@ -3,7 +3,7 @@ import { DatabaseSchema } from './db';
 import { OnboardingProfile, UserRecord } from './auth';
 
 /**
- * Hishab Rakhi - PostgreSQL Engine & DBeaver Direct Control Layer
+ * Behishebi - PostgreSQL Engine & DBeaver Direct Control Layer
  * 
  * Features:
  * 1. Dedicated separate table per user: `user_${userId}`

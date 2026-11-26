@@ -23,14 +23,14 @@ export function HishabSidebar() {
         {/* Brand Header */}
         <div className="flex items-center gap-space-sm px-space-xs">
           <div className="w-9 h-9 rounded-xl bg-primary text-on-primary flex items-center justify-center font-bold text-base tracking-tighter shadow-sm">
-            HR
+            B
           </div>
           <div className="flex flex-col">
             <span className="font-title-sm text-title-sm text-on-surface tracking-tight leading-none font-bold">
-              Hishab Rakhi
+              Behishebi
             </span>
             <span className="font-label-sm text-label-sm text-on-surface-variant leading-none mt-1">
-              হিসাব রাখি
+              বেহিসেবি
             </span>
           </div>
         </div>

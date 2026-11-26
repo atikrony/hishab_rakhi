@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Hishab Rakhi - Personal Ledger',
-  description: 'হিসাব রাখি — Track your income and spending.',
+  title: 'Behishebi - Personal Ledger',
+  description: 'বেহিসেবি — Track your income and spending.',
   manifest: '/manifest.json',
   icons: {
     icon: '/icon.svg',
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Hishab Rakhi',
+    title: 'Behishebi',
   },
 };
 

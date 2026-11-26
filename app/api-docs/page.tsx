@@ -170,7 +170,7 @@ export default function ApiDocsPage() {
           </Link>
           <div>
             <h1 className="text-xl font-bold flex items-center gap-2">
-              Hishab Rakhi
+              Behishebi
               <span className="text-xs px-2 py-0.5 rounded-full bg-[#079be8] text-white font-mono">
                 API v1.0
               </span>

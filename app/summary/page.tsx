@@ -1,7 +1,7 @@
 import { SummaryFeature } from '@/features/summary/SummaryFeature';
 
 export const metadata = {
-  title: 'Summary & Analytics - Hishab Rakhi',
+  title: 'Summary & Analytics - Behishebi',
   description: 'Overview of your income and spending.',
 };
 

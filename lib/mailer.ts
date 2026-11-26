@@ -3,7 +3,7 @@
  *
  * Env:
  *   RESEND_API_KEY  - API key from https://resend.com
- *   EMAIL_FROM      - verified sender, e.g. "Hishab Rakhi <no-reply@yourdomain.com>"
+ *   EMAIL_FROM      - verified sender, e.g. "Behishebi <no-reply@yourdomain.com>"
  *
  * Without RESEND_API_KEY outside production, the email is printed to the server
  * console so the flow can be tested locally.
@@ -45,7 +45,7 @@ export async function sendEmail(to: string, subject: string, html: string, text:
       method: 'POST',
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: process.env.EMAIL_FROM || 'Hishab Rakhi <onboarding@resend.dev>',
+        from: process.env.EMAIL_FROM || 'Behishebi <onboarding@resend.dev>',
         to: [to],
         subject,
         html,
@@ -79,29 +79,29 @@ export function sendVerificationEmail(to: string, name: string, url: string) {
   const safeName = escapeHtml(name || 'there');
   return sendEmail(
     to,
-    'Verify your email for Hishab Rakhi',
+    'Verify your email for Behishebi',
     layout(
       `Hi ${safeName}, confirm your email`,
-      'Thanks for signing up for Hishab Rakhi. Please confirm this is your email address to activate your account.',
+      'Thanks for signing up for Behishebi. Please confirm this is your email address to activate your account.',
       'Verify email',
       url,
       'This link expires in 24 hours. If you did not create an account, you can ignore this email.'
     ),
-    `Hi ${name || 'there'},\n\nConfirm your email for Hishab Rakhi by opening this link (valid 24 hours):\n${url}\n\nIf you did not create an account, ignore this email.`
+    `Hi ${name || 'there'},\n\nConfirm your email for Behishebi by opening this link (valid 24 hours):\n${url}\n\nIf you did not create an account, ignore this email.`
   );
 }
 
 export function sendPasswordResetEmail(to: string, url: string) {
   return sendEmail(
     to,
-    'Reset your Hishab Rakhi password',
+    'Reset your Behishebi password',
     layout(
       'Reset your password',
-      'We received a request to reset the password for your Hishab Rakhi account.',
+      'We received a request to reset the password for your Behishebi account.',
       'Choose a new password',
       url,
       'This link expires in 15 minutes. If you did not ask for this, you can ignore this email; your password will not change.'
     ),
-    `Reset your Hishab Rakhi password with this link (valid 15 minutes):\n${url}\n\nIf you did not ask for this, ignore this email.`
+    `Reset your Behishebi password with this link (valid 15 minutes):\n${url}\n\nIf you did not ask for this, ignore this email.`
   );
 }

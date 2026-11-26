@@ -129,7 +129,7 @@ export default function KotojonPage() {
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               Admin Only
             </span>
-            <span className="text-xs text-outline font-medium">Hishab Rakhi Analytics</span>
+            <span className="text-xs text-outline font-medium">Behishebi Analytics</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight flex items-center gap-2">
             <span>কতজন</span>

@@ -345,7 +345,7 @@ export function SummaryView({
     link.setAttribute('href', encodedUri);
     link.setAttribute(
       'download',
-      `hishab_rakhi_statement_${cadenceScope.toLowerCase()}_${today}.csv`
+      `behishebi_statement_${cadenceScope.toLowerCase()}_${today}.csv`
     );
     document.body.appendChild(link);
     link.click();
@@ -469,7 +469,7 @@ export function SummaryView({
         </div>
 
         {/* Main Analytics Section (Bento Grid) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop items-start mt-5">
           {/* Cashflow Ratio & Monthly Performance (Left 8 Cols) */}
           <div className="lg:col-span-8 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col gap-space-lg">
             {/* Header Controls: Cadence & Pie View Switchers */}

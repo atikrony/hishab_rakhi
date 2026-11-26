@@ -1,7 +1,7 @@
 import { SpendFeature } from '@/features/spend/SpendFeature';
 
 export const metadata = {
-  title: 'Spend - Hishab Rakhi',
+  title: 'Spend - Behishebi',
   description: 'Track your expenses.',
 };
 

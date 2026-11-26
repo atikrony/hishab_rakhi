@@ -432,7 +432,7 @@ export function initializeBlankUserLedger(userId: string, email: string, name?: 
       {
         id: `notif_${Date.now()}`,
         title: 'Solo Account Created',
-        message: 'Welcome to your private solo ledger on Hishab Rakhi.',
+        message: 'Welcome to your private solo ledger on Behishebi.',
         date: new Date().toISOString(),
         read: false,
         type: 'info',

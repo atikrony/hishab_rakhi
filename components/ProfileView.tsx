@@ -57,7 +57,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `hishab_rakhi_transactions_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `behishebi_transactions_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -72,7 +72,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `hishab_rakhi_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      link.download = `behishebi_backup_${new Date().toISOString().slice(0, 10)}.json`;
       link.click();
       URL.revokeObjectURL(url);
       onToast('JSON database backup downloaded!');
@@ -215,7 +215,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
       {/* Publishing & PWA */}
       <div className="text-center pt-2 text-xs text-[#888] space-y-1">
-        <div>Hishab Rakhi v1.0.0 • Production Ready</div>
+        <div>Behishebi v1.0.0 • Production Ready</div>
         <div className="text-[#aaa]">Supports Web, Mobile PWA, and Native Mobile APIs</div>
       </div>
     </div>

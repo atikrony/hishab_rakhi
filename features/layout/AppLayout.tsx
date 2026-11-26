@@ -53,9 +53,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     return (
       <div className="min-h-[100dvh] flex flex-col items-center justify-center text-on-surface">
         <div className="w-14 h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center font-bold text-xl shadow-xl animate-float">
-          HR
+          B
         </div>
-        <div className="mt-4 font-headline-md text-headline-md font-bold tracking-tight">Hishab Rakhi</div>
+        <div className="mt-4 font-headline-md text-headline-md font-bold tracking-tight">Behishebi</div>
         <div className="mt-3 w-28 h-1 rounded-full bg-surface-container overflow-hidden">
           <div className="h-full w-1/2 rounded-full bg-primary animate-loading-bar" />
         </div>

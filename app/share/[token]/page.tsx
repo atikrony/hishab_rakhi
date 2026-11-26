@@ -44,9 +44,9 @@ export default function SharedReceiptPage() {
       <div className="w-full max-w-lg flex items-center justify-between mb-5 print:hidden">
         <Link href="/" className="flex items-center gap-2">
           <span className="w-9 h-9 rounded-xl bg-primary text-on-primary flex items-center justify-center font-bold text-sm">
-            HR
+            B
           </span>
-          <span className="font-title-sm text-title-sm font-bold text-on-surface">Hishab Rakhi</span>
+          <span className="font-title-sm text-title-sm font-bold text-on-surface">Behishebi</span>
         </Link>
       </div>
 

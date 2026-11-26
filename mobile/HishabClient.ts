@@ -1,5 +1,5 @@
 /**
- * Hishab Rakhi - Official Mobile SDK Client
+ * Behishebi - Official Mobile SDK Client
  * Ready to use in React Native, Expo, Flutter (via REST), or pure TypeScript mobile apps.
  */
 

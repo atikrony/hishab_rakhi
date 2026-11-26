@@ -1,7 +1,7 @@
 import { PocketFeature } from '@/features/pocket/PocketFeature';
 
 export const metadata = {
-  title: 'Pocket - Hishab Rakhi',
+  title: 'Pocket - Behishebi',
   description: 'Record money you receive.',
 };
 

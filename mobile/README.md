@@ -1,6 +1,6 @@
-# Hishab Rakhi - Mobile App Integration Guide
+# Behishebi - Mobile App Integration Guide
 
-This directory contains the mobile SDK client and sample React Native code for **Hishab Rakhi**.
+This directory contains the mobile SDK client and sample React Native code for **Behishebi**.
 
 The Next.js backend provides a complete RESTful API under `/api/v1/` designed specifically for iOS and Android applications.
 
@@ -16,7 +16,7 @@ import { HishabMobileClient } from './HishabClient';
 
 // For local Android Emulator: use http://10.0.2.2:3000
 // For local iOS Simulator: use http://localhost:3000
-// For Production: use your deployed URL (e.g. https://hishab-rakhi.vercel.app)
+// For Production: use your deployed URL (e.g. https://behishebi.vercel.app)
 const client = new HishabMobileClient({
   baseUrl: 'https://your-app-domain.com',
 });
@@ -62,7 +62,7 @@ console.log('Balance:', dashboard.totalBalance);
 ### Option A: React Native / Expo
 1. Initialize a new Expo app:
    ```bash
-   npx create-expo-app HishabRakhiMobile
+   npx create-expo-app BehishebiMobile
    ```
 2. Copy `mobile/HishabClient.ts` and `mobile/App.tsx` into your Expo project.
 3. Start the app:
@@ -74,7 +74,7 @@ console.log('Balance:', dashboard.totalBalance);
 You can also package this exact Next.js application into iOS and Android apps with 1 command:
 ```bash
 npm install @capacitor/core @capacitor/cli @capacitor/ios @capacitor/android
-npx cap init "Hishab Rakhi" "com.hishabrakhi.app"
+npx cap init "Behishebi" "com.behishebi.app"
 npx cap add ios
 npx cap add android
 npx cap sync

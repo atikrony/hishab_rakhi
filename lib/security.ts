@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { verifySession, SESSION_COOKIE_NAME, SessionPayload } from './auth-token';
 
 /**
- * Hishab Rakhi - Security & Privacy Protection Suite
+ * Behishebi - Security & Privacy Protection Suite
  * Enforces sanitization, XSS mitigation, rate limiting, and PII masking.
  */
 

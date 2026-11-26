@@ -117,7 +117,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
           </div>
           <div>
             <div className="font-bold text-[17px] text-[#17191d] tracking-tight flex items-center gap-1.5">
-              Hishab Rakhi
+              Behishebi
               <span className="text-[10px] font-bold uppercase bg-[#079be8]/10 text-[#079be8] px-1.5 py-0.5 rounded-md">
                 Pro
               </span>

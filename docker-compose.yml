@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  hishab-rakhi:
+  behishebi:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: hishab-rakhi-app
+    container_name: behishebi-app
     restart: always
     ports:
       - "3000:3000"

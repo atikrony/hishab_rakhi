@@ -42,7 +42,7 @@ export default function MobileApp() {
     return (
       <SafeAreaView style={styles.center}>
         <ActivityIndicator size="large" color="#079be8" />
-        <Text style={{ marginTop: 10, color: '#888' }}>Connecting to Hishab Rakhi...</Text>
+        <Text style={{ marginTop: 10, color: '#888' }}>Connecting to Behishebi...</Text>
       </SafeAreaView>
     );
   }

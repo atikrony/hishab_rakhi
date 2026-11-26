@@ -2,17 +2,11 @@
  * Admin access for the hidden /kotojon research dashboard.
  * Edge-safe (used by middleware): no Node imports.
  *
- * Set ADMIN_EMAILS to a comma-separated list, e.g. ADMIN_EMAILS=me@example.com,partner@example.com
- * With no ADMIN_EMAILS set, nobody can open the dashboard.
+ * Exactly one account may open it. Everyone else gets a 404.
  */
-export function getAdminEmails(): string[] {
-  return (process.env.ADMIN_EMAILS || '')
-    .split(',')
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-}
+const ADMIN_EMAIL = 'atiqrony.aiub@gmail.com';
 
 export function isAdminEmail(email?: string | null): boolean {
   if (!email) return false;
-  return getAdminEmails().includes(email.trim().toLowerCase());
+  return email.trim().toLowerCase() === ADMIN_EMAIL;
 }

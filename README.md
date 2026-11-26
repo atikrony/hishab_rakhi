@@ -1,4 +1,4 @@
-# Hishab Rakhi (হিসাব রাখি) - Smart Financial Wallet & Expense Engine
+# Behishebi (বেহিসেবি) - Smart Financial Wallet & Expense Engine
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)](https://react.dev/)
@@ -6,7 +6,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3.4-38bdf8?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
 [![PWA Ready](https://img.shields.io/badge/PWA-Ready-green?style=for-the-badge&logo=pwa)](https://web.dev/progressive-web-apps/)
 
-**Hishab Rakhi** is a modern, high-performance financial wallet and expense tracking application. It transforms the mobile dashboard prototype into a **production-ready full-stack platform** featuring:
+**Behishebi** is a modern, high-performance financial wallet and expense tracking application. It transforms the mobile dashboard prototype into a **production-ready full-stack platform** featuring:
 - **Responsive Web & Mobile App**: Pixel-perfect replication of your original prototype with sleek mobile container (430px) as well as an expanded wide-screen desktop view.
 - **PWA (Progressive Web App)**: Installable directly onto iOS, Android, and Desktop home screens with native offline caching and app shell.
 - **Dedicated REST API for Mobile Apps**: A separated `/api/v1/*` API designed for iOS, Android, React Native, and Flutter apps.
@@ -112,10 +112,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ### Option 2: Deploy with Docker (Railway / Render / Fly.io / VPS)
 ```bash
 # Build the Docker container
-docker build -t hishab-rakhi .
+docker build -t behishebi .
 
 # Run the container
-docker run -p 3000:3000 hishab-rakhi
+docker run -p 3000:3000 behishebi
 ```
 Or run with Docker Compose:
 ```bash
@@ -141,7 +141,7 @@ You have two powerful options:
 ### B. Using Capacitor (Turn this Next.js app into native iOS/Android APK)
 ```bash
 npm install @capacitor/core @capacitor/cli @capacitor/ios @capacitor/android
-npx cap init "Hishab Rakhi" "com.hishabrakhi.app"
+npx cap init "Behishebi" "com.behishebi.app"
 npx cap add ios
 npx cap add android
 npx cap sync

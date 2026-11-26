@@ -72,7 +72,7 @@ export default function RegisterPage() {
         {/* Brand & Badge */}
         <div className="flex flex-col items-center text-center">
           <div className="w-14 h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center font-extrabold text-2xl shadow-md mb-space-md">
-            HR
+            B
           </div>
           <h1 className="font-headline-lg text-headline-lg text-on-surface font-extrabold tracking-tight">
             Create Your Account

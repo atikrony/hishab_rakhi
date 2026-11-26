@@ -46,7 +46,7 @@ export const dummyInitialData: DatabaseSchema = {
   user: {
     id: 'usr_atiqur_01',
     name: 'Atiqur',
-    email: 'atiqur@hishabrakhi.com',
+    email: 'atiqur@behishebi.com',
     avatar: defaultAvatar,
     plan: 'Premium Plan',
     currency: 'BDT',
@@ -373,7 +373,7 @@ export const realInitialData: DatabaseSchema = {
   user: {
     id: 'usr_guest',
     name: 'Solo User',
-    email: 'user@hishabrakhi.com',
+    email: 'user@behishebi.com',
     avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=User',
     plan: 'Solo Ledger',
     currency: 'BDT',
@@ -524,7 +524,7 @@ export function getDb(userId?: string): DatabaseSchema {
     try {
       const { findUserById, initializeBlankUserLedger, formatEmailToActualName } = require('./auth');
       const user = findUserById(userId);
-      const email = user?.email || `${userId}@user.hishabrakhi.com`;
+      const email = user?.email || `${userId}@user.behishebi.com`;
       const actualName =
         (user?.profile?.name && !user.profile.name.toLowerCase().startsWith('usr_') ? user.profile.name : null) ||
         formatEmailToActualName(email);
@@ -538,7 +538,7 @@ export function getDb(userId?: string): DatabaseSchema {
       const fallbackLedger: DatabaseSchema = JSON.parse(JSON.stringify(realInitialData));
       fallbackLedger.user.id = userId;
       fallbackLedger.user.name = 'Solo User';
-      fallbackLedger.user.email = `${userId}@user.hishabrakhi.com`;
+      fallbackLedger.user.email = `${userId}@user.behishebi.com`;
       writeUserLedgerData(userId, fallbackLedger);
       return fallbackLedger;
     }
@@ -643,7 +643,7 @@ export function resetDb(userId?: string): DatabaseSchema {
       const user = findUserById(userId);
       return initializeBlankUserLedger(
         userId,
-        user?.email || `${userId}@user.hishabrakhi.com`,
+        user?.email || `${userId}@user.behishebi.com`,
         user?.profile?.name
       );
     } catch (e) {}

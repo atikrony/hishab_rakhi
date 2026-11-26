@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Shared spending - Hishab Rakhi',
+  title: 'Shared spending - Behishebi',
   robots: { index: false, follow: false },
 };
 

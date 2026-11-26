@@ -20,7 +20,7 @@ export function MobileTopBar() {
       <div className="h-14 max-w-md mx-auto px-margin flex items-center justify-between gap-space-sm">
         <div className="flex items-center gap-space-sm min-w-0">
           <div className="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center font-bold text-sm tracking-tighter flex-shrink-0">
-            HR
+            B
           </div>
           <h1 className="font-title-sm text-title-sm text-on-surface font-bold truncate">{title}</h1>
         </div>

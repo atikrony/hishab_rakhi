@@ -36,7 +36,7 @@ const connectionString =
 const isLocal = connectionString.includes('localhost') || connectionString.includes('127.0.0.1');
 
 console.log('------------------------------------------------------------');
-console.log('⚡ Hishab Rakhi - PostgreSQL & DBeaver Direct Setup Tool');
+console.log('⚡ Behishebi - PostgreSQL & DBeaver Direct Setup Tool');
 console.log('------------------------------------------------------------');
 console.log(`📡 Connecting to: ${connectionString.replace(/:[^:@]+@/, ':****@')}`);
 
@@ -310,7 +310,7 @@ async function main() {
     console.log('7. Direct Control:');
     console.log('     Double-click any cell (e.g. monthly_income, name, wallets, transactions).');
     console.log('     Change the value, click "Save / Commit" (Ctrl+S).');
-    console.log('     Refresh Hishab Rakhi in your browser: The app immediately reads your new values!');
+    console.log('     Refresh Behishebi in your browser: The app immediately reads your new values!');
     console.log('------------------------------------------------------------\n');
 
   } catch (err) {

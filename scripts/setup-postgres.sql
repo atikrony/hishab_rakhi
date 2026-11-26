@@ -1,5 +1,5 @@
 -- ==============================================================================
--- Hishab Rakhi - PostgreSQL Schema & DBeaver Initialization Script
+-- Behishebi - PostgreSQL Schema & DBeaver Initialization Script
 -- ==============================================================================
 -- Run this in DBeaver (or via psql) to initialize your database structure.
 --
@@ -8,7 +8,7 @@
 -- 2. `user_ledgers`: Consolidated single-view table of all user ledgers.
 -- 3. Dedicated user table pattern: `user_${userId}` with single row storage.
 -- 4. Direct DBeaver control: Edit cells directly in DBeaver and click Save/Commit;
---    changes are immediately loaded by Hishab Rakhi!
+--    changes are immediately loaded by Behishebi!
 -- ==============================================================================
 
 -- Step 1: Create Database (run if not already created)
