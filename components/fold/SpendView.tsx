@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { DashboardSummary, Transaction, FixedCost } from '@/lib/types';
 import { FixedCostsCard } from './FixedCostsCard';
-import { PageHeader } from './PageHeader';
 
 interface SpendViewProps {
   summary: DashboardSummary;
@@ -235,58 +234,76 @@ export function SpendView({
 
   return (
     <div className="flex flex-col w-full">
-      <PageHeader title="Spend" />
+      {/* Top Dark Obsidian Header Chrome Split */}
+      <div className="w-full bg-primary-container text-on-primary px-margin-desktop py-space-xl relative overflow-hidden h-[238px]">
+        <div className="absolute -right-24 -top-24 w-96 h-96 rounded-full bg-surface-tint/10 blur-3xl pointer-events-none" />
+        <div className="absolute left-1/3 bottom-0 w-64 h-32 rounded-full bg-secondary-container/10 blur-2xl pointer-events-none" />
 
-      {/* Main Daylight Canvas Area */}
-      <div className="max-w-7xl mx-auto w-full px-margin-desktop py-space-xl flex flex-col gap-space-xl bg-surface">
-        {/* High-Impact Financial Overview Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter-desktop -mt-10 relative z-20">
-          {/* Spent Metric */}
-          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col justify-between hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <span className="font-label-md text-label-md text-on-surface-variant">
-                Total spent
-              </span>
-              <span className="material-symbols-outlined text-on-surface-variant text-[20px]">
-                arrow_outward
-              </span>
-            </div>
-            <div className="my-space-md">
-              <span className="font-currency-display text-currency-display text-on-surface leading-none font-bold">
-                ৳{Math.round(summary.totalExpense).toLocaleString()}
-              </span>
-              <p className="font-label-md text-label-md text-on-surface-variant mt-1">
-                {spentPercent}% of available funds spent
-              </p>
-            </div>
-            <div className="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
-              <div
-                className="bg-secondary h-full rounded-full transition-all duration-700"
-                style={{ width: `${spentPercent}%` }}
-              />
+        <div className="max-w-7xl mx-auto flex flex-col gap-space-lg relative z-10">
+          {/* Title Bar */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+            <div className="flex items-center gap-space-md">
+              <div>
+                <h1 className="font-headline-xl text-headline-xl text-on-primary tracking-tight font-bold">
+                  Spend
+                </h1>
+              </div>
             </div>
           </div>
 
-          {/* Available Remaining */}
-          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col justify-between hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <span className="font-label-md text-label-md text-on-surface-variant">
-                Safe to spend
-              </span>
-              <span className="material-symbols-outlined text-secondary text-[20px]">
-                account_balance_wallet
-              </span>
+          {/* High-Impact Financial Overview Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
+            {/* Spent Metric */}
+            <div className="bg-surface-container-lowest/5 rounded-xl p-space-lg backdrop-blur-sm flex flex-col justify-between border border-white/5">
+              <div className="flex items-center justify-between">
+                <span className="font-label-md text-label-md text-outline-variant">
+                  Total spent
+                </span>
+                <span className="material-symbols-outlined text-outline-variant text-[20px]">
+                  arrow_outward
+                </span>
+              </div>
+              <div className="mt-space-md mb-space-sm">
+                <span className="font-currency-display text-currency-display text-on-primary leading-none font-bold">
+                  ৳{Math.round(summary.totalExpense).toLocaleString()}
+                </span>
+                <p className="font-label-md text-label-md text-on-primary-container mt-1">
+                  {spentPercent}% of available funds spent
+                </p>
+              </div>
+              <div className="w-full bg-surface-container-lowest/10 h-1.5 rounded-full overflow-hidden">
+                <div
+                  className="bg-secondary-container h-full rounded-full transition-all duration-700"
+                  style={{ width: `${spentPercent}%` }}
+                />
+              </div>
             </div>
-            <div className="my-space-md">
-              <span className="font-currency-display text-currency-display text-on-surface leading-none font-bold">
-                ৳{Math.round(safeToSpend).toLocaleString()}
-              </span>
-              <p className="font-label-md text-label-md text-secondary mt-1">
-                Available: ৳{Math.round(summary.availablePocketCash).toLocaleString()}
-              </p>
+
+            {/* Available Remaining */}
+            <div className="bg-surface-container-lowest/5 rounded-xl p-space-lg backdrop-blur-sm flex flex-col justify-between border border-white/5">
+              <div className="flex items-center justify-between">
+                <span className="font-label-md text-label-md text-outline-variant">
+                  Safe to spend
+                </span>
+                <span className="material-symbols-outlined text-secondary-fixed text-[20px]">
+                  account_balance_wallet
+                </span>
+              </div>
+              <div className="mt-space-md mb-space-sm">
+                <span className="font-currency-display text-currency-display text-on-primary leading-none font-bold">
+                  ৳{Math.round(safeToSpend).toLocaleString()}
+                </span>
+                <p className="font-label-md text-label-md text-secondary-fixed mt-1">
+                  Available: ৳{Math.round(summary.availablePocketCash).toLocaleString()}
+                </p>
+              </div>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Main Daylight Canvas Area */}
+      <div className="w-full px-margin-desktop py-space-xl max-w-7xl mx-auto flex flex-col gap-space-xl bg-surface">
         {/* Category Spend Mosaic Bar */}
         <div className="flex flex-col gap-space-md">
           <div className="flex items-center justify-between">
