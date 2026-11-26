@@ -125,7 +125,7 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
       setLoading(true);
       const [dashRes, txRes, fcRes] = await Promise.all([
         fetch('/api/v1/dashboard', { cache: 'no-store' }),
-        fetch('/api/v1/transactions?limit=100', { cache: 'no-store' }),
+        fetch('/api/v1/transactions?limit=all', { cache: 'no-store' }),
         fetch('/api/v1/fixed-costs', { cache: 'no-store' }),
       ]);
 

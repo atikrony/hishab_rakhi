@@ -27,7 +27,12 @@ export async function GET(request: NextRequest) {
     const q = sanitizeString(searchParams.get('q') || '', 100).toLowerCase();
     const category = sanitizeString(searchParams.get('category') || '', 50);
     const type = sanitizeString(searchParams.get('type') || '', 20);
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)));
+    // `limit=all` returns every transaction (the app needs the full history)
+    const rawLimit = searchParams.get('limit');
+    const limit =
+      rawLimit === 'all'
+        ? Number.MAX_SAFE_INTEGER
+        : Math.min(100, Math.max(1, parseInt(rawLimit || '50', 10) || 50));
     const offset = Math.max(0, parseInt(searchParams.get('offset') || '0', 10));
 
     const db = await getDbAsync(session.userId);

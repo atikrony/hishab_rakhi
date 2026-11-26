@@ -453,6 +453,25 @@ export async function createDedicatedUserTable(
  * If the user changed any column in DBeaver (e.g. monthly_income, name, wallets, transactions, data),
  * those live DB edits are immediately parsed and returned to the application!
  */
+/**
+ * The one place that decides which dedicated table holds a user's ledger.
+ * Prefers users.table_name, then a name derived from the users row, and only
+ * then the caller's fallback — so reads and writes always agree.
+ */
+async function resolveUserTableName(
+  client: { query: (sql: string, params?: any[]) => Promise<{ rows: any[] }> },
+  userId: string,
+  fallbackNameOrEmail?: string
+): Promise<string> {
+  try {
+    const uRes = await client.query('SELECT table_name, name, email FROM users WHERE id = $1 LIMIT 1', [userId]);
+    const row = uRes.rows[0];
+    if (row?.table_name) return row.table_name;
+    if (row?.name || row?.email) return getSafeUserTableName(userId, row.name || row.email);
+  } catch (e) {}
+  return getSafeUserTableName(userId, fallbackNameOrEmail);
+}
+
 export async function getUserLedgerFromPostgres(userId: string): Promise<DatabaseSchema | null> {
   if (!isPostgresAvailable()) return null;
 
@@ -460,17 +479,7 @@ export async function getUserLedgerFromPostgres(userId: string): Promise<Databas
     const pool = getPostgresPool();
     const client = await pool.connect();
     lastConnectFailureTime = 0;
-    let tableName = getSafeUserTableName(userId);
-    try {
-      const uRes = await client.query('SELECT table_name, name, email FROM users WHERE id = $1 LIMIT 1', [userId]);
-      if (uRes.rows.length > 0) {
-        if (uRes.rows[0].table_name) {
-          tableName = uRes.rows[0].table_name;
-        } else if (uRes.rows[0].name || uRes.rows[0].email) {
-          tableName = getSafeUserTableName(userId, uRes.rows[0].name || uRes.rows[0].email);
-        }
-      }
-    } catch (e) {}
+    const tableName = await resolveUserTableName(client, userId);
 
     try {
       // 1. Try querying the user's dedicated separate table
@@ -583,7 +592,9 @@ export async function saveUserLedgerToPostgres(
     const pool = getPostgresPool();
     const client = await pool.connect();
     lastConnectFailureTime = 0;
-    const tableName = getSafeUserTableName(userId, ledger.user.name || ledger.user.email);
+    // Must resolve to the same table the reader uses, or saves land in a
+    // different table than loads and earlier transactions appear to vanish.
+    const tableName = await resolveUserTableName(client, userId, ledger.user.name || ledger.user.email);
 
     try {
       await client.query('BEGIN');
