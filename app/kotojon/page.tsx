@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { ResearchPanel } from '@/components/kotojon/ResearchPanel';
 
 interface UserItem {
   id: string;
@@ -126,7 +127,7 @@ export default function KotojonPage() {
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              Hidden Dashboard
+              Admin Only
             </span>
             <span className="text-xs text-outline font-medium">Hishab Rakhi Analytics</span>
           </div>
@@ -447,6 +448,9 @@ export default function KotojonPage() {
             </div>
           </div>
         )}
+
+        {/* Cross-user research */}
+        <ResearchPanel />
 
         {/* Registered Users Roster Table */}
         <div className="bg-surface-container-lowest rounded-2xl p-5 sm:p-6 border border-surface-container shadow-xs flex flex-col gap-4">

@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS users (
     salary_date VARCHAR(50),
     last_expense NUMERIC(15, 0) DEFAULT 0,
     onboarding_completed BOOLEAN DEFAULT FALSE,
+    email_verified BOOLEAN,             -- NULL = pre-verification account (treated as verified)
     table_name VARCHAR(120),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()

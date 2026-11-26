@@ -5,8 +5,17 @@ import { getAllUsers } from '@/lib/auth';
 import { getVisitorAnalytics } from '@/lib/visitor';
 import { getUserLedgersDirectory, getDataStorageDirectory, safeReadJson } from '@/lib/storage';
 import { DatabaseSchema, getActiveDbConfig } from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/security';
+import { isAdminEmail } from '@/lib/admin';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  const session = await getSessionFromRequest(request);
+  if (!session || !isAdminEmail(session.email)) {
+    return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
+  }
+
   try {
     // 1. Gather Users from JSON Storage
     const jsonUsers = getAllUsers();

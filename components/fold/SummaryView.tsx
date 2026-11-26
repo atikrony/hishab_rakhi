@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { DashboardSummary, Transaction, FixedCost } from '@/lib/types';
 import { FixedCostsCard } from './FixedCostsCard';
 import { SavingsPlanCard } from './SavingsPlanCard';
+import { PageHeader } from './PageHeader';
 
 interface SummaryViewProps {
   summary: DashboardSummary;
@@ -372,18 +373,7 @@ export function SummaryView({
 
   return (
     <div className="flex flex-col w-full">
-      {/* Architectural Dark Chrome Banner */}
-      <section className="bg-primary-container text-on-primary px-margin-desktop py-space-xl relative overflow-hidden shadow-sm">
-        <div className="absolute -right-20 -bottom-24 w-96 h-96 rounded-full bg-surface-tint/10 blur-3xl pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-space-lg relative z-10">
-          <div className="flex flex-col gap-space-xs">
-            <h1 className="font-headline-xl text-headline-xl text-on-primary tracking-tight font-bold">
-              Summary
-            </h1>
-          </div>
-        </div>
-      </section>
+      <PageHeader title="Summary" />
 
       {/* Main Daylight Canvas */}
       <div className="max-w-7xl mx-auto w-full px-margin-desktop py-space-xl flex flex-col gap-space-xl bg-surface">

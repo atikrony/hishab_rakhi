@@ -200,11 +200,15 @@ export async function initPostgresSchema(): Promise<boolean> {
           salary_date VARCHAR(50),
           last_expense NUMERIC(15, 0) DEFAULT 0,
           onboarding_completed BOOLEAN DEFAULT FALSE,
+          email_verified BOOLEAN,
           table_name VARCHAR(120),
           created_at TIMESTAMPTZ DEFAULT NOW(),
           updated_at TIMESTAMPTZ DEFAULT NOW()
         );
       `);
+
+      // NULL = account created before email verification existed (treated as verified)
+      await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN;`);
 
       // 2. Master consolidated user_ledgers table for single-view analysis in DBeaver
       await client.query(`
@@ -512,15 +516,8 @@ export async function getUserLedgerFromPostgres(userId: string): Promise<Databas
           : '';
 
       if (!resolvedName) {
-        const emailVal = row.email || fullData?.user?.email || '';
-        const local = (emailVal || '').split('@')[0] || '';
-        resolvedName = local
-          .replace(/[._-]+/g, ' ')
-          .trim()
-          .split(' ')
-          .filter(Boolean)
-          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-          .join(' ') || 'User';
+        const { formatEmailToActualName } = await import('./auth');
+        resolvedName = formatEmailToActualName(row.email || fullData?.user?.email || '') || 'User';
       }
 
       const base: DatabaseSchema = {
@@ -751,8 +748,8 @@ export async function saveUserToPostgres(user: UserRecord): Promise<boolean> {
     await pool.query(
       `
       INSERT INTO users (
-        id, email, password_hash, salt, name, occupation, monthly_income, salary_date, last_expense, onboarding_completed, table_name, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW())
+        id, email, password_hash, salt, name, occupation, monthly_income, salary_date, last_expense, onboarding_completed, table_name, created_at, email_verified, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
       ON CONFLICT (id) DO UPDATE SET
         email = EXCLUDED.email,
         password_hash = EXCLUDED.password_hash,
@@ -764,6 +761,7 @@ export async function saveUserToPostgres(user: UserRecord): Promise<boolean> {
         last_expense = EXCLUDED.last_expense,
         onboarding_completed = EXCLUDED.onboarding_completed,
         table_name = EXCLUDED.table_name,
+        email_verified = COALESCE(EXCLUDED.email_verified, users.email_verified),
         updated_at = NOW();
       `,
       [
@@ -779,6 +777,7 @@ export async function saveUserToPostgres(user: UserRecord): Promise<boolean> {
         user.onboardingCompleted,
         tableName,
         user.createdAt || new Date().toISOString(),
+        typeof user.emailVerified === 'boolean' ? user.emailVerified : null,
       ]
     );
     return true;
@@ -815,6 +814,7 @@ export async function findUserByEmailFromPostgres(email: string): Promise<UserRe
       salt: row.salt,
       createdAt: row.created_at,
       onboardingCompleted: row.onboarding_completed,
+      emailVerified: typeof row.email_verified === 'boolean' ? row.email_verified : undefined,
       profile: {
         name: resolvedName,
         occupation: row.occupation || '',
@@ -851,6 +851,7 @@ export async function getAllUsersFromPostgres(): Promise<UserRecord[]> {
         salt: row.salt,
         createdAt: row.created_at,
         onboardingCompleted: row.onboarding_completed,
+      emailVerified: typeof row.email_verified === 'boolean' ? row.email_verified : undefined,
         profile: {
           name: resolvedName,
           occupation: row.occupation || '',

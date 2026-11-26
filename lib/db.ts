@@ -841,7 +841,39 @@ export function getDashboardSummary(userId?: string): DashboardSummary {
   return computeDashboardSummary(db, userId);
 }
 
+function isPlaceholderName(name?: string | null): boolean {
+  const n = (name || '').trim();
+  return !n || n.toLowerCase().startsWith('usr_') || n === 'Solo User' || n === 'Not set' || n === 'User';
+}
+
 export async function getDashboardSummaryAsync(userId?: string): Promise<DashboardSummary> {
   const db = await getDbAsync(userId);
-  return computeDashboardSummary(db, userId);
+  const summary = computeDashboardSummary(db, userId);
+
+  // The account record (name typed at sign-up, or the Google profile name) is the
+  // source of truth for the display name. Ledger copies can hold stale seed names.
+  if (userId) {
+    try {
+      const { findUserByIdAsync, formatEmailToActualName } = await import('./auth');
+      const account = await findUserByIdAsync(userId);
+      const email = account?.email || summary.user.email || '';
+      const name = !isPlaceholderName(account?.profile?.name)
+        ? account!.profile!.name.trim()
+        : formatEmailToActualName(email);
+      if (name && name !== summary.user.name) {
+        const hadGeneratedAvatar = !summary.user.avatar || summary.user.avatar.includes('api.dicebear.com');
+        summary.user = {
+          ...summary.user,
+          name,
+          email: email || summary.user.email,
+          avatar: hadGeneratedAvatar
+            ? `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`
+            : summary.user.avatar,
+        };
+      }
+    } catch {
+      // keep the ledger's name
+    }
+  }
+  return summary;
 }

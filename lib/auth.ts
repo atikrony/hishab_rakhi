@@ -25,7 +25,16 @@ export interface UserRecord {
   salt: string;
   createdAt: string;
   onboardingCompleted: boolean;
+  /**
+   * false = signed up with email/password and has not confirmed the address yet.
+   * undefined = account predates email verification (treated as verified).
+   */
+  emailVerified?: boolean;
   profile?: OnboardingProfile;
+}
+
+export function isEmailVerified(user: UserRecord): boolean {
+  return user.emailVerified !== false;
 }
 
 export function formatEmailToActualName(email: string): string {
@@ -102,6 +111,7 @@ export async function findUserByIdAsync(id: string): Promise<UserRecord | null> 
           salt: row.salt,
           createdAt: row.created_at,
           onboardingCompleted: row.onboarding_completed,
+          emailVerified: typeof row.email_verified === 'boolean' ? row.email_verified : undefined,
           profile: row.name
             ? {
                 name: row.name,
@@ -149,6 +159,7 @@ export function createUser(email: string, password: string, name?: string): User
     salt,
     createdAt: now,
     onboardingCompleted: false,
+    emailVerified: false,
     profile: {
       name: actualName,
       occupation: '',
@@ -194,6 +205,7 @@ export async function createUserAsync(email: string, password: string, name?: st
     salt,
     createdAt: now,
     onboardingCompleted: false,
+    emailVerified: false,
     profile: {
       name: actualName,
       occupation: '',
@@ -281,14 +293,34 @@ export async function findOrCreateGoogleUserAsync(
   avatar?: string
 ): Promise<UserRecord> {
   const existing = await findUserByEmailAsync(email.trim().toLowerCase());
-  if (existing) return existing;
-  return findOrCreateGoogleUser(email, name, avatar);
+  if (existing) {
+    // Signing in with Google proves ownership of the address
+    if (existing.emailVerified === false) {
+      return (await markEmailVerifiedAsync(existing.email)) || existing;
+    }
+    return existing;
+  }
+  const newUser = findOrCreateGoogleUser(email, name, avatar, false);
+
+  // Await the Postgres write: on serverless hosts the function can be frozen
+  // right after the response, so a fire-and-forget save may never finish.
+  try {
+    const { saveUserToPostgres, createDedicatedUserTable } = await import('./postgres');
+    const ledger = initializeBlankUserLedger(newUser.id, newUser.email, newUser.profile?.name);
+    if (avatar) ledger.user.avatar = avatar;
+    await saveUserToPostgres(newUser);
+    await createDedicatedUserTable(newUser.id, newUser.email, ledger, newUser.profile);
+  } catch (err) {
+    console.error('[Google user Postgres save failed]:', (err as any)?.message);
+  }
+  return newUser;
 }
 
 export function findOrCreateGoogleUser(
   email: string,
   name: string,
-  avatar?: string
+  avatar?: string,
+  syncPostgres = true
 ): UserRecord {
   const normalized = email.trim().toLowerCase();
   const existing = findUserByEmail(normalized);
@@ -309,6 +341,7 @@ export function findOrCreateGoogleUser(
     salt,
     createdAt: now,
     onboardingCompleted: false,
+    emailVerified: true, // Google has already verified the address
     profile: {
       name: name || normalized.split('@')[0],
       occupation: '',
@@ -330,12 +363,14 @@ export function findOrCreateGoogleUser(
     writeUserLedgerData(newUser.id, initialLedger);
   }
 
-  import('./postgres')
-    .then(({ saveUserToPostgres, createDedicatedUserTable }) => {
-      saveUserToPostgres(newUser).catch(() => {});
-      createDedicatedUserTable(newUser.id, newUser.email, initialLedger).catch(() => {});
-    })
-    .catch(() => {});
+  if (syncPostgres) {
+    import('./postgres')
+      .then(({ saveUserToPostgres, createDedicatedUserTable }) => {
+        saveUserToPostgres(newUser).catch(() => {});
+        createDedicatedUserTable(newUser.id, newUser.email, initialLedger).catch(() => {});
+      })
+      .catch(() => {});
+  }
 
   return newUser;
 }
@@ -433,3 +468,24 @@ export async function markTourCompletedAsync(userId: string): Promise<boolean> {
   return true;
 }
 
+
+/** Marks the account's email as confirmed in local storage and Postgres. */
+export async function markEmailVerifiedAsync(email: string): Promise<UserRecord | null> {
+  const user = await findUserByEmailAsync(email);
+  if (!user) return null;
+  user.emailVerified = true;
+
+  const users = getAllUsers();
+  const idx = users.findIndex((u) => u.id === user.id);
+  if (idx >= 0) users[idx].emailVerified = true;
+  else users.push(user);
+  saveUsers(users);
+
+  try {
+    const { saveUserToPostgres } = await import('./postgres');
+    await saveUserToPostgres(user);
+  } catch {
+    // Postgres optional
+  }
+  return user;
+}

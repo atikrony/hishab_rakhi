@@ -13,6 +13,8 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [successNotice, setSuccessNotice] = useState<string | null>(null);
   const [nextPath, setNextPath] = useState<string | null>(null);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resending, setResending] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -23,7 +25,10 @@ export default function LoginPage() {
         setEmail(emailParam);
       }
       if (params.get('registered') === 'true') {
-        setSuccessNotice('Account created. Please sign in.');
+        setSuccessNotice('Account created. We sent a verification link to your email. Open it, then sign in here.');
+        setNeedsVerification(true);
+      } else if (params.get('verified') === 'true') {
+        setSuccessNotice('Email verified. You can sign in now.');
       } else if (params.get('reset') === 'true') {
         setSuccessNotice('Password updated. Please sign in.');
       }
@@ -37,6 +42,7 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setNeedsVerification(false);
 
     if (!email.trim() || !password) {
       setError('Please provide both email and password.');
@@ -57,6 +63,7 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok || !data.success) {
         setError(data.error || 'Invalid credentials. Please try again.');
+        if (data.code === 'EMAIL_NOT_VERIFIED') setNeedsVerification(true);
         return;
       }
 
@@ -66,6 +73,29 @@ export default function LoginPage() {
       setError('Network connection error. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!email.trim()) {
+      setError('Enter your email address above, then tap Resend link.');
+      return;
+    }
+    setResending(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/v1/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) setError(data.error || 'Could not resend the link.');
+      else setSuccessNotice(data.message);
+    } catch {
+      setError('Network connection error. Please try again.');
+    } finally {
+      setResending(false);
     }
   };
 
@@ -100,6 +130,23 @@ export default function LoginPage() {
           <div className="bg-error-container/20 border border-error/30 text-error rounded-xl p-space-md text-label-md font-medium flex items-center gap-2">
             <span className="material-symbols-outlined text-[20px] flex-shrink-0">error</span>
             <span>{error}</span>
+          </div>
+        )}
+
+        {needsVerification && (
+          <div className="bg-surface-container-low border border-surface-container rounded-xl p-space-md flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="material-symbols-outlined text-[20px] text-primary flex-shrink-0">mark_email_unread</span>
+              <span className="font-label-md text-label-md text-on-surface-variant">Didn&apos;t get the email?</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resending}
+              className="flex-shrink-0 h-9 px-4 rounded-lg bg-surface-container-lowest border border-surface-container text-on-surface font-label-md text-label-md font-bold hover:bg-surface-container disabled:opacity-50"
+            >
+              {resending ? 'Sending…' : 'Resend link'}
+            </button>
           </div>
         )}
 

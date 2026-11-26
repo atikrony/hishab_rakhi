@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createUserAsync, findUserByEmailAsync } from '@/lib/auth';
-import { signSession, SESSION_COOKIE_NAME } from '@/lib/auth-token';
+import { sendVerificationLink } from '@/lib/email-verification';
 import { checkRateLimit } from '@/lib/security';
 
 export async function POST(request: NextRequest) {
@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     const newUser = await createUserAsync(email, password, rawName);
+    const mail = await sendVerificationLink(newUser.email, rawName, request.nextUrl.origin);
 
     return NextResponse.json({
       success: true,
@@ -62,8 +63,12 @@ export async function POST(request: NextRequest) {
         userId: newUser.id,
         email: newUser.email,
         onboardingCompleted: false,
+        needsVerification: true,
+        emailSent: mail.sent,
       },
-      message: 'Account created successfully! Please sign in.',
+      message: mail.sent
+        ? `We sent a verification link to ${newUser.email}. Open it to activate your account.`
+        : 'Account created, but we could not send the verification email. Use "Resend link" on the sign-in page.',
     });
   } catch (error: any) {
     return NextResponse.json(

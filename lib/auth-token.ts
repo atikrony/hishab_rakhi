@@ -176,3 +176,56 @@ export async function verifyPasswordResetToken(token: string): Promise<string | 
     return null;
   }
 }
+
+/** Signed email-verification token (24h). Bound to the email address. */
+export async function signEmailVerifyToken(email: string): Promise<string> {
+  const payload = {
+    email: email.trim().toLowerCase(),
+    type: 'email_verify',
+    exp: Math.floor(Date.now() / 1000) + 24 * 3600,
+  };
+  const encHeader = base64UrlEncode(enc.encode(JSON.stringify({ alg: 'HS256', typ: 'JWT' })));
+  const encPayload = base64UrlEncode(enc.encode(JSON.stringify(payload)));
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(getSessionSecret()) as unknown as BufferSource,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const sig = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    enc.encode(`${encHeader}.${encPayload}`) as unknown as BufferSource
+  );
+  return `${encHeader}.${encPayload}.${base64UrlEncode(new Uint8Array(sig))}`;
+}
+
+/** Returns the verified email address, or null when the token is invalid/expired. */
+export async function verifyEmailVerifyToken(token: string): Promise<string | null> {
+  if (!token || typeof token !== 'string') return null;
+  try {
+    const [headerB64, payloadB64, sigB64] = token.split('.');
+    if (!headerB64 || !payloadB64 || !sigB64) return null;
+    const key = await crypto.subtle.importKey(
+      'raw',
+      enc.encode(getSessionSecret()) as unknown as BufferSource,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['verify']
+    );
+    const ok = await crypto.subtle.verify(
+      'HMAC',
+      key,
+      base64UrlDecode(sigB64) as unknown as BufferSource,
+      enc.encode(`${headerB64}.${payloadB64}`) as unknown as BufferSource
+    );
+    if (!ok) return null;
+    const payload = JSON.parse(dec.decode(base64UrlDecode(payloadB64)));
+    if (payload.type !== 'email_verify') return null;
+    if (!payload.exp || payload.exp < Math.floor(Date.now() / 1000)) return null;
+    return payload.email || null;
+  } catch {
+    return null;
+  }
+}

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyUserPasswordAsync, formatEmailToActualName } from '@/lib/auth';
+import { verifyUserPasswordAsync, formatEmailToActualName, isEmailVerified } from '@/lib/auth';
 import { signSession, SESSION_COOKIE_NAME } from '@/lib/auth-token';
 import { checkRateLimit } from '@/lib/security';
 
@@ -29,6 +29,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'Invalid email or password.' },
         { status: 401 }
+      );
+    }
+
+    if (!isEmailVerified(user)) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: 'EMAIL_NOT_VERIFIED',
+          error: 'Please verify your email first. Check your inbox for the link we sent.',
+        },
+        { status: 403 }
       );
     }
 

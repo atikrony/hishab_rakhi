@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { DashboardSummary, Transaction } from '@/lib/types';
+import { PageHeader } from './PageHeader';
 
 interface PocketViewProps {
   summary: DashboardSummary;
@@ -142,102 +143,91 @@ export function PocketView({
 
   return (
     <div className="flex flex-col w-full">
-      {/* Inverted High-Contrast Obsidian Chrome Header Zone */}
-      <section className="bg-primary-container text-on-primary px-margin-desktop py-space-xl relative overflow-hidden">
-        <div className="absolute -right-24 -top-24 w-96 h-96 rounded-full bg-secondary/10 blur-3xl pointer-events-none" />
-        <div className="absolute left-1/3 -bottom-20 w-80 h-80 rounded-full bg-surface-tint/10 blur-2xl pointer-events-none" />
+      <PageHeader title="Add Money" />
 
-        <div className="relative z-10 flex flex-col gap-space-lg">
-          <h1 className="font-headline-xl text-headline-xl text-on-primary tracking-tight font-bold">
-            Add Money
-          </h1>
-
-          {/* High-Impact 4-Metric Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-space-md">
-            {/* Card 1: Total Received */}
-            <div className="bg-surface-container-highest/10 rounded-xl p-space-lg backdrop-blur-md flex flex-col justify-between group hover:bg-surface-container-highest/15 transition-all border border-white/5">
-              <div className="flex items-center justify-between">
-                <span className="font-label-md text-label-md text-outline-variant">
-                  Total received
-                </span>
-                <div className="w-8 h-8 rounded-lg bg-secondary/20 text-secondary-fixed flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
-                </div>
-              </div>
-              <div className="mt-space-md">
-                <div className="font-currency-display text-currency-display text-on-primary tracking-tight font-bold">
-                  +৳{Math.round(summary.totalInflow).toLocaleString()}
-                </div>
+      {/* Main Multi-Column Interactive Daylight Canvas */}
+      <div className="max-w-7xl mx-auto w-full px-margin-desktop py-space-xl flex flex-col gap-space-xl bg-surface">
+        {/* High-Impact 4-Metric Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-gutter-desktop -mt-10 relative z-20">
+          {/* Card 1: Total Received */}
+          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <span className="font-label-md text-label-md text-on-surface-variant">
+                Total received
+              </span>
+              <div className="w-8 h-8 rounded-lg bg-secondary-container/30 text-on-secondary-container flex items-center justify-center">
+                <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
               </div>
             </div>
-
-            {/* Card 2: Current Pocket Balance */}
-            <div className="bg-surface-container-highest/10 rounded-xl p-space-lg backdrop-blur-md flex flex-col justify-between group hover:bg-surface-container-highest/15 transition-all border border-white/5">
-              <div className="flex items-center justify-between">
-                <span className="font-label-md text-label-md text-outline-variant">
-                  Available balance
-                </span>
-                <div className="w-8 h-8 rounded-lg bg-surface-container-highest/20 text-surface-bright flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
-                </div>
-              </div>
-              <div className="mt-space-md">
-                <div className="font-currency-display text-currency-display text-on-primary tracking-tight font-bold">
-                  ৳{Math.round(summary.availablePocketCash).toLocaleString()}
-                </div>
+            <div className="mt-space-md">
+              <div className="font-currency-display text-currency-display text-on-surface tracking-tight font-bold">
+                +৳{Math.round(summary.totalInflow).toLocaleString()}
               </div>
             </div>
+          </div>
 
-            {/* Card 3: Active Inflow Sources */}
-            <div className="bg-surface-container-highest/10 rounded-xl p-space-lg backdrop-blur-md flex flex-col justify-between group hover:bg-surface-container-highest/15 transition-all border border-white/5">
-              <div className="flex items-center justify-between">
-                <span className="font-label-md text-label-md text-outline-variant">
-                  Sources
-                </span>
-                <div className="w-8 h-8 rounded-lg bg-surface-container-highest/20 text-surface-bright flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[18px]">hub</span>
-                </div>
-              </div>
-              <div className="mt-space-md">
-                <div className="flex items-baseline gap-2">
-                  <span className="font-currency-display text-currency-display text-on-primary tracking-tight font-bold">
-                    {summary.activeChannelsCount}
-                  </span>
-                  <span className="font-label-md text-label-md text-outline-variant">
-                    active
-                  </span>
-                </div>
+          {/* Card 2: Current Pocket Balance */}
+          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <span className="font-label-md text-label-md text-on-surface-variant">
+                Available balance
+              </span>
+              <div className="w-8 h-8 rounded-lg bg-surface-container text-on-surface-variant flex items-center justify-center">
+                <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
               </div>
             </div>
-
-            {/* Card 4: Savings Conversion Rate */}
-            <div className="bg-surface-container-highest/10 rounded-xl p-space-lg backdrop-blur-md flex flex-col justify-between group hover:bg-surface-container-highest/15 transition-all border border-white/5">
-              <div className="flex items-center justify-between">
-                <span className="font-label-md text-label-md text-outline-variant">
-                  Savings rate
-                </span>
-                <div className="w-8 h-8 rounded-lg bg-secondary/20 text-secondary-fixed flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[18px]">pie_chart</span>
-                </div>
+            <div className="mt-space-md">
+              <div className="font-currency-display text-currency-display text-on-surface tracking-tight font-bold">
+                ৳{Math.round(summary.availablePocketCash).toLocaleString()}
               </div>
-              <div className="mt-space-md">
-                <div className="font-currency-display text-currency-display text-secondary-fixed tracking-tight font-bold">
-                  {summary.savingsVelocity}%
-                </div>
-                <div className="w-full bg-surface-container-highest/30 h-1.5 rounded-full mt-2 overflow-hidden">
-                  <div
-                    className="bg-secondary-fixed h-full rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(100, Math.max(5, summary.savingsVelocity))}%` }}
-                  />
-                </div>
+            </div>
+          </div>
+
+          {/* Card 3: Active Inflow Sources */}
+          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <span className="font-label-md text-label-md text-on-surface-variant">
+                Sources
+              </span>
+              <div className="w-8 h-8 rounded-lg bg-surface-container text-on-surface-variant flex items-center justify-center">
+                <span className="material-symbols-outlined text-[18px]">hub</span>
+              </div>
+            </div>
+            <div className="mt-space-md">
+              <div className="flex items-baseline gap-2">
+                <span className="font-currency-display text-currency-display text-on-surface tracking-tight font-bold">
+                  {summary.activeChannelsCount}
+                </span>
+                <span className="font-label-md text-label-md text-on-surface-variant">
+                  active
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 4: Savings Conversion Rate */}
+          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-hairline flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <span className="font-label-md text-label-md text-on-surface-variant">
+                Savings rate
+              </span>
+              <div className="w-8 h-8 rounded-lg bg-secondary-container/30 text-on-secondary-container flex items-center justify-center">
+                <span className="material-symbols-outlined text-[18px]">pie_chart</span>
+              </div>
+            </div>
+            <div className="mt-space-md">
+              <div className="font-currency-display text-currency-display text-secondary tracking-tight font-bold">
+                {summary.savingsVelocity}%
+              </div>
+              <div className="w-full bg-surface-container h-1.5 rounded-full mt-2 overflow-hidden">
+                <div
+                  className="bg-secondary h-full rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(100, Math.max(5, summary.savingsVelocity))}%` }}
+                />
               </div>
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Main Multi-Column Interactive Daylight Canvas */}
-      <div className="px-margin-desktop py-space-xl flex flex-col gap-space-xl bg-surface">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop items-start">
           {/* LEFT ASYMMETRIC COLUMN: Analytics, Velocity & Source Mix (5 Cols) */}
           <div className="lg:col-span-5 flex flex-col gap-space-lg">

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession, SESSION_COOKIE_NAME } from '@/lib/auth-token';
 import { safeNextPath } from '@/lib/safe-redirect';
+import { isAdminEmail } from '@/lib/admin';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -92,10 +93,22 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith('/api/v1/auth/forgot-password') ||
       pathname.startsWith('/api/v1/auth/reset-password') ||
       pathname.startsWith('/api/v1/auth/google') ||
+      pathname.startsWith('/api/v1/auth/verify-email') ||
+      pathname.startsWith('/api/v1/auth/resend-verification') ||
       pathname.startsWith('/api/v1/share/view/') ||
-      pathname.startsWith('/api/v1/kotojon');
+      pathname === '/api/v1/kotojon/visit';
 
     if (isPublicAuth) {
+      return withSecurityHeaders(NextResponse.next());
+    }
+
+    // Admin-only research APIs (/api/v1/kotojon, /api/v1/kotojon/research)
+    if (pathname.startsWith('/api/v1/kotojon')) {
+      if (!session || !isAdminEmail(session.email)) {
+        return withSecurityHeaders(
+          NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
+        );
+      }
       return withSecurityHeaders(NextResponse.next());
     }
 
@@ -115,8 +128,12 @@ export async function middleware(request: NextRequest) {
     return withSecurityHeaders(NextResponse.next());
   }
 
-  // 6. Hidden Analytics/Status Route (/kotojon)
+  // 6. Hidden admin research dashboard (/kotojon): admins only, 404 for everyone else
   if (pathname.startsWith('/kotojon')) {
+    // No redirect, no hint: signed-out visitors and non-admins just get a 404
+    if (!session || !isAdminEmail(session.email)) {
+      return withSecurityHeaders(new NextResponse('Not found', { status: 404 }));
+    }
     return withSecurityHeaders(NextResponse.next());
   }
 
