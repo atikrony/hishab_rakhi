@@ -106,7 +106,9 @@ export function ProductTour() {
 
   const doneKey = user.id ? `hr-tour-done:${user.id}` : null;
 
-  // Decide whether this account still needs the tour
+  // Decide whether this account still needs the tour. It is shown once, on the
+  // first sign-in: as soon as it starts we record it as done (locally and on the
+  // server), so leaving mid-tour or signing in again never brings it back.
   useEffect(() => {
     if (!doneKey) return;
     if (localStorage.getItem(doneKey)) return;
@@ -115,8 +117,11 @@ export function ProductTour() {
       .then((r) => r.json())
       .then((j) => {
         if (!alive || !j?.success) return;
-        if (j.data?.onboardingCompleted === false) setActive(true);
-        else localStorage.setItem(doneKey, '1');
+        localStorage.setItem(doneKey, '1');
+        if (j.data?.onboardingCompleted === false) {
+          setActive(true);
+          fetch('/api/v1/onboarding', { method: 'POST' }).catch(() => {});
+        }
       })
       .catch(() => {});
     return () => {

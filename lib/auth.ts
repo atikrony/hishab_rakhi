@@ -452,7 +452,8 @@ export function initializeBlankUserLedger(userId: string, email: string, name?: 
 export async function markTourCompletedAsync(userId: string): Promise<boolean> {
   const user = await findUserByIdAsync(userId);
   if (!user) return false;
-  if (user.onboardingCompleted) return true;
+  // No early return when the local copy already says "done": the local file
+  // store can be ahead of Postgres (or per-instance), so always persist both.
   user.onboardingCompleted = true;
   const users = getAllUsers();
   const idx = users.findIndex((u) => u.id === userId);

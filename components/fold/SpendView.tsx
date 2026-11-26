@@ -303,7 +303,7 @@ export function SpendView({
       </div>
 
       {/* Main Daylight Canvas Area */}
-      <div className="w-full px-margin-desktop py-space-xl max-w-7xl mx-auto flex flex-col gap-space-xl bg-surface">
+      <div className="w-full px-margin-desktop py-space-xl max-w-7xl mx-auto flex flex-col gap-space-md bg-surface">
         {/* Category Spend Mosaic Bar */}
         <div className="flex flex-col gap-space-md">
           <div className="flex items-center justify-between">
